@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOMRO Pro - Ultimate Number Counter</title>
+
+    <!-- CSInterface Library -->
+    <script src="lib/CSInterface.js"></script>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="css/compact.css">
+
+</head>
+
+
+<body class="theme-dark">
+
+    <!-- Main Container -->
+    <main class="app-container">
+
+        <!-- Header Section -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM17 14v3h-3v-3h3M7 17h3v3H7v-3z" />
+                            <path d="M12 8v8M8 12h8" />
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">NOMRO</span>
+                        <span class="logo-subtitle">PRO</span>
+                    </div>
+                </div>
+                <div class="brand-tagline">Ultimate Number Counter</div>
+            </div>
+
+            <div class="header-actions">
+                <button class="btn-icon" id="btn-help" title="Documentation & Help (دليل الاستخدام والمساعدة)" data-tooltip="Documentation">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                </button>
+                <button class="btn-icon" id="btn-settings" title="Extension Settings (إعدادات الإضافة)" data-tooltip="Settings">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                </button>
+                <button class="btn-icon btn-unlink" id="btn-unlink" title="Unlink Active Layer (إلغاء ربط الطبقة المحددة)" data-tooltip="Unlink Layer" style="display: none;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                        <line x1="2" y1="22" x2="22" y2="2"></line>
+                    </svg>
+                </button>
+                <div class="divider-vertical"></div>
+                <button class="btn-icon btn-refresh" id="btn-reset" title="Reset All Settings (إعادة ضبط جميع الإعدادات)" data-tooltip="Reset All">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-navigation" id="counter-tabs">
+            <button class="tab-btn active" data-tab="counter" title="Counter Mode: Number Animation (وضع عداد الأرقام)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+                <span>Counter</span>
+            </button>
+            <button class="tab-btn" data-tab="timer" title="Timer Mode: Stopwatch & Countdown (وضع المؤقت وساعة الإيقاف)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span>Timer</span>
+            </button>
+            <button class="tab-btn" data-tab="presets" title="Presets: Saved Configurations (إدارة القوالب والإعدادات الجاهزة)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon
+                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                    </polygon>
+                </svg>
+                <span>Presets</span>
+            </button>
+            <div class="tab-slider"></div>
+        </nav>
+
+        <!-- Content Area -->
+        <div class="content-area">
+
+            <!-- Counter Tab Panel -->
+            <section class="panel active" id="panel-counter">
+
+                <!-- Live Preview Card -->
+                <div class="card card-preview">
+                    <div class="preview-display compact" title="Live Counter Preview (معاينة حية للعداد)">
+                        <div class="preview-number-container">
+                            <span class="preview-number" id="preview-number">0</span>
+                        </div>
+                    </div>
+                    <div class="preview-controls-row">
+                        <button class="btn-preview" id="reset-preview" title="Reset Preview (إعادة ضبط المعاينة)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="1 4 1 10 7 10"></polyline>
+                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                            </svg>
+                        </button>
+                        <button class="btn-preview btn-preview-play" id="play-preview" title="Play Preview (تشغيل المعاينة الحية)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                        </button>
+                        <button class="btn-preview btn-preview-stop" id="stop-preview" title="Stop Preview (إيقاف المعاينة)"
+                            style="display: none;">
+                            <svg height="14" width="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="6" y="4" width="4" height="16"></rect>
+                                <rect x="14" y="4" width="4" height="16"></rect>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Range Configuration -->
+                <div class="card card-compact">
+                    <div class="card-header-mini" title="Number Range & Duration (نطاق الأرقام والمدة الزمنية)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <line x1="4" y1="21" x2="4" y2="14"></line>
+                            <line x1="4" y1="10" x2="4" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12" y2="3"></line>
+                            <line x1="20" y1="21" x2="20" y2="16"></line>
+                            <line x1="20" y1="12" x2="20" y2="3"></line>
+                        </svg>
+                        <span>Range</span>
+                    </div>
+                    <div class="range-inputs-row">
+                        <div class="input-wrapper-compact" title="Start Value (قيمة البداية - يدعم العمليات الحسابية: + - * /)">
+                            <svg class="input-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <polyline points="17 11 12 6 7 11"></polyline>
+                                <line x1="12" y1="6" x2="12" y2="18"></line>
+                            </svg>
+                            <input type="text" inputmode="decimal" class="input-field-compact" id="start-value" value="0" title="Start Value (قيمة البداية - يدعم + - * /)">
+                            <div class="input-arrows-compact">
+                                <button class="input-arrow-compact" data-action="up" data-target="start-value" title="Increase Start Value (+1 | Shift: +10 | Alt: +0.1)"><svg
+                                        width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="3">
+                                        <polyline points="18 15 12 9 6 15"></polyline>
+                                    </svg></button>
+                                <button class="input-arrow-compact" data-action="down" data-target="start-value" title="Decrease Start Value (-1 | Shift: -10 | Alt: -0.1)"><svg
+                                        width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="3">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg></button>
+                            </div>
+                        </div>
+                        <div class="input-wrapper-compact" title="End Value (قيمة النهاية - يدعم العمليات الحسابية: + - * /)">
+                            <svg class="input-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <polyline points="7 13 12 18 17 13"></polyline>
+                                <line x1="12" y1="18" x2="12" y2="6"></line>
+                            </svg>
+                            <input type="text" inputmode="decimal" class="input-field-compact" id="end-value" value="1000" title="End Value (قيمة النهاية - يدعم + - * /)">
+                            <div class="input-arrows-compact">
+                                <button class="input-arrow-compact" data-action="up" data-target="end-value" title="Increase End Value (+1 | Shift: +10 | Alt: +0.1)"><svg
+                                        width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="3">
+                                        <polyline points="18 15 12 9 6 15"></polyline>
+                                    </svg></button>
+                                <button class="input-arrow-compact" data-action="down" data-target="end-value" title="Decrease End Value (-1 | Shift: -10 | Alt: -0.1)"><svg
+                                        width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="3">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg></button>
+                            </div>
+                        </div>
+                        <div class="input-wrapper-compact" title="Duration in Seconds (مدة العداد بالثواني)">
+                            <svg class="input-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <input type="text" inputmode="decimal" class="input-field-compact" id="duration-value" value="2" min="0.01" step="0.5" title="Duration in Seconds (مدة العداد بالثواني)">
+                            <span class="unit-compact">s</span>
+                            <div class="input-arrows-compact">
+                                <button class="input-arrow-compact" data-action="up" data-target="duration-value" title="Increase Duration (+0.5s | Shift: +5s)"><svg
+                                        width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="3">
+                                        <polyline points="18 15 12 9 6 15"></polyline>
+                                    </svg></button>
+                                <button class="input-arrow-compact" data-action="down" data-target="duration-value" title="Decrease Duration (-0.5s | Shift: -5s)"><svg
+                                        width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="3">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Easing & Animation -->
+                <div class="card card-compact">
+                    <div class="card-header-mini" title="Animation Curves & Easing (منحنيات الحركة والتسارع)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                        </svg>
+                        <span>Easing</span>
+                    </div>
+
+                    <div class="segmented-control-compact easing-mode-switch">
+                        <button class="segment-compact active" data-easing-mode="single" title="Single Curve Mode: Unified motion curve (منحنى حركة موحد)">Single</button>
+                        <button class="segment-compact" data-easing-mode="dual" title="Entry/Exit Curve Mode: Independent acceleration & deceleration (منحنى دخول وخروج منفصل)">Entry/Exit</button>
+                    </div>
+
+                    <div class="easing-mode-panel active" data-easing-panel="single">
+                        <div class="input-group-compact easing-template-group">
+                            <label class="input-label-compact" title="Curve Template (قالب المنحنى)">Curve Template</label>
+                            <div class="input-wrapper-compact format-select-wrapper">
+                                <select class="input-field-compact format-select" id="single-easing-curve" title="Select Easing Curve Template (اختر قالب منحنى الحركة)"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="easing-mode-panel" data-easing-panel="dual">
+                        <div class="dual-easing-grid">
+                            <div class="input-group-compact">
+                                <label class="input-label-compact" title="Entry Acceleration Curve (منحنى تسارع البداية)">Entry Curve</label>
+                                <div class="input-wrapper-compact format-select-wrapper">
+                                    <select class="input-field-compact format-select" id="ease-in-curve" title="Entry Curve: Acceleration curve during initial phase (منحنى تسارع البداية)"></select>
+                                </div>
+                            </div>
+                            <div class="input-group-compact">
+                                <label class="input-label-compact" title="Exit Deceleration Curve (منحنى تباطؤ النهاية)">Exit Curve</label>
+                                <div class="input-wrapper-compact format-select-wrapper">
+                                    <select class="input-field-compact format-select" id="ease-out-curve" title="Exit Curve: Deceleration curve during final phase (منحنى تباطؤ النهاية)"></select>
+                                </div>
+                            </div>
+                            <div class="input-group-compact">
+                                <label class="input-label-compact" title="Entry Duration Percentage (نسبة مدة الدخول)">Entry %</label>
+                                <div class="input-wrapper-compact">
+                                    <input type="text" inputmode="decimal" class="input-field-compact" id="ease-in-pct" value="0.20" min="0.05" max="0.90" step="0.05" title="Entry Phase Percentage (0.05 - 0.90)">
+                                </div>
+                            </div>
+                            <div class="input-group-compact">
+                                <label class="input-label-compact" title="Exit Duration Percentage (نسبة مدة الخروج)">Exit %</label>
+                                <div class="input-wrapper-compact">
+                                    <input type="text" inputmode="decimal" class="input-field-compact" id="ease-out-pct" value="0.20" min="0.05" max="0.90" step="0.05" title="Exit Phase Percentage (0.05 - 0.90)">
+                                </div>
+                            </div>
+                            <div class="input-group-compact dual-middle-mode">
+                                <label class="input-label-compact" title="Middle Phase Behavior (سلوك المرحلة الوسطى)">Middle Mode</label>
+                                <div class="input-wrapper-compact format-select-wrapper">
+                                    <select class="input-field-compact format-select" id="middle-mode" title="Middle Mode: Transition behavior between entry and exit (نمط الحركة في المرحلة الوسطى)">
+                                        <option value="linear" selected>Linear</option>
+                                        <option value="easeInOut">Ease In Out</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Format Options -->
+                <div class="card card-compact">
+                    <div class="card-header-mini" title="Number Formatting & Styling (تنسيق الأرقام والرموز)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                            <line x1="9" y1="20" x2="15" y2="20"></line>
+                            <line x1="12" y1="4" x2="12" y2="20"></line>
+                        </svg>
+                        <span>Format</span>
+                    </div>
+                    <div class="format-compact">
+                        <!-- Number Format & Separator -->
+                        <div class="format-row-compact">
+                            <div class="segmented-control-compact" title="Leading Zeros Padding (أصفار البادئة)">
+                                <button class="segment-compact active" data-format="normal" title="Standard: Dynamic digits without leading zero (#)">#</button>
+                                <button class="segment-compact" data-format="2" title="Two Digits: Padded with leading zero (00)">00</button>
+                                <button class="segment-compact" data-format="3" title="Three Digits: Padded with leading zeros (000)">000</button>
+                                <button class="segment-compact" data-format="4" title="Four Digits: Padded with leading zeros (0000)">0000</button>
+                            </div>
+                            <div class="segmented-control-compact separator-control" title="Thousands Separator (فاصل الآلاف)">
+                                <button class="segment-compact active" data-separator="" title="None: 1000000 (بدون فاصل)">-</button>
+                                <button class="segment-compact" data-separator="," title="Comma: 1,000,000 (فاصلة آلاف)">,</button>
+                                <button class="segment-compact" data-separator=" " title="Space: 1 000 000 (مسافة فاصلة)">Space</button>
+                            </div>
+                        </div>
+
+                        <!-- Symbol Input with Presets -->
+                        <div class="format-row-compact">
+                            <div class="input-wrapper-compact symbol-input-wrapper prefix-wrapper" title="Prefix Text/Symbol: Displayed before the number (بادئة قبل الرقم)">
+                                <input type="text" class="input-field-compact" id="prefix-symbol" placeholder="Prefix"
+                                    maxlength="3" title="Prefix Symbol (e.g. $, €)">
+                                <div class="input-arrows-compact symbol-preset-arrows">
+                                    <button class="input-arrow-compact" data-symbol="$" title="Set Dollar Prefix ($)">$</button>
+                                    <button class="input-arrow-compact" data-symbol="&#8364;" title="Set Euro Prefix (€)">&#8364;</button>
+                                    <button class="input-arrow-compact" data-symbol="&#163;" title="Set British Pound Prefix (£)">&#163;</button>
+                                    <button class="input-arrow-compact" data-symbol="%" title="Set Percent Suffix (%)">%</button>
+                                </div>
+                            </div>
+                            <div class="input-wrapper-compact symbol-input-wrapper suffix-wrapper" title="Suffix Text/Symbol: Displayed after the number (لاحقة بعد الرقم)">
+                                <input type="text" class="input-field-compact" id="suffix-symbol" placeholder="Suffix"
+                                    maxlength="3" title="Suffix Symbol (e.g. %, USD, km)">
+                            </div>
+                        </div>
+
+                        <!-- Toggles with Symbol Position -->
+                        <div class="format-toggles-compact">
+                            <button class="toggle-btn-compact active" id="align-left-btn" title="Align Left: Symbol placed before number (محاذاة البادئة لليسار)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="17" y1="10" x2="3" y2="10"></line>
+                                    <line x1="21" y1="6" x2="3" y2="6"></line>
+                                    <line x1="21" y1="14" x2="3" y2="14"></line>
+                                    <line x1="17" y1="18" x2="3" y2="18"></line>
+                                </svg>
+                            </button>
+                            <button class="toggle-btn-compact" id="align-right-btn" title="Align Right: Symbol placed after number (محاذاة البادئة لليمين)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="21" y1="10" x2="7" y2="10"></line>
+                                    <line x1="21" y1="6" x2="3" y2="6"></line>
+                                    <line x1="21" y1="14" x2="3" y2="14"></line>
+                                    <line x1="21" y1="18" x2="7" y2="18"></line>
+                                </svg>
+                            </button>
+                            <div class="toggle-divider"></div>
+                            <button class="toggle-btn-compact" id="toggle-monospace-btn" title="Monospace Numbers: Equal-width figures preventing layout shake (أرقام متساوية العرض لمنع الاهتزاز)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                                    <line x1="9" y1="20" x2="15" y2="20"></line>
+                                    <line x1="12" y1="4" x2="12" y2="20"></line>
+                                </svg>
+                            </button>
+                            <button class="toggle-btn-compact" id="toggle-decimals-btn" title="Decimals: Toggle 2 decimal places display (إظهار/إخفاء الفواصل العشرية)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="19" r="2"></circle>
+                                </svg>
+                            </button>
+                            <button class="toggle-btn-compact active" id="toggle-commas-btn" title="Thousands Separators: Toggle grouping commas (تفعيل/تعطيل فواصل الآلاف)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                </svg>
+                            </button>
+                            <button class="toggle-btn-compact" id="toggle-markers-btn" title="Use Markers: Sync counter duration with layer markers (ربط التوقيت بماركرات الطبقة)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                                    <line x1="4" y1="22" x2="4" y2="15"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Counter Panel Footer -->
+                <div class="panel-footer">
+                    <button class="btn-create btn-create-counter" id="btn-create-counter" title="Create Counter: Apply expressions to layer or create new text layer (تطبيق العداد على الطبقة)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                        </svg>
+                        <span>Create Counter</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Timer Tab Panel -->
+            <section class="panel" id="panel-timer">
+                <div class="card card-preview timer-preview-card">
+                    <div class="preview-display timer-preview-large" title="Live Timer Preview (معاينة حية للمؤقت)">
+                        <div class="timer-digits-large">
+                            <span class="timer-unit-large" id="timer-h" title="Hours (الساعات)">00</span>
+                            <span class="timer-separator-large">:</span>
+                            <span class="timer-unit-large" id="timer-m" title="Minutes (الدقائق)">05</span>
+                            <span class="timer-separator-large">:</span>
+                            <span class="timer-unit-large" id="timer-s" title="Seconds (الثواني)">00</span>
+                            <span class="timer-separator-large" id="timer-sep-f" style="display: none;">:</span>
+                            <span class="timer-unit-large" id="timer-f" style="display: none;" title="Frames (الفريمات)">00</span>
+                        </div>
+                    </div>
+                    <div class="preview-controls-row">
+                        <button class="btn-preview" id="timer-reset-preview" title="Reset Timer Preview (إعادة ضبط معاينة المؤقت)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="1 4 1 10 7 10"></polyline>
+                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                            </svg>
+                        </button>
+                        <button class="btn-preview btn-preview-play" id="timer-play-preview" title="Play Timer Preview (تشغيل معاينة المؤقت)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                        </button>
+                        <button class="btn-preview btn-preview-stop" id="timer-stop-preview" title="Stop Timer Preview (إيقاف معاينة المؤقت)"
+                            style="display: none;">
+                            <svg height="14" width="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="6" y="4" width="4" height="16"></rect>
+                                <rect x="14" y="4" width="4" height="16"></rect>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card card-compact">
+                    <!-- Start Time Row -->
+                    <div class="time-row-simple">
+                        <button class="time-icon-btn" type="button" data-time-focus="start" title="Capture Start Time from Comp Playhead (التقاط وقت المؤشر الحالي كوقت البداية)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                            </svg>
+                        </button>
+                        <div class="time-inputs-simple">
+                            <div class="input-wrapper-compact time-input-compact" title="Start Hours: 00 to 99 (ساعات البداية)">
+                                <input type="text" inputmode="decimal" class="input-field-compact" id="input-hours" value="0" min="0"
+                                    max="99" title="Start Hours (0-99)">
+                                <div class="input-arrows-compact">
+                                    <button class="input-arrow-compact" data-action="up" data-target="input-hours" title="Increase Start Hours (+1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="3">
+                                            <polyline points="18 15 12 9 6 15"></polyline>
+                                        </svg>
+                                    </button>
+                                    <button class="input-arrow-compact" data-action="down" data-target="input-hours" title="Decrease Start Hours (-1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="3">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="input-wrapper-compact time-input-compact" title="Start Minutes: 00 to 59 (دقائق البداية)">
+                                <input type="text" inputmode="decimal" class="input-field-compact" id="input-mins" value="0" min="0"
+                                    max="59" title="Start Minutes (0-59)">
+                                <div class="input-arrows-compact">
+                                    <button class="input-arrow-compact" data-action="up" data-target="input-mins" title="Increase Start Minutes (+1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="3">
+                                            <polyline points="18 15 12 9 6 15"></polyline>
+                                        </svg>
+                                    </button>
+                                    <button class="input-arrow-compact" data-action="down" data-target="input-mins" title="Decrease Start Minutes (-1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="3">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="input-wrapper-compact time-input-compact" title="Start Seconds: 00 to 59 (ثواني البداية)">
+                                <input type="text" inputmode="decimal" class="input-field-compact" id="input-secs" value="0" min="0" max="59" title="Start Seconds (0-59)" placeholder="S">
+                                <div class="input-arrows-compact">
+                                    <button class="input-arrow-compact" data-action="up" data-target="input-secs" title="Increase Start Seconds (+1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <polyline points="18 15 12 9 6 15"></polyline>
+                                        </svg>
+                                    </button>
+                                    <button class="input-arrow-compact" data-action="down" data-target="input-secs" title="Decrease Start Seconds (-1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="input-wrapper-compact time-input-compact" title="Start Frames: 00 to 99 (فريمات البداية)">
+                                <input type="text" inputmode="decimal" class="input-field-compact" id="input-frames" value="0" min="0" max="99" title="Start Frames (0-99)" placeholder="F">
+                                <div class="input-arrows-compact">
+                                    <button class="input-arrow-compact" data-action="up" data-target="input-frames" title="Increase Start Frames (+1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <polyline points="18 15 12 9 6 15"></polyline>
+                                        </svg>
+                                    </button>
+                                    <button class="input-arrow-compact" data-action="down" data-target="input-frames" title="Decrease Start Frames (-1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- End Time Row -->
+                    <div class="time-row-simple">
+                        <button class="time-icon-btn" type="button" data-time-focus="end" title="Capture End Time from Comp Playhead (التقاط وقت المؤشر الحالي كوقت النهاية)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <rect x="9" y="9" width="6" height="6"></rect>
+                            </svg>
+                        </button>
+                        <div class="time-inputs-simple">
+                            <div class="input-wrapper-compact time-input-compact" title="End Hours: 00 to 99 (ساعات النهاية)">
+                                <input type="text" inputmode="decimal" class="input-field-compact" id="input-end-h" value="0" min="0"
+                                    max="99" title="End Hours (0-99)">
+                                <div class="input-arrows-compact">
+                                    <button class="input-arrow-compact" data-action="up" data-target="input-end-h" title="Increase End Hours (+1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="3">
+                                            <polyline points="18 15 12 9 6 15"></polyline>
+                                        </svg>
+                                    </button>
+                                    <button class="input-arrow-compact" data-action="down" data-target="input-end-h" title="Decrease End Hours (-1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="3">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="input-wrapper-compact time-input-compact" title="End Minutes: 00 to 59 (دقائق النهاية)">
+                                <input type="text" inputmode="decimal" class="input-field-compact" id="input-end-m" value="5" min="0"
+                                    max="59" title="End Minutes (0-59)">
+                                <div class="input-arrows-compact">
+                                    <button class="input-arrow-compact" data-action="up" data-target="input-end-m" title="Increase End Minutes (+1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="3">
+                                            <polyline points="18 15 12 9 6 15"></polyline>
+                                        </svg>
+                                    </button>
+                                    <button class="input-arrow-compact" data-action="down" data-target="input-end-m" title="Decrease End Minutes (-1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="3">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="input-wrapper-compact time-input-compact" title="End Seconds: 00 to 59 (ثواني النهاية)">
+                                <input type="text" inputmode="decimal" class="input-field-compact" id="input-end-s" value="0" min="0" max="59" title="End Seconds (0-59)" placeholder="S">
+                                <div class="input-arrows-compact">
+                                    <button class="input-arrow-compact" data-action="up" data-target="input-end-s" title="Increase End Seconds (+1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <polyline points="18 15 12 9 6 15"></polyline>
+                                        </svg>
+                                    </button>
+                                    <button class="input-arrow-compact" data-action="down" data-target="input-end-s" title="Decrease End Seconds (-1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="input-wrapper-compact time-input-compact" title="End Frames: 00 to 99 (فريمات النهاية)">
+                                <input type="text" inputmode="decimal" class="input-field-compact" id="input-end-f" value="0" min="0" max="99" title="End Frames (0-99)" placeholder="F">
+                                <div class="input-arrows-compact">
+                                    <button class="input-arrow-compact" data-action="up" data-target="input-end-f" title="Increase End Frames (+1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <polyline points="18 15 12 9 6 15"></polyline>
+                                        </svg>
+                                    </button>
+                                    <button class="input-arrow-compact" data-action="down" data-target="input-end-f" title="Decrease End Frames (-1)">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer Configuration -->
+                <div class="card card-compact">
+                    <div class="config-header-compact">
+                        <span class="config-title-compact" title="Timer Operating Configuration (إعدادات تشغيل المؤقت)">Configuration</span>
+                        <div class="duration-mode-icons-compact">
+                            <label class="mode-icon-btn-compact active" title="Fixed Duration Mode: Custom duration in seconds (تحديد المدة يدوياً بالثواني)">
+                                <input type="radio" name="duration-mode" value="manual" checked>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                            </label>
+                            <label class="mode-icon-btn-compact" title="Auto Duration Mode: Match Layer Duration automatically (مطابقة مدة الطبقة تلقائياً)">
+                                <input type="radio" name="duration-mode" value="auto">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M15 4V2"></path>
+                                    <path d="M15 16v-2"></path>
+                                    <path d="M8 9h2"></path>
+                                    <path d="M20 9h2"></path>
+                                    <path d="M17.8 11.8 19 13"></path>
+                                    <path d="M15 9h0"></path>
+                                    <path d="M17.8 6.2 19 5"></path>
+                                    <path d="m3 21 9-9"></path>
+                                    <path d="M12.2 6.2 11 5"></path>
+                                </svg>
+                            </label>
+                            <label class="mode-icon-btn-compact" title="Realtime Mode: 1 comp second = 1 timer second (توقيت واقعي 1 ثانية = 1 ثانية)">
+                                <input type="radio" name="duration-mode" value="realtime">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                            </label>
+                            <label class="mode-icon-btn-compact" title="Markers Mode: Fit between layer markers IN and OUT (بين علامات الطبقة)">
+                                <input type="radio" name="duration-mode" value="markers">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                </svg>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="config-row-compact" style="margin-bottom: var(--space-sm);">
+                        <div class="input-group-compact" id="duration-manual-group">
+                            <label class="input-label-compact" title="Timer Animation Duration (مدة حركة المؤقت)">Duration</label>
+                            <div class="input-wrapper-compact">
+                                <input type="text" inputmode="decimal" id="input-duration" class="input-field-compact" value="10"
+                                    min="0.1" step="0.5" title="Timer Duration in Seconds (مدة المؤقت بالثواني)">
+                                <div class="input-arrows-compact">
+                                    <button class="input-arrow-compact" data-action="up" data-target="input-duration" title="Increase Timer Duration (+0.5s)">
+                                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="3">
+                                            <polyline points="18 15 12 9 6 15"></polyline>
+                                        </svg>
+                                    </button>
+                                    <button class="input-arrow-compact" data-action="down" data-target="input-duration" title="Decrease Timer Duration (-0.5s)">
+                                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="3">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group-compact">
+                            <label class="input-label-compact" title="Start Delay in Seconds (تأخير بدء العد بالثواني)">Start At</label>
+                            <div class="input-wrapper-compact">
+                                <input type="text" inputmode="decimal" id="input-startat" class="input-field-compact" value="0"
+                                    min="0" step="0.1" title="Start Delay in Seconds (وقت بدء العد بالثواني)">
+                                <div class="input-arrows-compact">
+                                    <button class="input-arrow-compact" data-action="up" data-target="input-startat" title="Increase Start Delay (+0.1s)">
+                                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="3">
+                                            <polyline points="18 15 12 9 6 15"></polyline>
+                                        </svg>
+                                    </button>
+                                    <button class="input-arrow-compact" data-action="down" data-target="input-startat" title="Decrease Start Delay (-0.1s)">
+                                        <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="3">
+                                            <polyline points="6 9 12 15 18 9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="config-row-compact">
+                        <div class="input-group-compact format-group-compact">
+                            <label class="input-label-compact" title="Timer Time Units Display Format (صيغة عرض وحدات الوقت)">Format</label>
+                            <div class="format-select-wrapper">
+                                <select class="format-select" id="select-countdown-format" title="Select Timer Display Units (اختر صيغة العرض)">
+                                    <option value="hmsf">HH:MM:SS:FF</option>
+                                    <option value="msf">MM:SS:FF</option>
+                                    <option value="sf">SS:FF</option>
+                                    <option value="hms">HH:MM:SS</option>
+                                    <option value="ms">MM:SS</option>
+                                    <option value="s">SS</option>
+                                </select>
+                                <button class="toggle-btn-compact" id="timer-toggle-monospace-btn" title="Monospace Numbers: Equal-width figures preventing layout shake (أرقام متساوية العرض لمنع الاهتزاز)">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                                        <line x1="9" y1="20" x2="15" y2="20"></line>
+                                        <line x1="12" y1="4" x2="12" y2="20"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer Panel Footer -->
+                <div class="panel-footer">
+                    <button class="btn-create btn-create-timer" id="btn-create-timer" title="Create Timer: Apply countdown/stopwatch expressions to layer (تطبيق المؤقت على الطبقة)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span>Create Timer</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Presets Tab Panel -->
+            <section class="panel" id="panel-presets">
+                <!-- Save Preset Card -->
+                <div class="card card-compact">
+                    <div class="card-header-compact" title="Save Preset (حفظ الإعدادات كقالب)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        <span>Save Current Settings</span>
+                    </div>
+                    <div class="save-preset-compact">
+                        <div class="input-wrapper-compact" title="Enter Preset Name (أدخل اسم القالب)">
+                            <input type="text" class="input-field-compact" id="input-preset-name"
+                                placeholder="Enter preset name..." title="Enter Preset Name (أدخل اسم القالب)">
+                        </div>
+                        <button class="btn-primary-compact" id="btn-save-preset" title="Save Preset: Store current configuration for quick reuse (حفظ القالب)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Presets List -->
+                <div class="presets-list-compact" id="presets-list" title="Saved Presets List (قائمة القوالب المحفوظة)">
+                    <div class="nomro-presets__empty">No saved presets</div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Global Status Bar (Matching OpenBox Status Bar) -->
+        <div id="status-bar" class="status-bar" title="Host Connection & System Status (حالة النظام والاتصال)">
+            <span class="status-dot"></span>
+            <span id="status-text" title="Current Status">Ready</span>
+        </div>
+    </main>
+
+    <div class="nomro-loading" id="loading" style="display: none;">
+        <div class="nomro-spinner"></div>
+        <span>Processing...</span>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Error Message -->
+    <div class="message message-error" id="error-message" role="alert" style="display: none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span id="error-text"></span>
+    </div>
+
+    <!-- Success Message -->
+    <div class="message message-success" id="success-message" role="status" style="display: none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        <span id="success-text"></span>
+    </div>
+
+    <!-- JavaScript - NOMRO Extension Core -->
+    <script src="js/bridge/Bridge.js"></script>
+    <script src="js/services/Logger.js"></script>
+    <!-- State model removed: all state is managed by App.state in app.js -->
+    <script src="js/models/Preset.js"></script>
+    <script src="js/services/Validator.js"></script>
+    <script src="js/services/Storage.js"></script>
+    <script src="js/services/PresetService.js"></script>
+    <script src="js/easing/EasingDefaults.js"></script>
+    <script src="js/easing/EasingRegistry.js"></script>
+    <script src="js/easing/EasingMigrator.js"></script>
+    <script src="js/easing/EasingValidator.js"></script>
+    <script src="js/easing/EasingRuntime.js"></script>
+    <script src="js/views/PresetView.js"></script>
+    <script src="js/services/ErrorHandler.js"></script>
+    <script src="js/modules/timer-defaults.js"></script>
+    <script src="js/modules/counter.js"></script>
+    <script src="js/modules/timer.js"></script>
+    <script src="js/modules/presets.js"></script>
+    <script src="js/modules/ui-controls.js"></script>
+    <script src="js/modules/keyboard-shortcuts.js"></script>
+    <script src="js/modules/sync.js"></script>
+    <script src="js/modules/messages.js"></script>
+    <script src="js/modules/creation.js"></script>
+    <script src="js/modules/mode.js"></script>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

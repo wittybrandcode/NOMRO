@@ -1,0 +1,1436 @@
+/* ============================================================
+   NOMRO PRO — Industrial Slate Design System
+   Square Sharp Edges (0 Radius), Solid Fills, Large Precise Components
+   Matching OpenBox Industrial Design System
+   ============================================================ */
+
+:root {
+    /* Industrial Color Palette (Matching OpenBox) */
+    --bg-base:           #111114;
+    --bg-card:           #17171d;
+    --bg-card-hover:     #1d1d25;
+    --bg-surface:        #20202a;
+    --bg-surface-hi:     #2b2b38;
+    --bg-input:          #131318;
+    --bg-input-hover:    #1c1c24;
+    --bg-input-focus:    #242432;
+
+    /* Crisp Architectural Borders */
+    --border-subtle:     rgba(255, 255, 255, 0.09);
+    --border-contrast:   rgba(255, 255, 255, 0.20);
+    --border-focus:      #5b8def;
+
+    /* High-Contrast Studio Grayscale Tokens */
+    --accent-primary:    #d4d4e2;
+    --accent-secondary:  #9aa0b4;
+    --accent-amber:      #d4d4e2;
+    --accent-amber-hi:   #e8e8f2;
+    --accent-success:    #10b981;
+    --accent-danger:     #d46a74;
+    --accent-brand:      #10b981;
+
+    /* Solid Button Backgrounds */
+    --btn-solid-bg:      #1e1e27;
+    --btn-solid-hover:   #2b2b38;
+    --btn-solid-active:  #d4d4e2;
+
+    /* Typography */
+    --text-bright:       #e8e8f2;
+    --text-primary:      #dcdce8;
+    --text-secondary:    #9696a8;
+    --text-muted:        #686878;
+    --text-dim:          #4c4c5a;
+
+    --font-primary:      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono:         ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+    /* Spacing */
+    --space-xs:          3px;
+    --space-sm:          6px;
+    --space-md:          8px;
+    --space-lg:          12px;
+
+    /* Component Dimensions (OpenBox Compact Standard) */
+    --btn-size:          26px;
+    --input-height:      28px;
+    --header-height:     36px;
+    --transition-fast:   0.10s ease;
+}
+
+/* ============================================================
+   GLOBAL RESET & ZERO CORNER ROUNDING (Square Sharp Edges)
+   ============================================================ */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-radius: 0 !important; /* Sharp industrial squared corners */
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    font-family: var(--font-primary);
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--text-primary);
+    background: var(--bg-base);
+    transition: background-color 0.15s ease, color 0.15s ease;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.20);
+    border-radius: 0 !important;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-primary);
+}
+
+/* ============================================================
+   MAIN CONTAINER
+   ============================================================ */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    box-sizing: border-box;
+    gap: 7px;
+    max-width: 100%;
+    min-height: 100vh;
+}
+
+/* ============================================================
+   1. UNIFIED HEADER (Matching OpenBox Top Bar)
+   ============================================================ */
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 3px 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    height: var(--header-height);
+    box-sizing: border-box;
+    width: 100%;
+    position: relative;
+    z-index: 100;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.logo-icon {
+    width: 22px;
+    height: 22px;
+    background: var(--btn-solid-bg);
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-brand);
+    flex-shrink: 0;
+}
+
+.logo-icon svg {
+    width: 13px;
+    height: 13px;
+    stroke-width: 2.2;
+}
+
+.logo-text {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.logo-title {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    color: var(--text-bright);
+}
+
+.logo-subtitle {
+    font-size: 8.5px;
+    font-weight: 800;
+    color: var(--bg-base);
+    padding: 1px 4px;
+    background: var(--accent-brand);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.brand-tagline {
+    display: none; /* Hidden for compact OpenBox parity */
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;
+}
+
+.divider-vertical {
+    width: 1px;
+    height: 18px;
+    background: var(--border-subtle);
+    margin: 0 2px;
+    flex-shrink: 0;
+}
+
+/* Square Icon Buttons (OpenBox .square-icon-btn standard) */
+.btn-icon {
+    width: var(--btn-size);
+    height: var(--btn-size);
+    min-width: var(--btn-size);
+    flex: 0 0 var(--btn-size);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--btn-solid-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.10s ease, border-color 0.10s ease, color 0.10s ease, transform 0.08s ease;
+    padding: 0;
+    outline: none;
+}
+
+.btn-icon svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    flex-shrink: 0;
+}
+
+.btn-icon:hover {
+    background: var(--btn-solid-hover) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    color: var(--text-bright) !important;
+}
+
+.btn-icon:active {
+    transform: scale(0.94);
+}
+
+.btn-icon.active {
+    background: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    color: #161620 !important;
+}
+
+.btn-icon.active svg {
+    color: #161620 !important;
+    stroke: #161620 !important;
+}
+
+.btn-icon.btn-unlink {
+    color: #e88894;
+    border-color: rgba(212, 106, 116, 0.4);
+}
+
+.btn-icon.btn-unlink:hover {
+    background: #3e2226 !important;
+    border-color: #5a2e34 !important;
+    color: #e88894 !important;
+}
+
+/* ============================================================
+   2. TAB NAVIGATION (OpenBox Segmented Control)
+   ============================================================ */
+.tab-navigation {
+    display: flex;
+    background: #111115;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    padding: 2px;
+    gap: 2px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.tab-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 26px;
+    background: #1c1c24;
+    border: 1px solid transparent;
+    border-radius: 0 !important;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    padding: 0 4px;
+    user-select: none;
+}
+
+.tab-btn svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    color: var(--text-muted);
+    transition: color var(--transition-fast);
+}
+
+.tab-btn:hover {
+    background: #2e2e3d;
+    color: var(--text-bright);
+}
+
+.tab-btn:hover svg {
+    color: var(--text-bright);
+}
+
+/* Active Tab: Solid Off-White (OpenBox Master Style) */
+.tab-btn.active {
+    background: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    color: #161620 !important;
+    font-weight: 700;
+}
+
+.tab-btn.active svg {
+    color: #161620 !important;
+    stroke: #161620 !important;
+}
+
+.tab-slider {
+    display: none !important; /* Replaced by solid crisp segmented control */
+}
+
+/* ============================================================
+   3. CONTENT AREA & PANELS
+   ============================================================ */
+.content-area {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 100%;
+}
+
+.panel {
+    display: none !important;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.panel.active {
+    display: flex !important;
+    flex-direction: column;
+    gap: 7px;
+}
+
+/* ============================================================
+   4. CARDS & SECTION CONTAINERS (OpenBox Studio Card)
+   ============================================================ */
+.card,
+.card-compact {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    padding: 7px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-sizing: border-box;
+    transition: border-color var(--transition-fast);
+}
+
+.card:hover,
+.card-compact:hover {
+    border-color: var(--border-contrast);
+}
+
+.card-header-mini,
+.card-header-compact,
+.config-header-compact {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-secondary);
+    padding: 0 1px 1px;
+    gap: 5px;
+    border-bottom: none;
+    margin-bottom: 2px;
+}
+
+.card-header-mini svg,
+.card-header-compact svg {
+    width: 11px;
+    height: 11px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    color: var(--accent-primary);
+    flex-shrink: 0;
+}
+
+.config-title-compact {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-secondary);
+}
+
+/* ============================================================
+   5. LIVE PREVIEW CARD (Dark Charcoal, Monospace, Zero Yellow Outline)
+   ============================================================ */
+.card-preview {
+    background: #15151b;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.preview-display {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 0;
+}
+
+.preview-number-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    overflow: hidden;
+}
+
+.preview-number {
+    font-size: 24px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--text-bright) !important;
+    letter-spacing: -0.5px;
+    text-align: center;
+    line-height: 1.1;
+    display: inline-block;
+}
+
+.preview-controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Preview Action Buttons */
+.btn-preview {
+    width: var(--btn-size);
+    height: var(--btn-size);
+    min-width: var(--btn-size);
+    flex: 0 0 var(--btn-size);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--btn-solid-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.10s ease, border-color 0.10s ease, color 0.10s ease;
+    padding: 0;
+}
+
+.btn-preview svg {
+    width: 12px;
+    height: 12px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+}
+
+.btn-preview:hover {
+    background: var(--btn-solid-hover);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: var(--text-bright);
+}
+
+.btn-preview:active {
+    transform: scale(0.94);
+}
+
+.btn-preview-play {
+    background: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    color: #161620 !important;
+}
+
+.btn-preview-play svg {
+    color: #161620 !important;
+    stroke: #161620 !important;
+    fill: #161620 !important;
+}
+
+.btn-preview-play:hover {
+    background: #e0e0ec !important;
+    border-color: #e0e0ec !important;
+}
+
+.btn-preview-stop {
+    background: var(--accent-danger) !important;
+    border-color: var(--accent-danger) !important;
+    color: #ffffff !important;
+}
+
+.btn-preview-stop svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+    fill: #ffffff !important;
+}
+
+/* ============================================================
+   6. PRECISION INPUTS & STEPPER ARROWS (OpenBox Metric Box Standard)
+   ============================================================ */
+.range-inputs-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    width: 100%;
+}
+
+.input-wrapper-compact {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    height: var(--input-height);
+    box-sizing: border-box;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+    overflow: hidden;
+    min-width: 0;
+    width: 100%;
+}
+
+.input-wrapper-compact:hover {
+    background: var(--bg-input-hover);
+    border-color: var(--border-contrast);
+}
+
+.input-wrapper-compact:focus-within {
+    background: var(--bg-input-focus);
+    border-color: var(--border-focus);
+}
+
+.input-icon {
+    width: 12px;
+    height: 12px;
+    color: var(--text-muted);
+    margin-left: 5px;
+    margin-right: 2px;
+    flex-shrink: 0;
+    stroke-width: 2.2;
+}
+
+.input-field-compact {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-bright);
+    text-align: right;
+    padding: 0 4px 0 2px;
+    box-sizing: border-box;
+    -moz-appearance: textfield;
+}
+
+.input-field-compact::-webkit-outer-spin-button,
+.input-field-compact::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.input-field-compact::placeholder {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.unit-compact {
+    font-size: 8.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    user-select: none;
+    pointer-events: none;
+    flex-shrink: 0;
+    padding-right: 3px;
+}
+
+/* Stepper Column on Right */
+.input-arrows-compact {
+    position: relative;
+    right: 0;
+    top: 0;
+    transform: none;
+    width: 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #181820;
+    border-left: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.input-arrow-compact {
+    flex: 1;
+    width: 100%;
+    height: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 0 !important;
+    cursor: pointer;
+    font-size: 7px;
+    line-height: 1;
+    color: var(--text-secondary);
+    padding: 0;
+    outline: none;
+    transition: background 0.08s ease, color 0.08s ease;
+}
+
+.input-arrow-compact svg {
+    width: 7px;
+    height: 7px;
+    stroke: currentColor;
+    stroke-width: 2.5;
+}
+
+.input-arrow-compact:hover {
+    background: var(--accent-primary) !important;
+    color: #161620 !important;
+}
+
+.input-arrow-compact:active {
+    background: #b8b8c8 !important;
+}
+
+/* ============================================================
+   7. SEGMENTED CONTROLS & TOGGLES (OpenBox Slate Controls)
+   ============================================================ */
+.segmented-control-compact {
+    display: flex;
+    background: #111115;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    padding: 2px;
+    gap: 2px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.segment-compact {
+    flex: 1;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #1c1c24;
+    border: 1px solid transparent;
+    border-radius: 0 !important;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    padding: 0 4px;
+}
+
+.segment-compact:hover {
+    background: #2e2e3d;
+    color: var(--text-bright);
+}
+
+.segment-compact.active {
+    background: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    color: #161620 !important;
+    font-weight: 700;
+}
+
+/* Format Layout Rows */
+.format-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.format-row-compact {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+/* Symbol Presets Cluster */
+.symbol-input-wrapper {
+    flex: 1;
+}
+
+.symbol-input-wrapper .input-field-compact {
+    text-align: left;
+    padding-left: 6px;
+    font-family: var(--font-primary);
+}
+
+.symbol-preset-arrows {
+    display: flex;
+    flex-direction: row;
+    width: auto;
+    height: 100%;
+    background: transparent;
+    border-left: 1px solid var(--border-subtle);
+}
+
+.symbol-preset-arrows .input-arrow-compact {
+    width: 18px;
+    height: 100%;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: #181820;
+    border-right: 1px solid var(--border-subtle);
+}
+
+.symbol-preset-arrows .input-arrow-compact:last-child {
+    border-right: none;
+}
+
+/* Toggle Buttons Toolbar (OpenBox Square Icon Group) */
+.format-toggles-compact {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding-top: 3px;
+}
+
+.toggle-btn-compact {
+    width: var(--btn-size);
+    height: var(--btn-size);
+    min-width: var(--btn-size);
+    flex: 0 0 var(--btn-size);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--btn-solid-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.10s ease, border-color 0.10s ease, color 0.10s ease;
+    padding: 0;
+}
+
+.toggle-btn-compact svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    flex-shrink: 0;
+}
+
+.toggle-btn-compact:hover {
+    background: var(--btn-solid-hover);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: var(--text-bright);
+}
+
+.toggle-btn-compact.active {
+    background: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    color: #161620 !important;
+}
+
+.toggle-btn-compact.active svg {
+    color: #161620 !important;
+    stroke: #161620 !important;
+}
+
+.toggle-divider {
+    width: 1px;
+    height: 18px;
+    background: var(--border-subtle);
+    margin: 0 1px;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   8. SELECT DROPDOWNS (OpenBox Industrial Select)
+   ============================================================ */
+.format-select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: var(--input-height);
+    width: 100%;
+}
+
+.format-select {
+    width: 100%;
+    height: 100%;
+    background: #121218;
+    border: 1px solid var(--border-contrast);
+    border-radius: 0 !important;
+    color: #dcdce8;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 0 20px 0 8px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238c8c9e' stroke-width='2.2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+}
+
+.format-select:hover {
+    border-color: #55556c;
+    background-color: #1c1c24;
+}
+
+.format-select:focus {
+    border-color: var(--border-focus);
+    background-color: #242432;
+}
+
+.format-select option {
+    background: #181822;
+    color: #dcdce8;
+}
+
+/* Dual Easing Grid */
+.dual-easing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.dual-middle-mode {
+    grid-column: 1 / -1;
+}
+
+.input-label-compact {
+    font-size: 8.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    display: block;
+}
+
+/* ============================================================
+   9. TIMER CONFIGURATION (OpenBox Timing Matrix Standard)
+   ============================================================ */
+.timer-preview-card {
+    padding: 8px;
+}
+
+.timer-digits-large {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 100%;
+}
+
+.timer-unit-large {
+    font-size: 18px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-bright);
+    background: #1e1e27;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    padding: 4px 6px;
+    min-width: 32px;
+    text-align: center;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+}
+
+.timer-separator-large {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    line-height: 1;
+    user-select: none;
+}
+
+/* Time Input Rows */
+.time-row-simple {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+    width: 100%;
+}
+
+.time-row-simple:last-child {
+    margin-bottom: 0;
+}
+
+.time-icon-btn {
+    width: var(--btn-size);
+    height: var(--input-height);
+    min-width: var(--btn-size);
+    flex: 0 0 var(--btn-size);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--btn-solid-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    padding: 0;
+}
+
+.time-icon-btn svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+}
+
+.time-icon-btn:hover {
+    background: var(--btn-solid-hover);
+    color: var(--text-bright);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.time-icon-btn:active,
+.time-icon-btn.time-btn-capturing {
+    background: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    color: #161620 !important;
+}
+
+.time-inputs-simple {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    flex: 1;
+    min-width: 0;
+}
+
+.time-input-compact {
+    height: var(--input-height);
+}
+
+.time-input-compact .input-field-compact {
+    text-align: center;
+    padding: 0 2px;
+    font-size: 11px;
+}
+
+/* Duration Mode Radio Cluster (OpenBox Square Icon Group) */
+.duration-mode-icons-compact {
+    display: flex;
+    gap: 3px;
+}
+
+.mode-icon-btn-compact {
+    position: relative;
+    width: var(--btn-size);
+    height: var(--btn-size);
+    min-width: var(--btn-size);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--btn-solid-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.10s ease, color 0.10s ease, border-color 0.10s ease;
+}
+
+.mode-icon-btn-compact svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+}
+
+.mode-icon-btn-compact:hover {
+    background: var(--btn-solid-hover);
+    color: var(--text-bright);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.mode-icon-btn-compact input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.mode-icon-btn-compact.active {
+    background: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    color: #161620 !important;
+}
+
+.mode-icon-btn-compact.active svg {
+    color: #161620 !important;
+    stroke: #161620 !important;
+}
+
+.config-row-compact {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    width: 100%;
+}
+
+/* ============================================================
+   10. ACTION BUTTONS & FOOTER (OpenBox Industrial Action Buttons)
+   ============================================================ */
+.panel-footer {
+    margin-top: 3px;
+    padding-top: 0;
+}
+
+.btn-create {
+    width: 100%;
+    height: 32px;
+    background: var(--accent-primary);
+    color: #161620;
+    border: 1px solid var(--accent-primary);
+    border-radius: 0 !important;
+    font-family: var(--font-primary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: none;
+    transition: background 0.10s ease, border-color 0.10s ease, transform 0.08s ease;
+    user-select: none;
+}
+
+.btn-create svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+}
+
+.btn-create:hover {
+    background: #e0e0ec;
+    border-color: #e0e0ec;
+    color: #101016;
+}
+
+.btn-create:active {
+    background: #b8b8c8;
+    transform: scale(0.98);
+}
+
+.btn-create.btn-update {
+    background: #5b8def;
+    border-color: #5b8def;
+    color: #ffffff;
+}
+
+.btn-create.btn-update:hover {
+    background: #4a7de0;
+    border-color: #4a7de0;
+}
+
+.btn-create:disabled,
+.btn-create.btn-disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ============================================================
+   11. PRESETS TAB (OpenBox Compact Standard)
+   ============================================================ */
+.save-preset-compact {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    width: 100%;
+}
+
+.save-preset-compact .input-wrapper-compact {
+    flex: 1;
+}
+
+.save-preset-compact .input-field-compact {
+    text-align: left;
+    padding-left: 8px;
+    font-family: var(--font-primary);
+}
+
+.btn-primary-compact {
+    height: var(--input-height);
+    padding: 0 10px;
+    background: var(--accent-primary);
+    color: #161620;
+    border: 1px solid var(--accent-primary);
+    border-radius: 0 !important;
+    font-family: var(--font-primary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.10s ease;
+}
+
+.btn-primary-compact svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+}
+
+.btn-primary-compact:hover {
+    background: #e0e0ec;
+    border-color: #e0e0ec;
+}
+
+.presets-list-compact {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.nomro-presets__empty {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 12px;
+    background: #131318;
+    border: 1px dashed var(--border-subtle);
+    border-radius: 0 !important;
+}
+
+.nomro-presets__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    padding: 4px 6px;
+    height: 30px;
+    box-sizing: border-box;
+    transition: background 0.10s ease, border-color 0.10s ease;
+}
+
+.nomro-presets__item:hover {
+    border-color: var(--border-contrast);
+    background: var(--bg-card-hover);
+}
+
+.nomro-presets__name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.nomro-presets__actions {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.nomro-presets__btn {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-subtle);
+    background: var(--btn-solid-bg);
+    border-radius: 0 !important;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.10s ease;
+    padding: 0;
+}
+
+.nomro-presets__btn svg {
+    width: 11px;
+    height: 11px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+}
+
+.nomro-presets__btn--load:hover {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: #161620;
+}
+
+.nomro-presets__btn--delete:hover {
+    background: var(--accent-danger);
+    border-color: var(--accent-danger);
+    color: #ffffff;
+}
+
+/* ============================================================
+   12. STATUS BAR & TOASTS (Matching OpenBox Status Bar)
+   ============================================================ */
+.status-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    font-size: 9.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.3px;
+    user-select: none;
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    background: #4a4a58;
+    border-radius: 0 !important;
+    flex-shrink: 0;
+}
+
+/* Toast Container */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+.toast {
+    padding: 6px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    background: #181822;
+    border: 1px solid #3c3c4e;
+    border-radius: 0 !important;
+    color: var(--text-bright);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    pointer-events: auto;
+    animation: toastIn 0.15s ease-out;
+}
+
+.toast.toast-success {
+    border-left: 3px solid var(--accent-brand);
+}
+
+.toast.toast-error {
+    border-left: 3px solid var(--accent-danger);
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading Overlay */
+.nomro-loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 17, 20, 0.75);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    z-index: 9999;
+    color: var(--text-bright);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.nomro-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-contrast);
+    border-top-color: var(--accent-primary);
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Shortcuts Modal */
+.shortcuts-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.shortcuts-dialog {
+    width: 100%;
+    max-width: 340px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-contrast);
+    border-radius: 0 !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85);
+    padding: 12px;
+    color: var(--text-primary);
+}
+
+.shortcuts-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-bright);
+    margin-bottom: 4px;
+}
+
+.shortcuts-subtitle {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+}
+
+.shortcuts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 48vh;
+    overflow-y: auto;
+}
+
+.shortcuts-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    padding: 5px 8px;
+    background: var(--bg-input);
+}
+
+.shortcuts-desc {
+    font-size: 10.5px;
+    color: var(--text-primary);
+}
+
+.shortcuts-kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 6px;
+    border: 1px solid var(--border-contrast);
+    border-radius: 0 !important;
+    background: #1e1e27;
+    color: var(--text-bright);
+    font-size: 9.5px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+}
+
+.shortcuts-close-btn {
+    width: 100%;
+    height: 28px;
+    margin-top: 10px;
+    background: var(--btn-solid-bg);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-bright);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 0 !important;
+}
+
+.shortcuts-close-btn:hover {
+    background: var(--btn-solid-hover);
+}

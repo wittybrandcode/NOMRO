@@ -1,0 +1,270 @@
+/**
+ * NOMRO - Creation Module
+ * Handles counter/timer creation and layer updates
+ * @module modules/creation
+ */
+var CreationModule = (function () {
+    'use strict';
+
+    var _elements = null;
+    var _callbacks = {};
+    var _isCreating = false;
+
+    /**
+     * Initialize the module
+     * @param {Object} elements - Cached DOM elements
+     * @param {Object} callbacks -
+     * { getSettings, getLinkedLayer, getLinkedLayerInfo, switchTab, showError, showSuccess, showToast, handleError, hideLoading }
+     */
+    function init(elements, callbacks) {
+        _elements = elements;
+        _callbacks = callbacks || {};
+        _initCreateButtons();
+    }
+
+    /**
+     * Initialize tab-specific create buttons
+     */
+    function _initCreateButtons() {
+        // Legacy single button (if present)
+        if (_elements.btnCreate) {
+            _elements.btnCreate.addEventListener('click', function () {
+                create('counter');
+            });
+        }
+
+        // Counter-specific button
+        var btnCounter = document.getElementById('btn-create-counter');
+        if (btnCounter) {
+            btnCounter.addEventListener('click', function () {
+                create('counter');
+            });
+        }
+
+        // Timer-specific button
+        var btnTimer = document.getElementById('btn-create-timer');
+        if (btnTimer) {
+            btnTimer.addEventListener('click', function () {
+                create('timer');
+            });
+        }
+    }
+
+    /**
+     * Normalize type to update families: counter | timer
+     * @param {string} type
+     * @returns {string}
+     */
+    function _normalizeType(type) {
+        return type === 'timer' ? 'timer' : 'counter';
+    }
+
+    /**
+     * Report error through centralized handler (if available)
+     * @param {Error|Object|string} error
+     * @param {string} context
+     * @param {string} fallbackMessage
+     */
+    function _reportError(error, context, fallbackMessage) {
+        var message = fallbackMessage || 'Unexpected error';
+
+        if (error) {
+            if (typeof error === 'string') {
+                message = error;
+            } else if (error.message) {
+                message = error.message;
+            }
+        }
+
+        if (_callbacks.handleError) {
+            _callbacks.handleError({ message: message, raw: error }, context || 'creation');
+            return;
+        }
+
+        if (_callbacks.showError) {
+            _callbacks.showError(message);
+        }
+    }
+
+    /**
+     * Guard against cross-type updates (Counter tab -> Timer layer or reverse)
+     * @param {string} requestedType - counter|timer
+     * @param {Object|null} linkedLayerInfo - { layerName, counterType }
+     * @returns {boolean} True if mismatch is detected and handled
+     */
+    function _handleTypeMismatch(requestedType, linkedLayerInfo) {
+        if (!linkedLayerInfo || !linkedLayerInfo.counterType) return false;
+
+        var linkedType = _normalizeType(linkedLayerInfo.counterType);
+        if (linkedType === requestedType) return false;
+
+        if (_callbacks.switchTab) {
+            _callbacks.switchTab(linkedType);
+        }
+
+        var expectedLabel = linkedType === 'timer' ? 'Timer' : 'Counter';
+        var layerName = linkedLayerInfo.layerName || 'NOMRO layer';
+        _reportError(
+            { message: 'Cross-type update blocked. Layer "' + layerName + '" must be updated from ' + expectedLabel + ' tab.' },
+            'creation.typeMismatch'
+        );
+        return true;
+    }
+
+
+    /**
+     * Show loading state
+     */
+    function _showLoading() {
+        if (_elements.loading) {
+            _elements.loading.style.display = 'flex';
+        }
+        // Hide all create buttons
+        var btns = document.querySelectorAll('.btn-create');
+        btns.forEach(function (btn) {
+            btn.style.display = 'none';
+        });
+    }
+
+    /**
+     * Hide loading state
+     */
+    function hideLoading() {
+        if (_elements.loading) {
+            _elements.loading.style.display = 'none';
+        }
+        // Show all create buttons
+        var btns = document.querySelectorAll('.btn-create');
+        btns.forEach(function (btn) {
+            btn.style.display = 'flex';
+        });
+    }
+
+    /**
+     * Create counter or timer layer
+     * @param {string} type - 'counter' or 'timer'
+     */
+    function create(type) {
+        if (_isCreating) return;
+        _isCreating = true;
+
+        try {
+            type = _normalizeType(type || 'counter');
+            var settings = _callbacks.getSettings ? _callbacks.getSettings(type) : {};
+            var linkedLayer = _callbacks.getLinkedLayer ? _callbacks.getLinkedLayer() : null;
+            var linkedLayerInfo = _callbacks.getLinkedLayerInfo ? _callbacks.getLinkedLayerInfo() : null;
+
+            if (!linkedLayerInfo && linkedLayer) {
+                linkedLayerInfo = { layerName: linkedLayer };
+            }
+
+            // Force type based on button clicked
+            settings.counterType = (type === 'timer') ? 'timer' : 'basic';
+
+            if (typeof EasingValidator !== 'undefined') {
+                settings = EasingValidator.sanitizeSettings(settings);
+                var validation = EasingValidator.validateStrict(settings);
+                if (!validation.valid) {
+                    _reportError(
+                        { message: 'Invalid easing configuration: ' + validation.errors.join(' | ') },
+                        'creation.validation'
+                    );
+                    _isCreating = false;
+                    return;
+                }
+            }
+
+            // Check if we're in update mode
+            var layerRef = linkedLayerInfo || linkedLayer;
+            if (layerRef) {
+                if (_handleTypeMismatch(type, linkedLayerInfo)) {
+                    _isCreating = false;
+                    return;
+                }
+
+                if (typeof Logger !== 'undefined') {
+                    Logger.log('Creation', 'Updating layer:', layerRef);
+                }
+                updateLayer(layerRef, settings, linkedLayerInfo);
+                return;
+            }
+
+            if (typeof Logger !== 'undefined') {
+                Logger.log('Creation', 'Creating ' + type + ':', settings);
+            }
+            _showLoading();
+
+            if (typeof Bridge !== 'undefined' && Bridge.createCounter) {
+                Bridge.createCounter(settings, function (err, result) {
+                    hideLoading();
+                    _isCreating = false;
+                    if (err) {
+                        _reportError(err, 'creation.create', 'Error creating ' + type);
+                    } else {
+                        var typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+                        if (_callbacks.showSuccess) _callbacks.showSuccess(typeLabel + ' created successfully!');
+                    }
+                });
+            } else {
+                // Browser preview mode
+                setTimeout(function () {
+                    hideLoading();
+                    _isCreating = false;
+                    var typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
+                    if (_callbacks.showSuccess) _callbacks.showSuccess('Preview mode - ' + typeLabel + ' created!');
+                    if (_callbacks.showToast) _callbacks.showToast(typeLabel + ' created!', 'success');
+                }, 1500);
+            }
+        } catch (e) {
+            hideLoading();
+            _isCreating = false;
+            _reportError(e, 'creation.create', 'Unexpected error creating ' + type);
+        }
+    }
+
+    /**
+     * Update existing layer
+     * @param {string|Object} layerRef - Layer name or layer reference object
+     * @param {Object} settings - New settings
+     * @param {Object|null} linkedLayerInfo - Selected layer metadata
+     */
+    function updateLayer(layerRef, settings, linkedLayerInfo) {
+        _showLoading();
+
+        try {
+            if (typeof Bridge !== 'undefined' && Bridge.updateLayer) {
+                Bridge.updateLayer(layerRef, settings, function (err, result) {
+                    hideLoading();
+                    _isCreating = false;
+
+                    if (err) {
+                        _reportError(err, 'creation.update', 'Error updating layer');
+                        console.error('[CreationModule] Update error:', err);
+                        return;
+                    }
+
+                    if (_callbacks.showToast) _callbacks.showToast('Layer updated!', 'success');
+                });
+            } else {
+                // Browser preview mode
+                setTimeout(function () {
+                    hideLoading();
+                    _isCreating = false;
+                    if (_callbacks.showToast) _callbacks.showToast('Preview - Layer updated!', 'success');
+                }, 500);
+            }
+        } catch (e) {
+            hideLoading();
+            _isCreating = false;
+            _reportError(e, 'creation.update', 'Unexpected error updating layer');
+        }
+    }
+
+    // Public API
+    return {
+        init: init,
+        create: create,
+        updateLayer: updateLayer,
+        hideLoading: hideLoading
+    };
+})();
