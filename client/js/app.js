@@ -10,7 +10,7 @@
     // APP STATE
     // ========================================
     var App = {
-        version: '4.0.0',
+        version: '4.1.0',
         currentTab: 'counter',
         lastActiveSettingsTab: 'counter',
         isAnimating: false,
@@ -164,7 +164,6 @@
             presetsList: document.getElementById('presets-list'),
 
             // Create button
-            btnCreate: document.getElementById('btn-create'),
             btnCreateCounter: document.getElementById('btn-create-counter'),
             btnCreateTimer: document.getElementById('btn-create-timer'),
             loading: document.getElementById('loading'),
@@ -196,6 +195,7 @@
     var selectionPollMs = 1200;
 
     function init() {
+        try { if (localStorage.getItem('nomro_debug') === 'true') window.NOMRO_DEBUG = true; } catch (e) { }
         Logger.log('App', 'Initializing...');
 
         ensureCounterEasingState();
@@ -374,8 +374,6 @@
                         elements.btnCreateTimer.click();
                     } else if (elements.btnCreateCounter) {
                         elements.btnCreateCounter.click();
-                    } else if (elements.btnCreate) {
-                        elements.btnCreate.click();
                     }
                 },
                 onReset: function () {
@@ -383,8 +381,6 @@
                 }
             });
             Logger.log('App', 'KeyboardShortcuts initialized');
-        } else {
-            initKeyboardShortcuts(); // Fallback to legacy
         }
 
         // Initialize Real-time Validation
@@ -392,7 +388,6 @@
             var createButtons = [];
             if (elements.btnCreateCounter) createButtons.push(elements.btnCreateCounter);
             if (elements.btnCreateTimer) createButtons.push(elements.btnCreateTimer);
-            if (createButtons.length === 0 && elements.btnCreate) createButtons.push(elements.btnCreate);
             Validator.initRealtimeValidation(elements, createButtons);
             Logger.log('App', 'Real-time validation initialized');
         }
@@ -702,42 +697,170 @@
 
         if (elements.btnSettings) {
             elements.btnSettings.addEventListener('click', function () {
-                if (typeof MessagesModule !== 'undefined') {
-                    MessagesModule.showToast('Settings panel is coming soon', 'success');
-                }
+                showSettingsModal();
             });
         }
     }
 
     // ========================================
-    // KEYBOARD SHORTCUTS
+    // SETTINGS MODAL & DIAGNOSTICS
     // ========================================
-    function initKeyboardShortcuts() {
-        document.addEventListener('keydown', function (e) {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    function showSettingsModal() {
+        var existing = document.querySelector('.settings-modal');
+        if (existing) {
+            existing.remove();
+            return;
+        }
 
-            if (e.key === '1') switchTab('counter');
-            if (e.key === '2') switchTab('timer');
-            if (e.key === '3') switchTab('presets');
+        var hostInfo = (typeof Bridge !== 'undefined' && Bridge.getHostInfo) ? Bridge.getHostInfo() : null;
+        var hostName = hostInfo ? (hostInfo.appName + ' ' + hostInfo.appVersion) : 'After Effects (Active)';
+        var isCepActive = (typeof Bridge !== 'undefined' && Bridge.isCEP) ? Bridge.isCEP() : false;
+        var environmentStr = isCepActive ? 'CEP 8.0 Extension' : 'Browser Dev Mode';
+        var presetsCount = (typeof PresetService !== 'undefined' && PresetService.getAll) ? PresetService.getAll().length : 0;
+        var isDebug = (typeof window !== 'undefined' && !!window.NOMRO_DEBUG);
 
-            if (e.key === ' ' && App.currentTab === 'counter') {
+        var modal = document.createElement('div');
+        modal.className = 'settings-modal';
+
+        var dialog = document.createElement('div');
+        dialog.className = 'settings-dialog';
+
+        dialog.innerHTML =
+            '<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 8px;">' +
+                '<div>' +
+                    '<h3 class="shortcuts-title" style="margin: 0; font-size: 13px;">NOMRO PRO SETTINGS</h3>' +
+                    '<span class="shortcuts-subtitle" style="margin: 0;">Extension Configuration & Diagnostics</span>' +
+                '</div>' +
+                '<span style="font-family: var(--font-mono); font-size: 10px; color: var(--accent-primary); font-weight: 700;">v' + App.version + '</span>' +
+            '</div>' +
+
+            '<div class="settings-section">' +
+                '<div class="settings-section-title">Environment</div>' +
+                '<div class="settings-row">' +
+                    '<span class="settings-row-label">Host Application</span>' +
+                    '<span class="settings-row-val">' + hostName + '</span>' +
+                '</div>' +
+                '<div class="settings-row">' +
+                    '<span class="settings-row-label">Runtime</span>' +
+                    '<span class="settings-row-val">' + environmentStr + '</span>' +
+                '</div>' +
+            '</div>' +
+
+            '<div class="settings-section">' +
+                '<div class="settings-section-title">Diagnostics & Debugging</div>' +
+                '<div class="settings-row">' +
+                    '<span class="settings-row-label">Console Logging</span>' +
+                    '<button id="btn-toggle-debug" class="settings-btn" style="height: 22px; min-width: 68px;">' + (isDebug ? 'Enabled' : 'Disabled') + '</button>' +
+                '</div>' +
+            '</div>' +
+
+            '<div class="settings-section">' +
+                '<div class="settings-section-title">Presets & Data (' + presetsCount + ' Saved)</div>' +
+                '<div class="settings-btn-group">' +
+                    '<button id="btn-export-presets" class="settings-btn">Export Presets</button>' +
+                    '<button id="btn-import-presets" class="settings-btn">Import Presets</button>' +
+                '</div>' +
+                '<button id="btn-clear-presets" class="settings-btn settings-btn-danger" style="width: 100%; margin-top: 5px;">Clear All Presets</button>' +
+            '</div>' +
+
+            '<button id="btn-close-settings" class="shortcuts-close-btn" style="margin-top: 8px;">Close Settings</button>';
+
+        modal.appendChild(dialog);
+        document.body.appendChild(modal);
+
+        function closeModal() {
+            document.removeEventListener('keydown', handleKey);
+            modal.remove();
+        }
+
+        function handleKey(e) {
+            if (e.key === 'Escape') {
                 e.preventDefault();
-                if (elements.playPreview) {
-                    elements.playPreview.click();
-                }
+                closeModal();
             }
+        }
 
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                e.preventDefault();
-                if (App.currentTab === 'timer' && elements.btnCreateTimer) {
-                    elements.btnCreateTimer.click();
-                } else if (elements.btnCreateCounter) {
-                    elements.btnCreateCounter.click();
-                } else if (elements.btnCreate) {
-                    elements.btnCreate.click();
-                }
-            }
+        document.addEventListener('keydown', handleKey);
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeModal();
         });
+
+        dialog.querySelector('#btn-close-settings').addEventListener('click', closeModal);
+
+        var btnToggleDebug = dialog.querySelector('#btn-toggle-debug');
+        if (btnToggleDebug) {
+            btnToggleDebug.addEventListener('click', function() {
+                var current = !!(typeof window !== 'undefined' && window.NOMRO_DEBUG);
+                var next = !current;
+                window.NOMRO_DEBUG = next;
+                try { localStorage.setItem('nomro_debug', next ? 'true' : 'false'); } catch(e){}
+                btnToggleDebug.textContent = next ? 'Enabled' : 'Disabled';
+                if (typeof MessagesModule !== 'undefined') {
+                    MessagesModule.showToast('Debug logging ' + (next ? 'enabled' : 'disabled'), 'success');
+                }
+            });
+        }
+
+        var btnExportPresets = dialog.querySelector('#btn-export-presets');
+        if (btnExportPresets) {
+            btnExportPresets.addEventListener('click', function() {
+                if (typeof PresetService !== 'undefined' && PresetService.exportJSON) {
+                    var json = PresetService.exportJSON();
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(json).then(function() {
+                            if (typeof MessagesModule !== 'undefined') {
+                                MessagesModule.showToast('Presets copied to clipboard!', 'success');
+                            }
+                        }).catch(function() {
+                            prompt('Copy Presets JSON:', json);
+                        });
+                    } else {
+                        prompt('Copy Presets JSON:', json);
+                    }
+                }
+            });
+        }
+
+        var btnImportPresets = dialog.querySelector('#btn-import-presets');
+        if (btnImportPresets) {
+            btnImportPresets.addEventListener('click', function() {
+                var json = prompt('Paste Presets JSON here:');
+                if (json && typeof PresetService !== 'undefined' && PresetService.importJSON) {
+                    var ok = PresetService.importJSON(json);
+                    if (ok) {
+                        if (typeof PresetView !== 'undefined') {
+                            PresetView.render(PresetService.getAll());
+                        }
+                        if (typeof MessagesModule !== 'undefined') {
+                            MessagesModule.showToast('Presets imported successfully!', 'success');
+                        }
+                        closeModal();
+                    } else {
+                        if (typeof MessagesModule !== 'undefined') {
+                            MessagesModule.showToast('Failed to import presets: Invalid JSON', 'error');
+                        }
+                    }
+                }
+            });
+        }
+
+        var btnClearPresets = dialog.querySelector('#btn-clear-presets');
+        if (btnClearPresets) {
+            btnClearPresets.addEventListener('click', function() {
+                if (confirm('Are you sure you want to delete all saved presets? This cannot be undone.')) {
+                    if (typeof PresetService !== 'undefined' && PresetService.clear) {
+                        PresetService.clear();
+                        if (typeof PresetView !== 'undefined') {
+                            PresetView.render([]);
+                        }
+                        if (typeof MessagesModule !== 'undefined') {
+                            MessagesModule.showToast('All presets cleared', 'success');
+                        }
+                        closeModal();
+                    }
+                }
+            });
+        }
     }
 
     // ========================================

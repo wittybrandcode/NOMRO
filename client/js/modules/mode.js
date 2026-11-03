@@ -121,13 +121,6 @@ var ModeModule = (function () {
             btnTimer.classList.toggle('update-mode', isTimerLayer);
         }
 
-        // Legacy single button
-        if (_elements.btnCreate) {
-            var label = isTimerLayer ? 'Update Timer' : 'Update Counter';
-            _elements.btnCreate.innerHTML = '<span>' + label + '</span>';
-            _elements.btnCreate.classList.add('update-mode');
-        }
-
         var btnUnlink = document.getElementById('btn-unlink');
         if (btnUnlink) {
             btnUnlink.style.display = 'inline-flex';
@@ -159,14 +152,6 @@ var ModeModule = (function () {
             var spanT = btnTimer.querySelector('span');
             if (spanT) spanT.textContent = 'Create Timer';
             btnTimer.classList.remove('update-mode');
-        }
-
-        // Legacy single button
-        if (_elements.btnCreate) {
-            var currentTab = _state ? _state.currentTab || 'counter' : 'counter';
-            var text = (currentTab === 'timer') ? 'Create Timer' : 'Create Counter';
-            _elements.btnCreate.innerHTML = '<span>' + text + '</span>';
-            _elements.btnCreate.classList.remove('update-mode');
         }
 
         var btnUnlink = document.getElementById('btn-unlink');

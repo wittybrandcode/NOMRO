@@ -26,13 +26,6 @@ var CreationModule = (function () {
      * Initialize tab-specific create buttons
      */
     function _initCreateButtons() {
-        // Legacy single button (if present)
-        if (_elements.btnCreate) {
-            _elements.btnCreate.addEventListener('click', function () {
-                create('counter');
-            });
-        }
-
         // Counter-specific button
         var btnCounter = document.getElementById('btn-create-counter');
         if (btnCounter) {

@@ -1434,3 +1434,104 @@ body {
 .shortcuts-close-btn:hover {
     background: var(--btn-solid-hover);
 }
+
+/* Settings Modal */
+.settings-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.settings-dialog {
+    width: 100%;
+    max-width: 320px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-contrast);
+    border-radius: 0 !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85);
+    padding: 14px;
+    color: var(--text-primary);
+}
+
+.settings-section {
+    margin-bottom: 12px;
+}
+
+.settings-section-title {
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 3px;
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 5px 8px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    margin-bottom: 4px;
+    font-size: 11px;
+}
+
+.settings-row-label {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.settings-row-val {
+    color: var(--text-bright);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+}
+
+.settings-btn-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-top: 5px;
+}
+
+.settings-btn {
+    height: 26px;
+    padding: 0 8px;
+    background: var(--btn-solid-bg);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-bright);
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: background 0.15s ease;
+}
+
+.settings-btn:hover {
+    background: var(--btn-solid-hover);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.settings-btn-danger {
+    color: #ff5555;
+    border-color: rgba(255, 85, 85, 0.3);
+}
+
+.settings-btn-danger:hover {
+    background: rgba(255, 85, 85, 0.15);
+    border-color: #ff5555;
+}
