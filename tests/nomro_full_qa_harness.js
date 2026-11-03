@@ -18,7 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
-const baseDir = __dirname;
+const baseDir = path.resolve(__dirname, '..');
 let totalTests = 0;
 let passedTests = 0;
 let failedTests = 0;

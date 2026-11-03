@@ -19,7 +19,7 @@ const path = require('path');
 const vm = require('vm');
 
 // Setup environment and load modules
-const baseDir = __dirname;
+const baseDir = path.resolve(__dirname, '..');
 const timerDefaultsPath = path.join(baseDir, 'client', 'js', 'modules', 'timer-defaults.js');
 const easingDefaultsPath = path.join(baseDir, 'client', 'js', 'easing', 'EasingDefaults.js');
 const expressionGenPath = path.join(baseDir, 'host', 'expressions', 'ExpressionGenerator.jsx');

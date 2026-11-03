@@ -104,10 +104,10 @@ NOMRO Pro includes a comprehensive continuous integration and parity verificatio
 
 ```bash
 # Full Architectural & Regression Harness (67 Tests)
-node nomro_full_qa_harness.js
+node tests/nomro_full_qa_harness.js
 
 # Timer Parity & Frame Math Harness (50 Tests)
-node timer_parity_harness.js
+node tests/timer_parity_harness.js
 ```
 
 ```
@@ -124,3 +124,4 @@ TESTS FAILED    : 0
 <sub>Engineered with precision for the Motion Design Community • تطوير احترافي لمجتمع الموشن جرافيك</sub><br/>
 <sub>© wittybrandcode. Licensed under the MIT License.</sub>
 </div>
+
