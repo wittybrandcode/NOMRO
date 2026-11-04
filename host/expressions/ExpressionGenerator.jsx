@@ -206,7 +206,8 @@ NOMRO.expressions.generateCountdownEmbedded = function (settings) {
     expr += 'var hours = Math.floor(absSec / 3600);\n';
     expr += 'var mins = Math.floor((absSec % 3600) / 60);\n';
     expr += 'var secs = absSec % 60;\n';
-    expr += 'var sign = val < 0 ? "-" : "";\n\n';
+    expr += 'var isZero = (hours === 0 && mins === 0 && secs === 0 && ("' + displayFormat + '".indexOf("f") === -1 || frames === 0));\n';
+    expr += 'var sign = (val < 0 && !isZero) ? "-" : "";\n\n';
 
     // Format output
     if (displayFormat === 'hmsf') {

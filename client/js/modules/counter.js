@@ -230,8 +230,16 @@ var CounterModule = (function () {
             _elements.previewNumber.classList.add('counting');
         }
 
+        var rawDuration = parseFloat(_state.counter.duration);
+        if (isNaN(rawDuration) || rawDuration <= 0) {
+            _renderPreviewValue(_state.counter.end);
+            _togglePlayStopButtons(false);
+            _showToast('Preview completed!', 'success');
+            return;
+        }
+
         var startTime = performance.now();
-        var duration = _state.counter.duration * 1000;
+        var duration = Math.max(50, rawDuration * 1000);
         var startVal = _state.counter.start;
         var endVal = _state.counter.end;
 

@@ -69,6 +69,10 @@ var CreationModule = (function () {
             }
         }
 
+        if (_callbacks.onStatus) {
+            _callbacks.onStatus('error', message);
+        }
+
         if (_callbacks.handleError) {
             _callbacks.handleError({ message: message, raw: error }, context || 'creation');
             return;
@@ -186,6 +190,7 @@ var CreationModule = (function () {
                 Logger.log('Creation', 'Creating ' + type + ':', settings);
             }
             _showLoading();
+            if (_callbacks.onStatus) _callbacks.onStatus('busy', 'Creating ' + type + '...');
 
             if (typeof Bridge !== 'undefined' && Bridge.createCounter) {
                 Bridge.createCounter(settings, function (err, result) {
@@ -196,6 +201,7 @@ var CreationModule = (function () {
                     } else {
                         var typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
                         if (_callbacks.showSuccess) _callbacks.showSuccess(typeLabel + ' created successfully!');
+                        if (_callbacks.onStatus) _callbacks.onStatus('ready', typeLabel + ' created');
                     }
                 });
             } else {
@@ -206,6 +212,7 @@ var CreationModule = (function () {
                     var typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
                     if (_callbacks.showSuccess) _callbacks.showSuccess('Preview mode - ' + typeLabel + ' created!');
                     if (_callbacks.showToast) _callbacks.showToast(typeLabel + ' created!', 'success');
+                    if (_callbacks.onStatus) _callbacks.onStatus('ready', 'Preview mode - Ready');
                 }, 1500);
             }
         } catch (e) {
@@ -223,6 +230,7 @@ var CreationModule = (function () {
      */
     function updateLayer(layerRef, settings, linkedLayerInfo) {
         _showLoading();
+        if (_callbacks.onStatus) _callbacks.onStatus('busy', 'Updating layer...');
 
         try {
             if (typeof Bridge !== 'undefined' && Bridge.updateLayer) {
@@ -237,6 +245,7 @@ var CreationModule = (function () {
                     }
 
                     if (_callbacks.showToast) _callbacks.showToast('Layer updated!', 'success');
+                    if (_callbacks.onStatus) _callbacks.onStatus('ready', 'Layer updated');
                 });
             } else {
                 // Browser preview mode
@@ -244,6 +253,7 @@ var CreationModule = (function () {
                     hideLoading();
                     _isCreating = false;
                     if (_callbacks.showToast) _callbacks.showToast('Preview - Layer updated!', 'success');
+                    if (_callbacks.onStatus) _callbacks.onStatus('ready', 'Preview - Layer updated');
                 }, 500);
             }
         } catch (e) {

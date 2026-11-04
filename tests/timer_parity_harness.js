@@ -199,7 +199,7 @@ const exprManual = NOMRO.expressions.generateCountdownEmbedded(mockTimerSettings
 assert(typeof exprManual === 'string' && exprManual.length > 50, 'Generated countdown expression string');
 assert(exprManual.includes('var k ='), 'Expression includes easing evaluation (var k = ...) (T-02)');
 assert(exprManual.includes('var val = startVal + (endVal - startVal) * k;'), 'Expression interpolates values via easing factor k (T-02)');
-assert(exprManual.includes('var sign = val < 0 ? "-" : "";'), 'Expression includes negative sign preservation logic (T-01)');
+assert(exprManual.includes('var sign = (val < 0 && !isZero) ? "-" : "";') || exprManual.includes('var sign = val < 0 ? "-" : "";'), 'Expression includes negative sign preservation logic (T-01)');
 assert(exprManual.includes('/* NOMRO_CONFIG ='), 'Expression embeds config payload as source of truth');
 
 // Test Markers mode zero-division protection (T-10)

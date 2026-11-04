@@ -451,6 +451,37 @@ assert(Validator.validateNumber(100, { min: 0, max: 99 }) !== null,
 assert(Validator.validateNumber(24, { min: 0, max: 99 }) === null,
     'DEF-15: Validator accepts valid frame value within 0-99');
 
+// DEF-16: Center text justification in CounterBuilder and CountdownBuilder
+const counterBuilderCode = fs.readFileSync(path.join(baseDir, 'host', 'core', 'CounterBuilder.jsx'), 'utf8');
+const countdownBuilderCode = fs.readFileSync(path.join(baseDir, 'host', 'core', 'CountdownBuilder.jsx'), 'utf8');
+assert(counterBuilderCode.includes('ParagraphJustification.CENTER_JUSTIFY'),
+    'DEF-16: CounterBuilder sets textDoc.justification to CENTER_JUSTIFY');
+assert(countdownBuilderCode.includes('ParagraphJustification.CENTER_JUSTIFY'),
+    'DEF-16: CountdownBuilder sets textDoc.justification to CENTER_JUSTIFY');
+
+// DEF-17: MathEvaluator division by zero safety
+const uiControlsCode = fs.readFileSync(path.join(baseDir, 'client', 'js', 'modules', 'ui-controls.js'), 'utf8');
+assert(uiControlsCode.includes('return fallback !== undefined ? fallback : 0;') &&
+       uiControlsCode.includes('isFinite(result)'),
+    'DEF-17: MathEvaluator rejects division-by-zero Infinity and returns safe fallback');
+
+// DEF-18: Countdown expression negative zero suppression
+const exprCountdownDef = hostContext.NOMRO.expressions.generateCountdownEmbedded({ format: 'hms' });
+assert(exprCountdownDef.includes('!isZero') && exprCountdownDef.includes('isZero = (hours === 0 && mins === 0 && secs === 0'),
+    'DEF-18: generateCountdownEmbedded suppresses negative sign when value reaches zero');
+
+// DEF-19: Localized ErrorHandler mapping
+const errorHandlerCode = fs.readFileSync(path.join(baseDir, 'client', 'js', 'services', 'ErrorHandler.js'), 'utf8');
+assert(errorHandlerCode.includes('Layer is locked') && errorHandlerCode.includes('No layer selected'),
+    'DEF-19: ErrorHandler includes localized mappings for locked layers and unselected layers');
+
+// DEF-20: Timer preview negative sign element in index.html & status bar modifiers in compact.css
+const indexHtmlContent = fs.readFileSync(path.join(baseDir, 'client', 'index.html'), 'utf8');
+assert(indexHtmlContent.includes('id="timer-sign"'),
+    'DEF-20: index.html contains dedicated #timer-sign element for negative time preview');
+assert(compactCssCode.includes('.status-dot.status--ready') && compactCssCode.includes('.status-dot.status--linked'),
+    'DEF-20: compact.css contains dynamic status bar modifier classes');
+
 // -------------------------------------------------------------------
 // MASTER SUMMARY REPORT
 // -------------------------------------------------------------------

@@ -364,7 +364,7 @@ var TimerModule = (function () {
         var elapsed = (now - _previewStartTime) / 1000;
         
         var settings = getSettings();
-        var totalDuration = settings.duration;
+        var totalDuration = Math.max(0.05, settings.duration);
         
         if (elapsed >= totalDuration) {
             stopPreview();
@@ -391,6 +391,7 @@ var TimerModule = (function () {
         var fps = _state.timer.fps || 30;
         var displayStr = TimerDefaults.formatDisplayTime(totalSeconds, format, fps);
         
+        var isNeg = totalSeconds < 0;
         var absVal = Math.abs(totalSeconds);
         var absSec = Math.floor(absVal);
         var frac = absVal - absSec;
@@ -403,6 +404,14 @@ var TimerModule = (function () {
         var m = Math.floor((absSec % 3600) / 60);
         var s = absSec % 60;
         
+        var isZero = (h === 0 && m === 0 && s === 0 && (format.indexOf('f') === -1 || f === 0));
+        var showSign = isNeg && !isZero;
+
+        var timerSignEl = (_elements && _elements.timerSign) || document.getElementById('timer-sign');
+        if (timerSignEl) {
+            timerSignEl.style.display = showSign ? 'inline-block' : 'none';
+        }
+
         if (_elements.timerH) _elements.timerH.textContent = TimerDefaults.pad2(h);
         if (_elements.timerM) _elements.timerM.textContent = TimerDefaults.pad2(m);
         if (_elements.timerS) _elements.timerS.textContent = TimerDefaults.pad2(s);
@@ -475,6 +484,10 @@ var TimerModule = (function () {
             : (_state.timer.endFrames || 0);
 
         if (!_isPreviewPlaying) {
+            var timerSignEl = (_elements && _elements.timerSign) || document.getElementById('timer-sign');
+            if (timerSignEl) {
+                timerSignEl.style.display = 'none';
+            }
             if (_elements.timerH) _elements.timerH.textContent = TimerDefaults.pad2(startHours);
             if (_elements.timerM) _elements.timerM.textContent = TimerDefaults.pad2(startMins);
             if (_elements.timerS) _elements.timerS.textContent = TimerDefaults.pad2(startSecs);

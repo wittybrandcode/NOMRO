@@ -57,8 +57,10 @@ var TimerDefaults = (function () {
         var mins = Math.floor((totalInt % 3600) / 60);
         var secs = totalInt % 60;
 
+        var isZero = (hours === 0 && mins === 0 && secs === 0 && frames === 0);
+
         return {
-            isNegative: isNegative,
+            isNegative: isNegative && !isZero,
             hours: _clamp(hours, LIMITS.HOURS.min, LIMITS.HOURS.max),
             mins: _clamp(mins, LIMITS.MINS.min, LIMITS.MINS.max),
             secs: _clamp(secs, LIMITS.SECS.min, LIMITS.SECS.max),
@@ -96,7 +98,8 @@ var TimerDefaults = (function () {
         var hours = Math.floor(absSec / 3600);
         var mins = Math.floor((absSec % 3600) / 60);
         var secs = absSec % 60;
-        var sign = isNeg ? "-" : "";
+        var isZero = (hours === 0 && mins === 0 && secs === 0 && (format.indexOf('f') === -1 || frames === 0));
+        var sign = (isNeg && !isZero) ? "-" : "";
 
         if (format === 'hms') {
             return sign + pad2(hours) + ":" + pad2(mins) + ":" + pad2(secs);

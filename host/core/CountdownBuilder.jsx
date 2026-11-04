@@ -65,16 +65,17 @@ NOMRO.core.buildCountdown = function (comp, settings) {
         }
 
         // ========================================
-        // APPLY MONOSPACE FONT
+        // PARAGRAPH & FONT SETTINGS
         // ========================================
-        if (settings.monospace) {
-            try {
-                var textProp = textLayer.property("Source Text");
-                var textDoc = textProp.value;
+        try {
+            var textProp = textLayer.property("Source Text");
+            var textDoc = textProp.value;
+            textDoc.justification = ParagraphJustification.CENTER_JUSTIFY;
+            if (settings.monospace) {
                 textDoc.font = "CourierNewPSMT";
-                textProp.setValue(textDoc);
-            } catch (e) { }
-        }
+            }
+            textProp.setValue(textDoc);
+        } catch (e) { }
 
         // ========================================
         // BUILD AND APPLY EXPRESSION

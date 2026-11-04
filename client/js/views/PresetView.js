@@ -84,15 +84,34 @@ var PresetView = (function () {
     function bindEvents(callbacks) {
         _initElements();
 
+        function triggerSave() {
+            var name = _elements.nameInput ? _elements.nameInput.value.trim() : '';
+            if (name) {
+                callbacks.onSave(name);
+                if (_elements.nameInput) {
+                    _elements.nameInput.value = '';
+                }
+            } else {
+                if (typeof MessagesModule !== 'undefined' && MessagesModule.showToast) {
+                    MessagesModule.showToast('Please enter a preset name', 'error');
+                }
+                if (_elements.nameInput) {
+                    _elements.nameInput.focus();
+                }
+            }
+        }
+
         // Save button
         if (_elements.saveBtn && callbacks.onSave) {
-            _elements.saveBtn.addEventListener('click', function () {
-                var name = _elements.nameInput ? _elements.nameInput.value.trim() : '';
-                if (name) {
-                    callbacks.onSave(name);
-                    if (_elements.nameInput) {
-                        _elements.nameInput.value = '';
-                    }
+            _elements.saveBtn.addEventListener('click', triggerSave);
+        }
+
+        // Enter key in preset name input
+        if (_elements.nameInput && callbacks.onSave) {
+            _elements.nameInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    triggerSave();
                 }
             });
         }

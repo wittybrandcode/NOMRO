@@ -107,16 +107,17 @@ NOMRO.core.buildCounter = function (comp, settings) {
         sourceText.expressionEnabled = true;
 
         // ========================================
-        // FONT SETTINGS
+        // PARAGRAPH & FONT SETTINGS
         // ========================================
-        if (settings.monospace) {
-            try {
-                var textDoc = sourceText.value;
+        try {
+            var textDoc = sourceText.value;
+            textDoc.justification = ParagraphJustification.CENTER_JUSTIFY;
+            if (settings.monospace) {
                 textDoc.font = "CourierNewPSMT";
-                sourceText.setValue(textDoc);
-            } catch (e) {
-                // Ignore if font not found
             }
+            sourceText.setValue(textDoc);
+        } catch (e) {
+            // Ignore if font or justification not supported
         }
 
         // ========================================

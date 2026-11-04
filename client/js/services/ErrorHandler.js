@@ -80,9 +80,13 @@ var ErrorHandler = (function () {
      */
     function _getUserMessage(errorObj) {
         var messages = {
-            'No composition': 'الرجاء فتح Composition أولا',
-            'No composition selected': 'الرجاء فتح Composition أولا',
-            'Invalid input': 'الرجاء التحقق من المدخلات',
+            'No composition': 'الرجاء فتح Composition أولاً',
+            'No composition selected': 'الرجاء فتح Composition أولاً',
+            'No layer selected': 'الرجاء تحديد طبقة في After Effects',
+            'Layer is locked': 'الطبقة المحددة مقفلة، يرجى إلغاء قفلها أولاً',
+            'Layer not found': 'لم يتم العثور على الطبقة المحددة',
+            'Not a NOMRO layer': 'الطبقة المحددة ليست من طبقات NOMRO',
+            'Invalid input': 'الرجاء التحقق من صحة المدخلات',
             'CEP not available': 'خطأ في الاتصال مع After Effects',
             'Script execution failed': 'فشل في تنفيذ السكربت',
             'Error parsing update response': 'خطأ في قراءة استجابة التحديث',

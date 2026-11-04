@@ -152,6 +152,7 @@
             durationManualGroup: document.getElementById('duration-manual-group'),
 
             // Timer display
+            timerSign: document.getElementById('timer-sign'),
             timerH: document.getElementById('timer-h'),
             timerM: document.getElementById('timer-m'),
             timerS: document.getElementById('timer-s'),
@@ -180,7 +181,12 @@
             // Header
             btnReset: document.getElementById('btn-reset'),
             btnHelp: document.getElementById('btn-help'),
-            btnSettings: document.getElementById('btn-settings')
+            btnSettings: document.getElementById('btn-settings'),
+
+            // Status Bar
+            statusBar: document.getElementById('status-bar'),
+            statusText: document.getElementById('status-text'),
+            statusDot: document.querySelector('.status-dot')
         };
     }
 
@@ -321,6 +327,7 @@
                     unlinkedLayerKey = key || null;
                     linkedLayer = null;
                     linkedLayerInfo = null;
+                    updateStatusBar('unlinked', 'Create Mode (Unlinked)');
                     Logger.log('App', 'Layer explicitly unlinked, suppressing auto-relink for:', unlinkedLayerKey);
                 }
             });
@@ -340,11 +347,14 @@
                     return typeof ModeModule !== 'undefined' ? ModeModule.getLinkedLayerInfo() : linkedLayerInfo;
                 },
                 switchTab: switchTab,
+                onStatus: updateStatusBar,
                 showError: function (msg) {
                     if (typeof MessagesModule !== 'undefined') MessagesModule.showError(msg);
+                    updateStatusBar('error', msg);
                 },
                 showSuccess: function (msg) {
                     if (typeof MessagesModule !== 'undefined') MessagesModule.showSuccess(msg);
+                    updateStatusBar('ready', msg);
                 },
                 showToast: function (msg, type) {
                     if (typeof MessagesModule !== 'undefined') MessagesModule.showToast(msg, type);
@@ -410,6 +420,18 @@
             updateTimerDisplay();
         }
         animateEntry();
+
+        if (typeof Bridge !== 'undefined' && Bridge.hasActiveComp) {
+            Bridge.hasActiveComp(function (err, hasComp) {
+                if (hasComp) {
+                    updateStatusBar('ready', 'Ready');
+                } else {
+                    updateStatusBar('unlinked', 'No Active Composition');
+                }
+            });
+        } else {
+            updateStatusBar('ready', 'Ready');
+        }
 
         Logger.log('App', 'NOMRO Pro v' + App.version + ' initialized with modules');
     }
@@ -574,6 +596,7 @@
                         if (!isSameLayer) {
                             Logger.log('Sync', 'Layer selected:', settings.layerName);
                             onLayerSelected(settings);
+                            updateStatusBar('linked', 'Linked: ' + settings.layerName);
                         } else if (isSameLayer) {
                             // Live slider sync: re-apply values if they changed in AE
                             _syncLiveValues(settings);
@@ -589,6 +612,7 @@
                 if (typeof ModeModule !== 'undefined') {
                     ModeModule.showCreateMode();
                 }
+                updateStatusBar('unlinked', 'Create Mode (Unlinked)');
             }
         });
     }
@@ -676,12 +700,148 @@
     }
 
     // ========================================
+    // STATUS BAR MANAGEMENT
+    // ========================================
+    function updateStatusBar(type, message) {
+        if (!elements) return;
+        var textEl = elements.statusText || document.getElementById('status-text');
+        var dotEl = elements.statusDot || document.querySelector('.status-dot');
+
+        if (textEl && message) {
+            textEl.textContent = message;
+            textEl.title = message;
+        }
+
+        if (dotEl) {
+            dotEl.className = 'status-dot';
+            if (type) {
+                dotEl.classList.add('status--' + type);
+            }
+        }
+    }
+
+    // ========================================
+    // GRACEFUL SOFT RESET
+    // ========================================
+    function resetAllToDefaults() {
+        // 1. Reset state
+        App.state.counter = {
+            start: 0,
+            end: 1000,
+            duration: 2,
+            easing: 'linear',
+            easingConfig: {
+                mode: 'single',
+                singleCurveId: 'linear',
+                dual: {
+                    inCurveId: 'easeIn',
+                    outCurveId: 'easeOut',
+                    inPct: 0.2,
+                    outPct: 0.2,
+                    middleMode: 'linear'
+                }
+            },
+            curveLibrary: [],
+            format: 'normal',
+            prefix: '',
+            suffix: '',
+            separator: '',
+            symbolPosition: 'left',
+            monospace: false,
+            decimals: false,
+            commas: false,
+            useMarkers: false
+        };
+
+        App.state.timer = {
+            hours: 0,
+            mins: 5,
+            secs: 0,
+            frames: 0,
+            endHours: 0,
+            endMins: 0,
+            endSecs: 0,
+            endFrames: 0,
+            duration: 10,
+            startAt: 0,
+            durationMode: 'manual',
+            format: 'hms',
+            monospace: false,
+            easing: 'linear',
+            fps: 30
+        };
+
+        // 2. Unlink layer
+        linkedLayer = null;
+        linkedLayerInfo = null;
+        unlinkedLayerKey = null;
+        if (typeof ModeModule !== 'undefined') {
+            ModeModule.showCreateMode();
+        }
+
+        // 3. Reset Counter UI Elements
+        if (elements.startValue) elements.startValue.value = '0';
+        if (elements.endValue) elements.endValue.value = '1000';
+        if (elements.durationValue) elements.durationValue.value = '2';
+        if (elements.prefixSymbol) elements.prefixSymbol.value = '';
+        if (elements.suffixSymbol) elements.suffixSymbol.value = '';
+
+        if (elements.toggleDecimalsBtn) elements.toggleDecimalsBtn.classList.remove('active');
+        if (elements.toggleCommasBtn) elements.toggleCommasBtn.classList.remove('active');
+        if (elements.toggleMonospaceBtn) elements.toggleMonospaceBtn.classList.remove('active');
+        if (elements.toggleMarkersBtn) elements.toggleMarkersBtn.classList.remove('active');
+
+        document.querySelectorAll('.segment-compact[data-format]').forEach(function (seg) {
+            seg.classList.toggle('active', seg.getAttribute('data-format') === 'normal');
+        });
+        document.querySelectorAll('.segment-compact[data-separator]').forEach(function (seg) {
+            seg.classList.toggle('active', seg.getAttribute('data-separator') === '');
+        });
+
+        if (typeof UIControlsModule !== 'undefined' && UIControlsModule.applyEasingConfig) {
+            UIControlsModule.applyEasingConfig(App.state.counter.easingConfig, 'linear', []);
+        }
+
+        // 4. Reset Timer UI Elements
+        if (elements.inputHours) elements.inputHours.value = '0';
+        if (elements.inputMins) elements.inputMins.value = '5';
+        if (elements.inputSecs) elements.inputSecs.value = '0';
+        if (elements.inputFrames) elements.inputFrames.value = '0';
+        if (elements.inputEndH) elements.inputEndH.value = '0';
+        if (elements.inputEndM) elements.inputEndM.value = '0';
+        if (elements.inputEndS) elements.inputEndS.value = '0';
+        if (elements.inputEndF) elements.inputEndF.value = '0';
+        if (elements.inputDuration) elements.inputDuration.value = '10';
+        if (elements.inputStartAt) elements.inputStartAt.value = '0';
+        if (elements.selectCountdownFormat) elements.selectCountdownFormat.value = 'hms';
+        if (elements.timerToggleMonospaceBtn) elements.timerToggleMonospaceBtn.classList.remove('active');
+
+        if (typeof TimerDefaults !== 'undefined' && TimerDefaults.applyDurationModeUI) {
+            TimerDefaults.applyDurationModeUI(elements, 'manual');
+        }
+
+        // 5. Update previews
+        if (typeof CounterModule !== 'undefined') {
+            CounterModule.updatePreview();
+        }
+        if (typeof TimerModule !== 'undefined') {
+            TimerModule.updateDisplay();
+        }
+
+        // 6. Update Status & Notification
+        updateStatusBar('ready', 'Settings reset to defaults');
+        if (typeof MessagesModule !== 'undefined') {
+            MessagesModule.showToast('All settings reset to defaults', 'success');
+        }
+    }
+
+    // ========================================
     // HEADER ACTIONS
     // ========================================
     function initHeaderActions() {
         if (elements.btnReset) {
             elements.btnReset.addEventListener('click', function () {
-                location.reload();
+                resetAllToDefaults();
             });
         }
 

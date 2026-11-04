@@ -107,7 +107,10 @@ var UIControlsModule = (function () {
                     if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
                         return parseFloat(result.toFixed(4));
                     }
-                } catch (e) {}
+                    return fallback !== undefined ? fallback : 0;
+                } catch (e) {
+                    return fallback !== undefined ? fallback : 0;
+                }
             }
 
             var fallbackNum = parseFloat(clean);
