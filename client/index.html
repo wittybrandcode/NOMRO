@@ -702,27 +702,89 @@
                 </div>
             </section>
 
-            <!-- Presets Tab Panel -->
+            <!-- Presets Tab Panel (Elevated Preset Studio) -->
             <section class="panel" id="panel-presets">
-                <!-- Save Preset Card -->
-                <div class="card card-compact">
-                    <div class="card-header-compact" title="Save Preset (حفظ الإعدادات كقالب)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
+                <!-- 1. Live Preset Inspector / Preview Stage -->
+                <div class="card card-compact preset-inspector-card" id="preset-inspector-card">
+                    <div class="preset-inspector-header">
+                        <div class="preset-inspector-title-group">
+                            <span class="preset-inspector-badge" id="preset-inspector-type">COUNTER</span>
+                            <span class="preset-inspector-name" id="preset-inspector-name">Social Metric (250K+)</span>
+                        </div>
+                        <div class="preset-inspector-chips">
+                            <span class="preset-meta-chip" id="preset-inspector-easing">Snappy (85%)</span>
+                            <span class="preset-meta-chip" id="preset-inspector-dur">2.0s</span>
+                        </div>
+                    </div>
+
+                    <!-- Live Dynamic Preview Viewport -->
+                    <div class="preset-preview-stage" id="preset-preview-stage" title="Interactive Preset Preview (معاينة حركية تفاعلية)">
+                        <span class="preset-preview-number" id="preset-preview-number">250,000+</span>
+                    </div>
+
+                    <!-- Quick Inspector Actions -->
+                    <div class="preset-inspector-actions">
+                        <button type="button" class="btn-preset-action btn-preset-play" id="btn-preset-play" title="Play / Test Motion Preview (تشغيل حركة المعاينة)">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                            <span id="btn-preset-play-label">Test Preview</span>
+                        </button>
+                        <button type="button" class="btn-preset-action btn-preset-apply" id="btn-preset-apply" title="Apply to Editor (تطبيق الإعدادات في المحرر)">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 20h9"></path>
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                            </svg>
+                            <span>Apply</span>
+                        </button>
+                        <button type="button" class="btn-preset-action btn-preset-create" id="btn-preset-create" title="Create directly in After Effects (إنشاء مباشر في الآفترإفكتس)">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                            <span>Create in AE</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. Search & Category Filters -->
+                <div class="preset-filter-toolbar">
+                    <div class="preset-search-wrapper">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" class="preset-search-input" id="preset-search-input" placeholder="Search presets (بحث في القوالب)..." title="Search presets by name or format">
+                    </div>
+                    <div class="segmented-control-compact preset-category-switch" id="preset-category-switch">
+                        <button type="button" class="segment-compact active" data-preset-cat="all">All</button>
+                        <button type="button" class="segment-compact" data-preset-cat="counter">Counters</button>
+                        <button type="button" class="segment-compact" data-preset-cat="timer">Timers</button>
+                        <button type="button" class="segment-compact" data-preset-cat="custom">My Presets</button>
+                    </div>
+                </div>
+
+                <!-- 3. Presets List Grid -->
+                <div class="presets-list-compact" id="presets-list" title="Saved & Factory Presets (قائمة القوالب)">
+                    <!-- Dynamically populated by PresetView -->
+                </div>
+
+                <!-- 4. Save Preset Card -->
+                <div class="card card-compact preset-save-card">
+                    <div class="card-header-mini" title="Save Preset (حفظ الإعدادات الحالية كقالب جديد)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                             <polyline points="17 21 17 13 7 13 7 21"></polyline>
                             <polyline points="7 3 7 8 15 8"></polyline>
                         </svg>
-                        <span>Save Current Settings</span>
+                        <span>Save Current Configuration</span>
                     </div>
                     <div class="save-preset-compact">
                         <div class="input-wrapper-compact" title="Enter Preset Name (أدخل اسم القالب)">
                             <input type="text" class="input-field-compact" id="input-preset-name"
-                                placeholder="Enter preset name..." title="Enter Preset Name (أدخل اسم القالب)">
+                                placeholder="Preset name..." title="Enter Preset Name (أدخل اسم القالب)">
                         </div>
-                        <button class="btn-primary-compact" id="btn-save-preset" title="Save Preset: Store current configuration for quick reuse (حفظ القالب)">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
+                        <button type="button" class="btn-primary-compact" id="btn-save-preset" title="Save Preset: Store current configuration for quick reuse (حفظ القالب)">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
@@ -731,9 +793,32 @@
                     </div>
                 </div>
 
-                <!-- Presets List -->
-                <div class="presets-list-compact" id="presets-list" title="Saved Presets List (قائمة القوالب المحفوظة)">
-                    <div class="nomro-presets__empty">No saved presets</div>
+                <!-- 5. Utility Toolbar: Import, Export, Reset Defaults -->
+                <div class="preset-utility-bar">
+                    <button type="button" class="btn-utility-compact" id="btn-export-presets" title="Export Presets to JSON file (تصدير القوالب)">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <span>Export</span>
+                    </button>
+                    <button type="button" class="btn-utility-compact" id="btn-import-presets" title="Import Presets from JSON (استيراد قوالب)">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <span>Import</span>
+                    </button>
+                    <input type="file" id="input-import-presets" accept=".json" style="display:none;" />
+                    <button type="button" class="btn-utility-compact" id="btn-reset-presets" title="Restore 12 Factory Presets (استعادة القوالب الافتراضية)">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                        </svg>
+                        <span>Reset Defaults</span>
+                    </button>
                 </div>
             </section>
 
@@ -778,6 +863,7 @@
     <script src="js/services/Logger.js"></script>
     <!-- State model removed: all state is managed by App.state in app.js -->
     <script src="js/models/Preset.js"></script>
+    <script src="js/presets/PresetDefaults.js"></script>
     <script src="js/services/Validator.js"></script>
     <script src="js/services/Storage.js"></script>
     <script src="js/services/PresetService.js"></script>

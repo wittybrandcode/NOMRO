@@ -1,6 +1,6 @@
 /**
  * NOMRO - Presets Module
- * Handles preset management
+ * Handles preset management, live preview inspection, and 1-click AE creation
  * @module modules/presets
  */
 var PresetsModule = (function () {
@@ -14,8 +14,6 @@ var PresetsModule = (function () {
         var num = parseFloat(value);
         return isNaN(num) ? fallback : num;
     }
-
-
 
     function _applyTimerModeUI(mode) {
         if (typeof TimerDefaults !== 'undefined' && TimerDefaults.applyDurationModeUI) {
@@ -40,8 +38,131 @@ var PresetsModule = (function () {
             PresetView.bindEvents({
                 onSave: _handleSave,
                 onLoad: _handleLoad,
-                onDelete: _handleDelete
+                onSelect: _handleSelect,
+                onFilterChange: _handleFilterChange,
+                onCreate: _handleCreateDirect,
+                onCreateById: _handleCreateById,
+                onDuplicate: _handleDuplicate,
+                onDelete: _handleDelete,
+                onExport: _handleExport,
+                onImport: _handleImport,
+                onResetDefaults: _handleResetDefaults
             });
+        }
+    }
+
+    /**
+     * Handle preset selection from row click
+     */
+    function _handleSelect(id) {
+        var preset = PresetService.getById(id);
+        if (preset) {
+            PresetView.updateInspector(preset);
+            PresetView.startPreview(preset);
+        }
+    }
+
+    /**
+     * Handle category or search filter change
+     */
+    function _handleFilterChange(category, query) {
+        var filtered = PresetService.search(query, category);
+        PresetView.render(filtered);
+    }
+
+    /**
+     * Handle direct layer creation in After Effects from a preset
+     */
+    function _handleCreateDirect(preset) {
+        if (!preset || !preset.settings) return;
+
+        // 1. Apply settings into state & UI
+        applySettings(preset.settings);
+
+        // 2. Trigger direct creation via CreationModule
+        var type = (preset.settings && preset.settings.counterType === 'timer') ? 'timer' : 'counter';
+        if (typeof CreationModule !== 'undefined' && CreationModule.create) {
+            CreationModule.create(type);
+            if (_callbacks.onShowToast) {
+                _callbacks.onShowToast('Creating layer from preset in After Effects...', 'success');
+            }
+        } else {
+            if (_callbacks.onShowToast) {
+                _callbacks.onShowToast('Preset applied! Click Create to generate layer.', 'info');
+            }
+        }
+    }
+
+    function _handleCreateById(id) {
+        var preset = PresetService.getById(id);
+        if (preset) {
+            _handleCreateDirect(preset);
+        }
+    }
+
+    /**
+     * Handle duplicate preset
+     */
+    function _handleDuplicate(id) {
+        var dup = PresetService.duplicate(id);
+        if (dup) {
+            PresetView.render(PresetService.getAll(), dup.id);
+            if (_callbacks.onShowToast) {
+                _callbacks.onShowToast('Preset duplicated!', 'success');
+            }
+        }
+    }
+
+    /**
+     * Handle export presets to JSON file
+     */
+    function _handleExport() {
+        var json = PresetService.exportJSON();
+        try {
+            var blob = new Blob([json], { type: 'application/json' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'nomro_presets_' + new Date().toISOString().slice(0, 10) + '.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            if (_callbacks.onShowToast) {
+                _callbacks.onShowToast('Presets exported to JSON file!', 'success');
+            }
+        } catch (e) {
+            if (_callbacks.onShowToast) {
+                _callbacks.onShowToast('Export error: ' + (e.message || e), 'error');
+            }
+        }
+    }
+
+    /**
+     * Handle import presets from JSON
+     */
+    function _handleImport(jsonStr) {
+        var success = PresetService.importJSON(jsonStr);
+        if (success) {
+            PresetView.render(PresetService.getAll());
+            if (_callbacks.onShowToast) {
+                _callbacks.onShowToast('Presets imported successfully!', 'success');
+            }
+        } else {
+            if (_callbacks.onShowToast) {
+                _callbacks.onShowToast('Failed to import presets: Invalid JSON file', 'error');
+            }
+        }
+    }
+
+    /**
+     * Handle restore factory presets
+     */
+    function _handleResetDefaults() {
+        var restored = PresetService.resetFactoryPresets();
+        PresetView.render(restored);
+        if (_callbacks.onShowToast) {
+            _callbacks.onShowToast('Factory presets restored!', 'success');
         }
     }
 
@@ -55,8 +176,8 @@ var PresetsModule = (function () {
             currentTab = window.NOMRO_App.lastActiveSettingsTab;
         }
         var settings = _getSettingsForCurrentTab(currentTab);
-        PresetService.save(name, settings);
-        PresetView.render(PresetService.getAll());
+        var created = PresetService.save(name, settings);
+        PresetView.render(PresetService.getAll(), created.id);
         if (_callbacks.onShowToast) {
             _callbacks.onShowToast('Preset saved!', 'success');
         }
@@ -78,6 +199,7 @@ var PresetsModule = (function () {
             var easingSettings = {
                 schemaVersion: 2,
                 easing: _state.counter.easing,
+                easeStrength: _state.counter.easeStrength !== undefined ? _state.counter.easeStrength : 75,
                 easingConfig: _state.counter.easingConfig,
                 curveLibrary: _state.counter.curveLibrary
             };
@@ -87,9 +209,14 @@ var PresetsModule = (function () {
             }
 
             settings.schemaVersion = easingSettings.schemaVersion || 2;
-            settings.easingConfig = easingSettings.easingConfig || { mode: 'single', singleCurveId: _state.counter.easing || 'linear' };
+            settings.easeStrength = easingSettings.easeStrength !== undefined ? easingSettings.easeStrength : 75;
+            settings.easingConfig = easingSettings.easingConfig || {
+                mode: 'single',
+                singleCurveId: _state.counter.easing || 'smoothOut',
+                easeStrength: settings.easeStrength
+            };
             settings.curveLibrary = easingSettings.curveLibrary || [];
-            settings.easing = easingSettings.easing || _state.counter.easing || 'linear';
+            settings.easing = easingSettings.easing || _state.counter.easing || 'smoothOut';
             settings.numberFormat = _state.counter.format;
             settings.symbol = _state.counter.prefix;
             settings.suffix = _state.counter.suffix;
@@ -117,7 +244,7 @@ var PresetsModule = (function () {
         if (preset && preset.settings) {
             applySettings(preset.settings);
             if (_callbacks.onShowToast) {
-                _callbacks.onShowToast('Preset loaded!', 'success');
+                _callbacks.onShowToast('Preset loaded into editor!', 'success');
             }
         }
     }
@@ -129,6 +256,9 @@ var PresetsModule = (function () {
     function _handleDelete(id) {
         PresetService.remove(id);
         PresetView.render(PresetService.getAll());
+        if (_callbacks.onShowToast) {
+            _callbacks.onShowToast('Preset deleted', 'info');
+        }
     }
 
     /**
@@ -156,10 +286,20 @@ var PresetsModule = (function () {
                 _elements.durationValue.value = settings.duration;
                 _state.counter.duration = settings.duration;
             }
+
+            var str = settings.easeStrength !== undefined
+                ? settings.easeStrength
+                : (settings.easingConfig && settings.easingConfig.easeStrength !== undefined ? settings.easingConfig.easeStrength : 75);
+            _state.counter.easeStrength = str;
+
             var easingConfig = settings.easingConfig || {
                 mode: 'single',
-                singleCurveId: settings.easing || _state.counter.easing || 'smoothOut'
+                singleCurveId: settings.easing || _state.counter.easing || 'smoothOut',
+                easeStrength: str
             };
+            if (easingConfig.easeStrength === undefined) {
+                easingConfig.easeStrength = str;
+            }
 
             if (typeof EasingValidator !== 'undefined') {
                 easingConfig = EasingValidator.sanitizeConfig(easingConfig);
@@ -170,7 +310,7 @@ var PresetsModule = (function () {
 
             var selectedCurve = easingConfig.mode === 'single'
                 ? easingConfig.singleCurveId
-                : (settings.easing || _state.counter.easing || 'linear');
+                : (settings.easing || _state.counter.easing || 'smoothOut');
 
             if (typeof UIControlsModule !== 'undefined' && UIControlsModule.applyEasingConfig) {
                 UIControlsModule.applyEasingConfig(easingConfig, selectedCurve, _state.counter.curveLibrary);
@@ -317,6 +457,7 @@ var PresetsModule = (function () {
             if (settings.curveLibrary !== undefined) {
                 _state.timer.curveLibrary = settings.curveLibrary;
             }
+            _state.timer.easeStrength = settings.easeStrength !== undefined ? settings.easeStrength : 75;
 
             // Duration Mode
             var mode = TimerDefaults.normalizeMode(settings.durationMode || _state.timer.durationMode);
@@ -334,5 +475,6 @@ var PresetsModule = (function () {
     };
 })();
 
-
-
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = PresetsModule;
+}

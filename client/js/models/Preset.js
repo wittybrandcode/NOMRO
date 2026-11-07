@@ -23,9 +23,13 @@ var Preset = (function () {
             }
         }
 
+        var category = (settings && settings.counterType === 'timer') ? 'timer' : 'counter';
+
         return {
             id: 'preset_' + Date.now() + '_' + Math.floor(Math.random() * 1000000),
             name: name,
+            category: category,
+            isFactory: false,
             settings: clonedSettings,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()

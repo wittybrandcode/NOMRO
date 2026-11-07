@@ -588,6 +588,88 @@ const evalCustom = hostContext.EasingRuntime.evaluateById('smoothOut', 0.5, 37.5
 assert(Math.abs(evalCustom - 0.75) < 1e-6,
     'DEF-30: EasingRuntime evaluates exact parametric power at custom strength 37.5% (t=0.5 -> 0.75)');
 
+// DEF-31: 12 Golden Presets (6 Counters, 6 Timers) in PresetDefaults
+const presetDefaultsSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'presets', 'PresetDefaults.js'), 'utf8');
+vm.runInContext(presetDefaultsSrc, hostContext);
+assert(hostContext.PresetDefaults && hostContext.PresetDefaults.FACTORY_PRESETS && hostContext.PresetDefaults.FACTORY_PRESETS.length === 12,
+    'DEF-31: PresetDefaults defines exactly the 12 Golden Factory Presets');
+const counterPresets = hostContext.PresetDefaults.FACTORY_PRESETS.filter(p => p.category === 'counter');
+const timerPresets = hostContext.PresetDefaults.FACTORY_PRESETS.filter(p => p.category === 'timer');
+assert(counterPresets.length === 6 && timerPresets.length === 6,
+    'DEF-31: 12 Golden Presets are balanced (6 Counters and 6 Timers)');
+assert(counterPresets.every(p => p.isFactory === true && p.settings && p.settings.easeStrength !== undefined),
+    'DEF-31: All factory counter presets include isFactory flag and easeStrength');
+
+// DEF-32: Live Preset Inspector & Filter DOM & CSS Contract
+assert(indexHtmlContent.includes('id="preset-inspector-card"') &&
+       indexHtmlContent.includes('id="preset-preview-stage"') &&
+       indexHtmlContent.includes('id="preset-preview-number"') &&
+       indexHtmlContent.includes('id="btn-preset-play"') &&
+       indexHtmlContent.includes('id="btn-preset-apply"') &&
+       indexHtmlContent.includes('id="btn-preset-create"'),
+    'DEF-32: index.html contains Live Preset Inspector stage and action buttons');
+assert(compactCssCode.includes('.preset-inspector-card') &&
+       compactCssCode.includes('.preset-preview-stage') &&
+       compactCssCode.includes('.preset-preview-number') &&
+       compactCssCode.includes('.btn-preset-create'),
+    'DEF-32: compact.css contains Industrial Slate styling for live inspector stage');
+
+// DEF-33: PresetService Search & Categorization Subsystem
+const storageSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'services', 'Storage.js'), 'utf8');
+const presetModelSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'models', 'Preset.js'), 'utf8');
+const presetServiceSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'services', 'PresetService.js'), 'utf8');
+// Mock localStorage in hostContext
+hostContext.localStorage = {
+    _store: {},
+    getItem: function(k) { return this._store[k] !== undefined ? this._store[k] : null; },
+    setItem: function(k, v) { this._store[k] = String(v); },
+    removeItem: function(k) { delete this._store[k]; },
+    clear: function() { this._store = {}; }
+};
+vm.runInContext(storageSrc, hostContext);
+vm.runInContext(presetModelSrc, hostContext);
+vm.runInContext(presetServiceSrc, hostContext);
+
+const allPresets = hostContext.PresetService.getAll();
+assert(allPresets.length === 12,
+    'DEF-33: PresetService auto-seeds with the 12 Golden Presets on initial startup');
+const searchSnappy = hostContext.PresetService.search('Snappy', 'counter');
+assert(searchSnappy.length >= 1 && searchSnappy[0].name.includes('Social Metric'),
+    'DEF-33: PresetService.search successfully finds presets by name keyword');
+const timerFiltered = hostContext.PresetService.getByCategory('timer');
+assert(timerFiltered.length === 6 && timerFiltered[0].category === 'timer',
+    'DEF-33: PresetService.getByCategory correctly filters only timer presets');
+
+// DEF-34: Preset Duplication, EaseStrength Preservation & Factory Protection
+const duped = hostContext.PresetService.duplicate(counterPresets[0].id);
+assert(duped && duped.isFactory === false && duped.name.includes('(Copy)'),
+    'DEF-34: PresetService.duplicate clones preset as non-factory user preset');
+assert(duped.settings.easeStrength === counterPresets[0].settings.easeStrength,
+    'DEF-34: Duplicated preset preserves exact easeStrength (85%)');
+
+// DEF-35: Presets JSON Export & Strict Import Validation
+const exportedJSON = hostContext.PresetService.exportJSON();
+assert(typeof exportedJSON === 'string' && exportedJSON.includes('Social Metric') && exportedJSON.includes('Boxing'),
+    'DEF-35: PresetService.exportJSON exports valid JSON string containing presets');
+const importSuccess = hostContext.PresetService.importJSON(JSON.stringify([{
+    name: 'Custom Marketing Counter',
+    category: 'counter',
+    settings: {
+        counterType: 'basic',
+        start: 0,
+        end: 50000,
+        duration: 2,
+        easing: 'smoothOut',
+        easeStrength: 80,
+        easingConfig: { mode: 'single', singleCurveId: 'smoothOut', easeStrength: 80 }
+    }
+}]));
+assert(importSuccess === true,
+    'DEF-35: PresetService.importJSON successfully parses and imports valid custom preset');
+const importedFound = hostContext.PresetService.search('Marketing');
+assert(importedFound.length === 1 && importedFound[0].settings.easeStrength === 80,
+    'DEF-35: Imported custom preset is searchable and preserves easeStrength');
+
 // -------------------------------------------------------------------
 // MASTER SUMMARY REPORT
 // -------------------------------------------------------------------

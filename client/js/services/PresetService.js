@@ -33,8 +33,17 @@ var PresetService = (function () {
      * @returns {Array} Array of preset objects
      */
     function getAll() {
-        var presets = Storage.get(_storageKey, []);
-        if (!Array.isArray(presets)) return [];
+        var presets = Storage.get(_storageKey, null);
+
+        // Auto-seed factory presets if storage is uninitialized
+        if (presets === null || !Array.isArray(presets) || presets.length === 0) {
+            if (typeof PresetDefaults !== 'undefined' && PresetDefaults.getFactoryPresets) {
+                presets = PresetDefaults.getFactoryPresets();
+                Storage.set(_storageKey, presets);
+                return presets;
+            }
+            return [];
+        }
 
         var changed = false;
         for (var i = 0; i < presets.length; i++) {
@@ -49,6 +58,92 @@ var PresetService = (function () {
         }
 
         return presets;
+    }
+
+    /**
+     * Reset factory presets while preserving custom user presets
+     * @returns {Array} Updated presets list
+     */
+    function resetFactoryPresets() {
+        var existing = getAll();
+        var userPresets = [];
+        for (var i = 0; i < existing.length; i++) {
+            if (!existing[i].isFactory) {
+                userPresets.push(existing[i]);
+            }
+        }
+
+        var factory = (typeof PresetDefaults !== 'undefined' && PresetDefaults.getFactoryPresets)
+            ? PresetDefaults.getFactoryPresets()
+            : [];
+
+        var combined = factory.concat(userPresets);
+        Storage.set(_storageKey, combined);
+        return combined;
+    }
+
+    /**
+     * Duplicate an existing preset
+     * @param {string} id - Preset ID
+     * @returns {Object|null} Duplicated preset
+     */
+    function duplicate(id) {
+        var original = getById(id);
+        if (!original) return null;
+
+        var presets = getAll();
+        var cloned = JSON.parse(JSON.stringify(original));
+        cloned.id = 'preset_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
+        cloned.name = original.name + ' (Copy)';
+        cloned.isFactory = false;
+        cloned.createdAt = new Date().toISOString();
+        cloned.updatedAt = new Date().toISOString();
+
+        presets.push(cloned);
+        Storage.set(_storageKey, presets);
+        return cloned;
+    }
+
+    /**
+     * Filter presets by category ('all', 'counter', 'timer', 'custom')
+     * @param {string} category
+     * @returns {Array} Filtered presets
+     */
+    function getByCategory(category) {
+        var presets = getAll();
+        if (!category || category === 'all') return presets;
+
+        if (category === 'custom') {
+            return presets.filter(function (p) {
+                return !p.isFactory;
+            });
+        }
+
+        return presets.filter(function (p) {
+            var cat = p.category || (p.settings && p.settings.counterType === 'timer' ? 'timer' : 'counter');
+            return cat === category;
+        });
+    }
+
+    /**
+     * Search presets across name, description, and tags
+     * @param {string} query
+     * @param {string} [category='all']
+     * @returns {Array} Matched presets
+     */
+    function search(query, category) {
+        var pool = getByCategory(category);
+        if (!query || typeof query !== 'string') return pool;
+        var q = query.trim().toLowerCase();
+        if (!q) return pool;
+
+        return pool.filter(function (p) {
+            var name = (p.name || '').toLowerCase();
+            var desc = (p.description || '').toLowerCase();
+            var type = (p.category || (p.settings && p.settings.counterType === 'timer' ? 'timer' : 'counter')).toLowerCase();
+            var sym = (p.settings && (p.settings.symbol || p.settings.suffix) ? (p.settings.symbol + ' ' + p.settings.suffix) : '').toLowerCase();
+            return name.indexOf(q) !== -1 || desc.indexOf(q) !== -1 || type.indexOf(q) !== -1 || sym.indexOf(q) !== -1;
+        });
     }
 
     /**
@@ -188,10 +283,14 @@ var PresetService = (function () {
     return {
         getAll: getAll,
         getById: getById,
+        getByCategory: getByCategory,
+        search: search,
         save: save,
         update: update,
+        duplicate: duplicate,
         remove: remove,
         clear: clear,
+        resetFactoryPresets: resetFactoryPresets,
         exportJSON: exportJSON,
         importJSON: importJSON
     };

@@ -1205,8 +1205,336 @@ body {
 }
 
 /* ============================================================
-   11. PRESETS TAB (OpenBox Compact Standard)
+   11. PRESETS TAB & PRESET STUDIO (OpenBox Compact Standard)
    ============================================================ */
+
+/* 1. Live Preset Inspector / Preview Stage */
+.preset-inspector-card {
+    background: #15151c;
+    border: 1px solid var(--border-subtle);
+    padding: 8px;
+    margin-bottom: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.preset-inspector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.preset-inspector-title-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+}
+
+.preset-inspector-badge {
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 1px 4px;
+    background: #242432;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+}
+
+.preset-inspector-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.preset-inspector-chips {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.preset-meta-chip {
+    font-size: 8.5px;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    background: #1b1b24;
+    border: 1px solid var(--border-subtle);
+    padding: 1px 5px;
+    white-space: nowrap;
+}
+
+.preset-preview-stage {
+    width: 100%;
+    height: 48px;
+    background: #0f0f13;
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.preset-preview-number {
+    font-size: 20px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-bright);
+    letter-spacing: 0.5px;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.preset-preview-number.is-animating {
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+.preset-inspector-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr;
+    gap: 4px;
+    width: 100%;
+}
+
+.btn-preset-action {
+    height: 24px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    font-family: var(--font-primary);
+    font-size: 9.5px;
+    font-weight: 700;
+    transition: all 0.10s ease;
+}
+
+.btn-preset-action svg {
+    flex-shrink: 0;
+}
+
+.btn-preset-play {
+    background: var(--btn-solid-bg);
+    color: var(--text-primary);
+}
+
+.btn-preset-play:hover {
+    background: var(--btn-solid-hover);
+    color: #ffffff;
+    border-color: var(--border-contrast);
+}
+
+.btn-preset-play.is-playing {
+    background: #2b2b3c;
+    color: var(--accent-primary);
+    border-color: var(--border-focus);
+}
+
+.btn-preset-apply {
+    background: #242432;
+    color: var(--text-bright);
+}
+
+.btn-preset-apply:hover {
+    background: #2e2e40;
+    border-color: var(--border-contrast);
+}
+
+.btn-preset-create {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: #111116;
+}
+
+.btn-preset-create:hover {
+    background: #ffffff;
+    border-color: #ffffff;
+}
+
+/* 2. Filter & Search Toolbar */
+.preset-filter-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.preset-search-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.preset-search-wrapper svg {
+    position: absolute;
+    left: 7px;
+    pointer-events: none;
+    color: var(--text-muted);
+}
+
+.preset-search-input {
+    width: 100%;
+    height: 24px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    padding: 0 6px 0 24px;
+    font-family: var(--font-primary);
+    font-size: 10px;
+    color: var(--text-primary);
+    box-sizing: border-box;
+}
+
+.preset-search-input:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    background: var(--bg-input-focus);
+}
+
+.preset-category-switch {
+    width: 100%;
+}
+
+.preset-category-switch .segment-compact {
+    font-size: 9.5px;
+    padding: 3px 0;
+}
+
+/* 3. Presets List */
+.presets-list-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-height: 240px;
+    overflow-y: auto;
+    margin-bottom: 6px;
+}
+
+.preset-item-compact {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0 !important;
+    padding: 3px 6px;
+    height: 32px;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: background 0.10s ease, border-color 0.10s ease;
+}
+
+.preset-item-compact:hover {
+    border-color: var(--border-contrast);
+    background: var(--bg-card-hover);
+}
+
+.preset-item-compact.is-selected {
+    border-color: var(--border-focus);
+    background: #1c1c28;
+}
+
+.preset-item-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+    flex: 1;
+}
+
+.preset-item-icon {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-secondary);
+    flex-shrink: 0;
+}
+
+.preset-item-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-bright);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.preset-item-badge {
+    font-size: 7.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    padding: 1px 3px;
+    background: #1d1d29;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.preset-item-badge--factory {
+    color: var(--accent-secondary);
+}
+
+.preset-item-actions {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.preset-btn-compact {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-subtle);
+    background: var(--btn-solid-bg);
+    border-radius: 0 !important;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.10s ease;
+    padding: 0;
+}
+
+.preset-btn-compact svg {
+    width: 11px;
+    height: 11px;
+    stroke: currentColor;
+    stroke-width: 2.2;
+}
+
+.preset-btn-compact:hover {
+    background: var(--btn-solid-hover);
+    color: #ffffff;
+    border-color: var(--border-contrast);
+}
+
+.preset-btn-compact.preset-btn--create-ae:hover {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: #111116;
+}
+
+.preset-btn-compact.preset-btn--delete:hover {
+    background: var(--accent-danger);
+    border-color: var(--accent-danger);
+    color: #ffffff;
+}
+
+/* 4. Save Preset Card */
+.preset-save-card {
+    margin-bottom: 6px;
+}
+
 .save-preset-compact {
     display: flex;
     gap: 4px;
@@ -1256,88 +1584,47 @@ body {
     border-color: #e0e0ec;
 }
 
-.presets-list-compact {
-    margin-top: 4px;
+/* 5. Utility Toolbar */
+.preset-utility-bar {
     display: flex;
-    flex-direction: column;
-    gap: 3px;
+    gap: 4px;
+    width: 100%;
 }
 
-.nomro-presets__empty {
-    font-size: 10px;
-    color: var(--text-muted);
-    text-align: center;
-    padding: 12px;
-    background: #131318;
+.btn-utility-compact {
+    flex: 1;
+    height: 22px;
+    background: transparent;
     border: 1px dashed var(--border-subtle);
     border-radius: 0 !important;
-}
-
-.nomro-presets__item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
-    border-radius: 0 !important;
-    padding: 4px 6px;
-    height: 30px;
-    box-sizing: border-box;
-    transition: background 0.10s ease, border-color 0.10s ease;
-}
-
-.nomro-presets__item:hover {
-    border-color: var(--border-contrast);
-    background: var(--bg-card-hover);
-}
-
-.nomro-presets__name {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-bright);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.nomro-presets__actions {
-    display: flex;
-    gap: 2px;
-    flex-shrink: 0;
-}
-
-.nomro-presets__btn {
-    width: 22px;
-    height: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--border-subtle);
-    background: var(--btn-solid-bg);
-    border-radius: 0 !important;
+    gap: 4px;
     cursor: pointer;
-    color: var(--text-secondary);
-    transition: all 0.10s ease;
-    padding: 0;
+    font-family: var(--font-primary);
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.12s ease;
+    white-space: nowrap;
+    padding: 0 4px;
 }
 
-.nomro-presets__btn svg {
-    width: 11px;
-    height: 11px;
-    stroke: currentColor;
-    stroke-width: 2.2;
+.btn-utility-compact:hover {
+    border-color: var(--border-contrast);
+    color: var(--text-bright);
+    background: #171720;
 }
 
-.nomro-presets__btn--load:hover {
-    background: var(--accent-primary);
-    border-color: var(--accent-primary);
-    color: #161620;
-}
-
-.nomro-presets__btn--delete:hover {
-    background: var(--accent-danger);
-    border-color: var(--accent-danger);
-    color: #ffffff;
+.preset-empty-compact {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 16px;
+    background: #131318;
+    border: 1px dashed var(--border-subtle);
+    border-radius: 0 !important;
 }
 
 /* ============================================================

@@ -155,10 +155,22 @@
             timerF: document.getElementById('timer-f'),
             timerSepF: document.getElementById('timer-sep-f'),
 
-            // Presets
+            // Presets & Preset Studio
             presetNameInput: document.getElementById('input-preset-name'),
             btnSavePreset: document.getElementById('btn-save-preset'),
             presetsList: document.getElementById('presets-list'),
+            presetSearchInput: document.getElementById('preset-search-input'),
+            presetCategorySwitch: document.getElementById('preset-category-switch'),
+            presetInspectorCard: document.getElementById('preset-inspector-card'),
+            presetPreviewStage: document.getElementById('preset-preview-stage'),
+            presetPreviewNumber: document.getElementById('preset-preview-number'),
+            btnPresetPlay: document.getElementById('btn-preset-play'),
+            btnPresetApply: document.getElementById('btn-preset-apply'),
+            btnPresetCreate: document.getElementById('btn-preset-create'),
+            btnExportPresets: document.getElementById('btn-export-presets'),
+            btnImportPresets: document.getElementById('btn-import-presets'),
+            inputImportPresets: document.getElementById('input-import-presets'),
+            btnResetPresets: document.getElementById('btn-reset-presets'),
 
             // Create button
             btnCreateCounter: document.getElementById('btn-create-counter'),
