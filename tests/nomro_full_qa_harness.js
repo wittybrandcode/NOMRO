@@ -670,6 +670,12 @@ const importedFound = hostContext.PresetService.search('Marketing');
 assert(importedFound.length === 1 && importedFound[0].settings.easeStrength === 80,
     'DEF-35: Imported custom preset is searchable and preserves easeStrength');
 
+// DEF-36: Cross-Type & Preset Direct Creation Invariant
+const creationSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'modules', 'creation.js'), 'utf8');
+assert(creationSrc.includes('forceCreate') &&
+       creationSrc.includes('linkedType === type'),
+    'DEF-36: CreationModule allows creating a timer when a counter is selected and supports forceCreate');
+
 // -------------------------------------------------------------------
 // MASTER SUMMARY REPORT
 // -------------------------------------------------------------------

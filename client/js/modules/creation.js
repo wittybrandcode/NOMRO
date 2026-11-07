@@ -140,14 +140,16 @@ var CreationModule = (function () {
     /**
      * Create counter or timer layer
      * @param {string} type - 'counter' or 'timer'
+     * @param {boolean} [forceCreate=false] - If true, force new layer creation regardless of linked layer
+     * @param {Object} [overrideSettings=null] - Optional settings payload
      */
-    function create(type) {
+    function create(type, forceCreate, overrideSettings) {
         if (_isCreating) return;
         _isCreating = true;
 
         try {
             type = _normalizeType(type || 'counter');
-            var settings = _callbacks.getSettings ? _callbacks.getSettings(type) : {};
+            var settings = overrideSettings || (_callbacks.getSettings ? _callbacks.getSettings(type) : {});
             var linkedLayer = _callbacks.getLinkedLayer ? _callbacks.getLinkedLayer() : null;
             var linkedLayerInfo = _callbacks.getLinkedLayerInfo ? _callbacks.getLinkedLayerInfo() : null;
 
@@ -172,18 +174,25 @@ var CreationModule = (function () {
             }
 
             // Check if we're in update mode
-            var layerRef = linkedLayerInfo || linkedLayer;
+            var layerRef = (!forceCreate) ? (linkedLayerInfo || linkedLayer) : null;
             if (layerRef) {
-                if (_handleTypeMismatch(type, linkedLayerInfo)) {
-                    _isCreating = false;
+                var linkedType = linkedLayerInfo && linkedLayerInfo.counterType
+                    ? _normalizeType(linkedLayerInfo.counterType)
+                    : null;
+
+                // Only update if the linked layer matches the requested type
+                if (linkedType === type) {
+                    if (typeof Logger !== 'undefined') {
+                        Logger.log('Creation', 'Updating layer:', layerRef);
+                    }
+                    updateLayer(layerRef, settings, linkedLayerInfo);
                     return;
                 }
 
-                if (typeof Logger !== 'undefined') {
-                    Logger.log('Creation', 'Updating layer:', layerRef);
-                }
-                updateLayer(layerRef, settings, linkedLayerInfo);
-                return;
+                // If linked layer does NOT match the requested type (e.g. Counter is selected in AE,
+                // but user clicked "Create Timer" or a Timer preset), this is an intentional request
+                // to CREATE a new layer of the requested type rather than an invalid update.
+                // We proceed to create a new layer without blocking.
             }
 
             if (typeof Logger !== 'undefined') {

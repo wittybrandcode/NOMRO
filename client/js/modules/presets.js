@@ -79,10 +79,10 @@ var PresetsModule = (function () {
         // 1. Apply settings into state & UI
         applySettings(preset.settings);
 
-        // 2. Trigger direct creation via CreationModule
+        // 2. Trigger direct creation via CreationModule (force fresh layer creation)
         var type = (preset.settings && preset.settings.counterType === 'timer') ? 'timer' : 'counter';
         if (typeof CreationModule !== 'undefined' && CreationModule.create) {
-            CreationModule.create(type);
+            CreationModule.create(type, true, preset.settings);
             if (_callbacks.onShowToast) {
                 _callbacks.onShowToast('Creating layer from preset in After Effects...', 'success');
             }
