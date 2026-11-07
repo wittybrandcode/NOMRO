@@ -41,7 +41,8 @@ var EasingValidator = (function () {
         if (!config || typeof config !== 'object') {
             return {
                 mode: 'single',
-                singleCurveId: DEFAULT_CURVE_ID
+                singleCurveId: DEFAULT_CURVE_ID,
+                easeStrength: 75
             };
         }
 
@@ -53,10 +54,15 @@ var EasingValidator = (function () {
         }
 
         var resolvedId = normalizeCurveId(candidate || config.easing);
+        var strength = parseFloat(config.easeStrength);
+        if (isNaN(strength)) strength = 75;
+        if (strength < 10) strength = 10;
+        if (strength > 100) strength = 100;
 
         return {
             mode: 'single',
-            singleCurveId: resolvedId
+            singleCurveId: resolvedId,
+            easeStrength: strength
         };
     }
 
@@ -65,12 +71,18 @@ var EasingValidator = (function () {
 
         var config = sanitizeConfig(settings.easingConfig || {
             mode: 'single',
-            singleCurveId: settings.easing || DEFAULT_CURVE_ID
+            singleCurveId: settings.easing || DEFAULT_CURVE_ID,
+            easeStrength: settings.easeStrength !== undefined ? settings.easeStrength : 75
         });
+
+        if (settings.easeStrength !== undefined) {
+            config.easeStrength = parseFloat(settings.easeStrength) || 75;
+        }
 
         settings.schemaVersion = 2;
         settings.easingConfig = config;
         settings.easing = config.singleCurveId;
+        settings.easeStrength = config.easeStrength;
         settings.curveLibrary = [];
 
         return settings;

@@ -53,6 +53,7 @@ var CounterModule = (function () {
             var easingSettings = {
                 schemaVersion: 2,
                 easing: _state.counter.easing,
+                easeStrength: _state.counter.easeStrength !== undefined ? _state.counter.easeStrength : 75,
                 easingConfig: _state.counter.easingConfig,
                 curveLibrary: _state.counter.curveLibrary
             };
@@ -60,9 +61,10 @@ var CounterModule = (function () {
                 easingSettings = EasingValidator.sanitizeSettings(easingSettings);
             }
             settings.schemaVersion = easingSettings.schemaVersion || 2;
-            settings.easingConfig = easingSettings.easingConfig || { mode: 'single', singleCurveId: _state.counter.easing || 'linear' };
+            settings.easeStrength = easingSettings.easeStrength !== undefined ? easingSettings.easeStrength : 75;
+            settings.easingConfig = easingSettings.easingConfig || { mode: 'single', singleCurveId: _state.counter.easing || 'smoothOut', easeStrength: settings.easeStrength };
             settings.curveLibrary = easingSettings.curveLibrary || [];
-            settings.easing = easingSettings.easing || _state.counter.easing || 'linear';
+            settings.easing = easingSettings.easing || _state.counter.easing || 'smoothOut';
             settings.numberFormat = _state.counter.format;
             settings.symbol = _state.counter.prefix;
             settings.suffix = _state.counter.suffix;
@@ -323,6 +325,9 @@ var CounterModule = (function () {
         init: init,
         initInputs: initInputs,
         initPreview: initPreview,
+        startAnimation: startAnimation,
+        stopAnimation: stopAnimation,
+        resetAnimation: resetAnimation,
         getSettings: getSettings,
         setLinkedLayer: setLinkedLayer,
         getLinkedLayer: getLinkedLayer,

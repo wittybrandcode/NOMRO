@@ -256,13 +256,81 @@ var UIControlsModule = (function () {
     }
 
     // ========================================
-    // EASING (5 GOLDEN CURVES)
+    // EASING (5 GOLDEN CURVES + INTERACTIVE VISUALIZER)
     // ========================================
+    var _kineticDotAnimId = null;
+
+    function _updateCurveVisualizer(curveId, strength, animateDot) {
+        var pathEl = document.getElementById('easing-curve-path');
+        var dotEl = document.getElementById('easing-kinetic-dot');
+        if (!pathEl) return;
+
+        var strNum = parseFloat(strength);
+        if (isNaN(strNum)) strNum = 75;
+
+        var resolved = curveId || 'smoothOut';
+        if (typeof EasingDefaults !== 'undefined' && EasingDefaults.resolveCurveId) {
+            resolved = EasingDefaults.resolveCurveId(curveId);
+        }
+
+        // Generate smooth SVG polyline for the curve (viewBox 0 0 260 64)
+        // Baseline y = 58, Target 100% y = 12 (height = 46)
+        var points = [];
+        var steps = 40;
+        for (var i = 0; i <= steps; i++) {
+            var t = i / steps;
+            var v = (typeof EasingRuntime !== 'undefined' && EasingRuntime.evaluateById)
+                ? EasingRuntime.evaluateById(resolved, t, strNum)
+                : t;
+            var x = (t * 260).toFixed(1);
+            var y = (58 - (v * 46)).toFixed(1);
+            points.push((i === 0 ? 'M ' : 'L ') + x + ' ' + y);
+        }
+        pathEl.setAttribute('d', points.join(' '));
+
+        if (dotEl) {
+            if (_kineticDotAnimId) {
+                cancelAnimationFrame(_kineticDotAnimId);
+                _kineticDotAnimId = null;
+            }
+
+            if (animateDot) {
+                var animStart = performance.now();
+                var rawDur = _state && _state.counter ? parseFloat(_state.counter.duration) : 2;
+                var animDuration = Math.max(600, Math.min(1800, (isNaN(rawDur) ? 2 : rawDur) * 800));
+
+                function animStep(now) {
+                    var elapsed = now - animStart;
+                    var p = Math.min(elapsed / animDuration, 1);
+                    var val = (typeof EasingRuntime !== 'undefined' && EasingRuntime.evaluateById)
+                        ? EasingRuntime.evaluateById(resolved, p, strNum)
+                        : p;
+                    var dotX = (p * 260).toFixed(1);
+                    var dotY = (58 - (val * 46)).toFixed(1);
+
+                    dotEl.setAttribute('cx', dotX);
+                    dotEl.setAttribute('cy', dotY);
+
+                    if (p < 1) {
+                        _kineticDotAnimId = requestAnimationFrame(animStep);
+                    } else {
+                        _kineticDotAnimId = null;
+                    }
+                }
+                _kineticDotAnimId = requestAnimationFrame(animStep);
+            } else {
+                dotEl.setAttribute('cx', '0');
+                dotEl.setAttribute('cy', '58');
+            }
+        }
+    }
+
     function _ensureEasingConfig() {
         if (!_state.counter.easingConfig) {
             _state.counter.easingConfig = {
                 mode: 'single',
-                singleCurveId: _state.counter.easing || 'smoothOut'
+                singleCurveId: _state.counter.easing || 'smoothOut',
+                easeStrength: _state.counter.easeStrength !== undefined ? _state.counter.easeStrength : 75
             };
         }
 
@@ -271,15 +339,19 @@ var UIControlsModule = (function () {
         }
 
         _state.counter.easing = _state.counter.easingConfig.singleCurveId;
+        _state.counter.easeStrength = _state.counter.easingConfig.easeStrength !== undefined ? _state.counter.easingConfig.easeStrength : 75;
     }
 
-    function _syncEasingUI(selectedCurve) {
+    function _syncEasingUI(selectedCurve, strength) {
         var resolved = 'smoothOut';
         if (typeof EasingDefaults !== 'undefined' && EasingDefaults.resolveCurveId) {
             resolved = EasingDefaults.resolveCurveId(selectedCurve);
         } else {
             resolved = selectedCurve || 'smoothOut';
         }
+
+        var strNum = parseFloat(strength);
+        if (isNaN(strNum)) strNum = 75;
 
         var buttons = document.querySelectorAll('[data-easing]');
         if (buttons && buttons.length) {
@@ -294,8 +366,38 @@ var UIControlsModule = (function () {
             }
         }
 
-        if (_elements.singleEasingCurve) {
+        var sliderEl = document.getElementById('ease-strength-slider');
+        var valEl = document.getElementById('ease-strength-val');
+        if (sliderEl) {
+            sliderEl.value = strNum;
+            if (resolved === 'linear') {
+                sliderEl.disabled = true;
+                sliderEl.style.opacity = '0.35';
+                if (valEl) valEl.textContent = 'N/A';
+            } else {
+                sliderEl.disabled = false;
+                sliderEl.style.opacity = '1';
+                if (valEl) valEl.textContent = Math.round(strNum) + '%';
+            }
+        }
+
+        if (_elements && _elements.singleEasingCurve) {
             _elements.singleEasingCurve.value = resolved;
+        }
+
+        _updateCurveVisualizer(resolved, strNum, true);
+    }
+
+    function _triggerAutoPreview() {
+        if (typeof CounterModule !== 'undefined') {
+            if (CounterModule.stopAnimation) CounterModule.stopAnimation();
+            if (CounterModule.startAnimation) {
+                CounterModule.startAnimation();
+                return;
+            }
+            if (CounterModule.updatePreview) CounterModule.updatePreview();
+        } else if (_callbacks.onUpdatePreview) {
+            _callbacks.onUpdatePreview();
         }
     }
 
@@ -303,11 +405,16 @@ var UIControlsModule = (function () {
         _ensureEasingConfig();
 
         var candidate = legacyCurve || _state.counter.easing || 'smoothOut';
+        var str = _state.counter.easeStrength !== undefined ? _state.counter.easeStrength : 75;
+
         if (config && typeof config === 'object') {
             if (config.mode === 'dual' && config.dual && config.dual.outCurveId) {
                 candidate = config.dual.outCurveId;
             } else if (config.singleCurveId) {
                 candidate = config.singleCurveId;
+            }
+            if (config.easeStrength !== undefined) {
+                str = config.easeStrength;
             }
         }
 
@@ -318,16 +425,22 @@ var UIControlsModule = (function () {
             resolved = candidate;
         }
 
+        var strNum = parseFloat(str);
+        if (isNaN(strNum)) strNum = 75;
+        strNum = Math.max(10, Math.min(100, strNum));
+
         var normalized = {
             mode: 'single',
-            singleCurveId: resolved
+            singleCurveId: resolved,
+            easeStrength: strNum
         };
 
         _state.counter.easingConfig = normalized;
         _state.counter.easing = resolved;
+        _state.counter.easeStrength = strNum;
         _state.counter.curveLibrary = [];
 
-        _syncEasingUI(resolved);
+        _syncEasingUI(resolved, strNum);
     }
 
     function initEasing() {
@@ -342,29 +455,50 @@ var UIControlsModule = (function () {
                         var curveId = btn.getAttribute('data-easing');
                         applyEasingConfig({
                             mode: 'single',
-                            singleCurveId: curveId
+                            singleCurveId: curveId,
+                            easeStrength: _state.counter.easeStrength || 75
                         }, curveId);
 
-                        if (_callbacks.onUpdatePreview) {
-                            _callbacks.onUpdatePreview();
-                        }
+                        _triggerAutoPreview();
                     });
                 })(buttons[i]);
             }
         }
 
-        // 2. Synchronized change listener on hidden/fallback select for presets
-        if (_elements.singleEasingCurve) {
+        // 2. Ease Strength / Influence Slider
+        var sliderEl = document.getElementById('ease-strength-slider');
+        var valEl = document.getElementById('ease-strength-val');
+        if (sliderEl) {
+            sliderEl.addEventListener('input', function () {
+                var sVal = parseInt(this.value, 10) || 75;
+                _state.counter.easeStrength = sVal;
+                if (_state.counter.easingConfig) {
+                    _state.counter.easingConfig.easeStrength = sVal;
+                }
+                if (valEl) valEl.textContent = sVal + '%';
+                var curCurve = _state.counter.easing || 'smoothOut';
+                _updateCurveVisualizer(curCurve, sVal, false);
+            });
+
+            sliderEl.addEventListener('change', function () {
+                var sVal = parseInt(this.value, 10) || 75;
+                var curCurve = _state.counter.easing || 'smoothOut';
+                _updateCurveVisualizer(curCurve, sVal, true);
+                _triggerAutoPreview();
+            });
+        }
+
+        // 3. Synchronized change listener on hidden/fallback select for presets
+        if (_elements && _elements.singleEasingCurve) {
             _elements.singleEasingCurve.addEventListener('change', function () {
                 var selected = this.value || 'smoothOut';
                 applyEasingConfig({
                     mode: 'single',
-                    singleCurveId: selected
+                    singleCurveId: selected,
+                    easeStrength: _state.counter.easeStrength || 75
                 }, selected);
 
-                if (_callbacks.onUpdatePreview) {
-                    _callbacks.onUpdatePreview();
-                }
+                _triggerAutoPreview();
             });
         }
 

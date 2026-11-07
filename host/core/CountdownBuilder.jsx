@@ -46,6 +46,7 @@ NOMRO.core.buildCountdown = function (comp, settings) {
         NOMRO.core.addSlider(textLayer, 'NOMRO_Start', startValue);
         NOMRO.core.addSlider(textLayer, 'NOMRO_End', endValue);
         NOMRO.core.addSlider(textLayer, 'NOMRO_Duration', duration);
+        NOMRO.core.addSlider(textLayer, 'NOMRO_Ease', settings.easeStrength !== undefined ? settings.easeStrength : 75);
 
         // ========================================
         // ADD MARKERS FOR MARKER MODE

@@ -500,15 +500,17 @@ assert(hostContext.EasingDefaults.resolveCurveId('easeOutQuad') === 'smoothOut' 
        hostContext.EasingDefaults.resolveCurveId('back') === 'overshoot' &&
        hostContext.EasingDefaults.resolveCurveId('easeOutExpo') === 'snappyOut',
     'DEF-22: EasingDefaults resolves legacy curve aliases to corresponding Golden Curves');
-assert(hostContext.NOMRO.easing.get('easeOutQuad') === '(1 - Math.pow(1 - t, 3))',
-    'DEF-22: Host EasingLib seamlessly resolves legacy alias easeOutQuad to smoothOut');
+assert(hostContext.NOMRO.easing.resolveId('easeOutQuad') === 'smoothOut' &&
+       hostContext.NOMRO.easing.get('easeOutQuad').includes('NOMRO_Ease') &&
+       hostContext.NOMRO.easing.get('easeOutQuad').includes('1 - Math.pow(1 - t, p)'),
+    'DEF-22: Host EasingLib seamlessly resolves legacy alias easeOutQuad to smoothOut with NOMRO_Ease slider binding');
 
 // DEF-23: Ultra-Fast AE Expression Generation (No Newton-Raphson bloat)
 const smoothExpr = hostContext.NOMRO.expressions.generateEmbedded({
     start: 0, end: 100, duration: 2, easing: 'smoothOut'
 });
-assert(smoothExpr.includes('(1 - Math.pow(1 - t, 3))') && !smoothExpr.includes('solveX'),
-    'DEF-23: AE counter expression contains pure cubic formula without Newton-Raphson iterative loops');
+assert(smoothExpr.includes('NOMRO_Ease') && smoothExpr.includes('1 - Math.pow(1 - t, p)') && !smoothExpr.includes('solveX'),
+    'DEF-23: AE counter expression contains pure parametric formula reading NOMRO_Ease without Newton-Raphson iterative loops');
 
 // DEF-24: Streamlined One-Click UI DOM Contract
 assert(indexHtmlContent.includes('id="easing-curve-switch"') &&
@@ -533,6 +535,58 @@ assert(typeof hostContext.EasingRuntime.evaluateCounterState === 'function',
 const counterEval = hostContext.EasingRuntime.evaluateCounterState({ easing: 'smoothOut' }, 0.5);
 assert(Math.abs(counterEval - 0.875) < 1e-6,
     'DEF-25: evaluateCounterState evaluates accurate progress for counter state');
+
+// DEF-26: SVG Curve Visualizer DOM & CSS Contract
+assert(indexHtmlContent.includes('id="easing-visualizer"') &&
+       indexHtmlContent.includes('id="easing-svg"') &&
+       indexHtmlContent.includes('id="easing-curve-path"') &&
+       indexHtmlContent.includes('id="easing-kinetic-dot"'),
+    'DEF-26: index.html contains SVG curve visualizer and kinetic dot elements');
+assert(compactCssCode.includes('.easing-visualizer-container') &&
+       compactCssCode.includes('#easing-curve-path') &&
+       compactCssCode.includes('#easing-kinetic-dot'),
+    'DEF-26: compact.css contains styles for visualizer container, curve path, and glowing dot');
+
+// DEF-27: Ease Strength Slider DOM & EasingDefaults Limits Contract
+assert(indexHtmlContent.includes('id="ease-strength-slider"') &&
+       indexHtmlContent.includes('min="20"') &&
+       indexHtmlContent.includes('max="95"') &&
+       indexHtmlContent.includes('value="75"'),
+    'DEF-27: index.html contains #ease-strength-slider with min=20, max=95, default=75');
+assert(hostContext.EasingDefaults.DEFAULT_STRENGTH === 75 &&
+       hostContext.EasingDefaults.MIN_STRENGTH === 20 &&
+       hostContext.EasingDefaults.MAX_STRENGTH === 95,
+    'DEF-27: EasingDefaults exports DEFAULT_STRENGTH=75, MIN_STRENGTH=20, MAX_STRENGTH=95');
+
+// DEF-28: CounterBuilder & CountdownBuilder add NOMRO_Ease slider to AE layers
+const counterBuilderSrc = fs.readFileSync(path.join(baseDir, 'host', 'core', 'CounterBuilder.jsx'), 'utf8');
+const countdownBuilderSrc = fs.readFileSync(path.join(baseDir, 'host', 'core', 'CountdownBuilder.jsx'), 'utf8');
+assert(counterBuilderSrc.includes("NOMRO.core.addSlider(textLayer, 'NOMRO_Ease'") || counterBuilderSrc.includes('NOMRO_Ease'),
+    'DEF-28: CounterBuilder adds NOMRO_Ease slider to After Effects counter layer');
+assert(countdownBuilderSrc.includes("NOMRO.core.addSlider(textLayer, 'NOMRO_Ease'") || countdownBuilderSrc.includes('NOMRO_Ease'),
+    'DEF-28: CountdownBuilder adds NOMRO_Ease slider to After Effects timer layer');
+
+// DEF-29: SettingsExtractor & Constants Bidirectional Ease Sync
+assert(hostContext.NOMRO_CONSTANTS && hostContext.NOMRO_CONSTANTS.SLIDER_NAMES &&
+       hostContext.NOMRO_CONSTANTS.SLIDER_NAMES.EASE === 'NOMRO_Ease',
+    'DEF-29: NOMRO_CONSTANTS defines EASE slider name as NOMRO_Ease');
+const mergedSettings = hostContext.NOMRO.helpers.mergeSettings({
+    counterType: 'basic',
+    start: 0,
+    end: 100,
+    duration: 2
+}, {
+    ease: 85
+});
+assert(mergedSettings.easeStrength === 85,
+    'DEF-29: SettingsExtractor.mergeSettings maps extracted ease slider value to easeStrength');
+
+// DEF-30: Parametric Easing Parity at Custom Strength
+const evalCustom = hostContext.EasingRuntime.evaluateById('smoothOut', 0.5, 37.5);
+// At strength=37.5 (ratio=0.5), power = 1 + 0.5*2 = 2.0 (quadratic deceleration)
+// 1 - (1 - 0.5)^2 = 1 - 0.25 = 0.75
+assert(Math.abs(evalCustom - 0.75) < 1e-6,
+    'DEF-30: EasingRuntime evaluates exact parametric power at custom strength 37.5% (t=0.5 -> 0.75)');
 
 // -------------------------------------------------------------------
 // MASTER SUMMARY REPORT

@@ -40,15 +40,18 @@ NOMRO.expressions.resolveEasingExpression = function (settings) {
     settings = settings || {};
 
     var easingConfig = settings.easingConfig || null;
-    var legacyEasing = settings.easing || 'linear';
+    var legacyEasing = settings.easing || 'smoothOut';
     var curveLibrary = settings.curveLibrary || null;
+    var strength = settings.easeStrength !== undefined
+        ? settings.easeStrength
+        : (easingConfig && easingConfig.easeStrength !== undefined ? easingConfig.easeStrength : 75);
 
     if (NOMRO.easingAdapter && NOMRO.easingAdapter.getExpressionFromConfig) {
-        return NOMRO.easingAdapter.getExpressionFromConfig(easingConfig, legacyEasing, curveLibrary);
+        return NOMRO.easingAdapter.getExpressionFromConfig(easingConfig, legacyEasing, curveLibrary, strength);
     }
 
     if (NOMRO.easing && NOMRO.easing.getFromConfig) {
-        return NOMRO.easing.getFromConfig(easingConfig, legacyEasing, curveLibrary);
+        return NOMRO.easing.getFromConfig(easingConfig, legacyEasing, curveLibrary, strength);
     }
 
     return 't';

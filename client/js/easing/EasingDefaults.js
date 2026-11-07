@@ -95,10 +95,14 @@ var EasingDefaults = (function () {
     };
 
     var DEFAULT_CURVE_ID = 'smoothOut';
+    var DEFAULT_STRENGTH = 75;
+    var MIN_STRENGTH = 20;
+    var MAX_STRENGTH = 95;
 
     var DEFAULT_CONFIG = {
         mode: 'single',
-        singleCurveId: DEFAULT_CURVE_ID
+        singleCurveId: DEFAULT_CURVE_ID,
+        easeStrength: DEFAULT_STRENGTH
     };
 
     function clone(obj) {
@@ -121,6 +125,9 @@ var EasingDefaults = (function () {
         GOLDEN_CURVES: GOLDEN_CURVES,
         LEGACY_ALIASES: LEGACY_ALIASES,
         DEFAULT_CURVE_ID: DEFAULT_CURVE_ID,
+        DEFAULT_STRENGTH: DEFAULT_STRENGTH,
+        MIN_STRENGTH: MIN_STRENGTH,
+        MAX_STRENGTH: MAX_STRENGTH,
         DEFAULT_CONFIG: Object.freeze ? Object.freeze(clone(DEFAULT_CONFIG)) : DEFAULT_CONFIG,
         resolveCurveId: resolveCurveId,
         clone: clone

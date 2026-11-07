@@ -72,6 +72,7 @@ NOMRO.core.buildCounter = function (comp, settings) {
         addLargeValue('NOMRO_End', settings.end !== undefined ? settings.end : 100);
         NOMRO.core.addSlider(textLayer, 'NOMRO_Duration', settings.duration !== undefined ? settings.duration : 2);
         NOMRO.core.addSlider(textLayer, 'NOMRO_Delay', 0);
+        NOMRO.core.addSlider(textLayer, 'NOMRO_Ease', settings.easeStrength !== undefined ? settings.easeStrength : 75);
 
         // ========================================
         // ADD MARKERS (If Enabled)

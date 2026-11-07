@@ -861,14 +861,104 @@ body {
     color: #dcdce8;
 }
 
-/* Easing Curve Switch (5 Golden Curves) */
+/* Easing Curve Switch & Visualizer (5 Golden Curves + Dynamic Kinetic Graph) */
+.easing-visualizer-container {
+    width: 100%;
+    height: 52px;
+    background: #111116;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0;
+    margin-bottom: 6px;
+    position: relative;
+    overflow: hidden;
+}
+
+.easing-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#easing-curve-path {
+    stroke: var(--accent-primary, #d4d4e2);
+    transition: stroke 0.2s ease;
+}
+
+#easing-kinetic-dot {
+    fill: #ffffff;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
+}
+
 .easing-curve-switch {
-    margin-top: 2px;
+    margin-top: 0;
 }
 
 .easing-curve-switch .segment-compact {
     font-size: 9.5px;
     letter-spacing: 0.2px;
+}
+
+.ease-strength-control {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.ease-strength-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ease-strength-label {
+    font-size: 8.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.ease-strength-val {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--accent-primary);
+    font-family: var(--font-mono);
+}
+
+.input-range-compact {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: #242432;
+    outline: none;
+    border: none;
+    margin: 4px 0 2px 0;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.input-range-compact::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #d4d4e2;
+    border: 1px solid #111114;
+    border-radius: 0;
+    cursor: pointer;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.input-range-compact::-webkit-slider-thumb:hover {
+    background: #ffffff;
+    transform: scale(1.1);
+}
+
+.input-range-compact:focus::-webkit-slider-thumb {
+    outline: 1px solid var(--border-focus);
 }
 
 .input-label-compact {

@@ -21,9 +21,11 @@
                 end: 1000,
                 duration: 2,
                 easing: 'smoothOut',
+                easeStrength: 75,
                 easingConfig: {
                     mode: 'single',
-                    singleCurveId: 'smoothOut'
+                    singleCurveId: 'smoothOut',
+                    easeStrength: 75
                 },
                 curveLibrary: [],
                 format: 'normal',
@@ -69,11 +71,13 @@
         var migrated = EasingValidator.sanitizeSettings({
             schemaVersion: 2,
             easing: App.state.counter.easing,
+            easeStrength: App.state.counter.easeStrength !== undefined ? App.state.counter.easeStrength : 75,
             easingConfig: App.state.counter.easingConfig,
             curveLibrary: App.state.counter.curveLibrary
         });
 
         App.state.counter.easing = migrated.easing;
+        App.state.counter.easeStrength = migrated.easeStrength !== undefined ? migrated.easeStrength : 75;
         App.state.counter.easingConfig = migrated.easingConfig;
         App.state.counter.curveLibrary = migrated.curveLibrary;
     }
@@ -103,9 +107,14 @@
             previewResetBtn: document.getElementById('timer-reset-preview'),
             timerToggleMonospaceBtn: document.getElementById('timer-toggle-monospace-btn'),
 
-            // Easing (5 Golden Curves)
+            // Easing (5 Golden Curves + Dynamic Kinetic Graph)
             singleEasingCurve: document.getElementById('single-easing-curve'),
             easingButtons: document.querySelectorAll('[data-easing]'),
+            easeStrengthSlider: document.getElementById('ease-strength-slider'),
+            easeStrengthVal: document.getElementById('ease-strength-val'),
+            easingVisualizer: document.getElementById('easing-visualizer'),
+            easingCurvePath: document.getElementById('easing-curve-path'),
+            easingKineticDot: document.getElementById('easing-kinetic-dot'),
 
             // Format
             formatSegments: document.querySelectorAll('[data-format]'),
@@ -717,9 +726,11 @@
             end: 1000,
             duration: 2,
             easing: 'smoothOut',
+            easeStrength: 75,
             easingConfig: {
                 mode: 'single',
-                singleCurveId: 'smoothOut'
+                singleCurveId: 'smoothOut',
+                easeStrength: 75
             },
             curveLibrary: [],
             format: 'normal',
@@ -779,7 +790,7 @@
         });
 
         if (typeof UIControlsModule !== 'undefined' && UIControlsModule.applyEasingConfig) {
-            UIControlsModule.applyEasingConfig(App.state.counter.easingConfig, 'linear', []);
+            UIControlsModule.applyEasingConfig(App.state.counter.easingConfig, 'smoothOut', []);
         }
 
         // 4. Reset Timer UI Elements

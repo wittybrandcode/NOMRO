@@ -35,7 +35,8 @@ var NOMRO_CONSTANTS = {
     SLIDER_NAMES: {
         START: 'NOMRO_Start',
         END: 'NOMRO_End',
-        DURATION: 'NOMRO_Duration'
+        DURATION: 'NOMRO_Duration',
+        EASE: 'NOMRO_Ease'
     },
 
     CONFIG_MARKER: 'NOMRO_CONFIG',
@@ -272,6 +273,9 @@ function updateLayer(data) {
             NOMRO.helpers.updateLargeSlider(layer, NOMRO_CONSTANTS.SLIDER_NAMES.START, settings.start);
             NOMRO.helpers.updateLargeSlider(layer, NOMRO_CONSTANTS.SLIDER_NAMES.END, settings.end);
             NOMRO.helpers.updateSlider(layer, NOMRO_CONSTANTS.SLIDER_NAMES.DURATION, settings.duration);
+            if (settings.easeStrength !== undefined) {
+                NOMRO.helpers.updateSlider(layer, NOMRO_CONSTANTS.SLIDER_NAMES.EASE, settings.easeStrength);
+            }
 
             // 2. Update metadata comment
             NOMRO.helpers.updateComment(layer, settings);

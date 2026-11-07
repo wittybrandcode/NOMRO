@@ -227,12 +227,35 @@
                         <span>Easing</span>
                     </div>
 
+                    <!-- Interactive SVG Curve Visualizer -->
+                    <div class="easing-visualizer-container" id="easing-visualizer" title="Interactive Easing Curve (منحنى الحركة التفاعلي)">
+                        <svg class="easing-svg" id="easing-svg" viewBox="0 0 260 64" preserveAspectRatio="none">
+                            <!-- Reference Grid & Diagonal -->
+                            <line x1="0" y1="58" x2="260" y2="12" class="easing-grid-diagonal" stroke="rgba(255,255,255,0.08)" stroke-dasharray="3,3" />
+                            <line x1="0" y1="12" x2="260" y2="12" stroke="rgba(255,255,255,0.05)" stroke-dasharray="2,2" />
+                            <line x1="0" y1="58" x2="260" y2="58" stroke="rgba(255,255,255,0.05)" />
+                            <!-- Active Curve Path -->
+                            <path id="easing-curve-path" d="M 0 58 Q 130 12 260 12" fill="none" stroke="var(--accent-primary, #d4d4e2)" stroke-width="2.2" stroke-linecap="round"/>
+                            <!-- Kinetic Dot -->
+                            <circle id="easing-kinetic-dot" cx="0" cy="58" r="4.5" fill="#ffffff"/>
+                        </svg>
+                    </div>
+
                     <div class="segmented-control-compact easing-curve-switch" id="easing-curve-switch" title="Select Easing Curve (اختر منحنى الحركة)">
                         <button type="button" class="segment-compact active" data-easing="smoothOut" title="Smooth Out: Graceful deceleration to landing (تباطؤ تدريجي ناعم - الموصى به)">Smooth</button>
                         <button type="button" class="segment-compact" data-easing="snappyOut" title="Snappy Out: Fast explosive burst into landing (تسارع قوي وهبوط سريع)">Snappy</button>
                         <button type="button" class="segment-compact" data-easing="easeInOut" title="Ease In-Out: Balanced acceleration & deceleration (انسيابي متوازن)">In-Out</button>
                         <button type="button" class="segment-compact" data-easing="linear" title="Linear: Constant uniform speed (سرعة ثابتة منتظمة)">Linear</button>
                         <button type="button" class="segment-compact" data-easing="overshoot" title="Spring: Dynamic overshoot and settle (ارتداد وتجاوز مرن)">Spring</button>
+                    </div>
+
+                    <!-- Ease Strength / Influence Slider -->
+                    <div class="ease-strength-control" id="ease-strength-control">
+                        <div class="ease-strength-header">
+                            <span class="ease-strength-label" title="Ease Strength / Curve Influence (قوة وتأثير المنحنى)">Influence / Strength</span>
+                            <span class="ease-strength-val" id="ease-strength-val">75%</span>
+                        </div>
+                        <input type="range" class="input-range-compact" id="ease-strength-slider" min="20" max="95" value="75" step="1" title="Curve Influence (قوة وتأثير المنحنى)">
                     </div>
 
                     <!-- Hidden synchronized element for full backward compatibility with scripts and presets -->
