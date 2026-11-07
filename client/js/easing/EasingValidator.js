@@ -10,6 +10,21 @@ var EasingValidator = (function () {
         ? EasingDefaults.DEFAULT_CURVE_ID
         : 'smoothOut';
 
+    var LIMITS = (typeof EasingDefaults !== 'undefined' && EasingDefaults.LIMITS)
+        ? EasingDefaults.LIMITS
+        : {
+            MIN_PHASE: 0.05,
+            MAX_PHASE: 0.90,
+            MAX_PHASE_SUM: 0.95
+        };
+
+    var DEFAULT_CONFIG = (typeof EasingDefaults !== 'undefined' && EasingDefaults.DEFAULT_CONFIG)
+        ? EasingDefaults.DEFAULT_CONFIG
+        : {
+            mode: 'single',
+            singleCurveId: DEFAULT_CURVE_ID
+        };
+
     function _clone(obj) {
         return JSON.parse(JSON.stringify(obj || {}));
     }
@@ -61,17 +76,34 @@ var EasingValidator = (function () {
         return settings;
     }
 
-    function validate(config) {
-        if (!config || typeof config !== 'object') {
-            return { valid: false, errors: ['Easing configuration must be an object'] };
+    function validateStrict(settings) {
+        var errors = [];
+        settings = settings || {};
+
+        if (!settings.easingConfig || typeof settings.easingConfig !== 'object') {
+            errors.push('easingConfig is required');
+            return { valid: false, errors: errors };
         }
-        return { valid: true, errors: [] };
+
+        var config = settings.easingConfig;
+        var curveId = config.singleCurveId || settings.easing;
+        if (!curveId) {
+            errors.push('singleCurveId is required');
+        }
+
+        return {
+            valid: errors.length === 0,
+            errors: errors
+        };
     }
 
     return {
+        LIMITS: LIMITS,
+        DEFAULT_CONFIG: _clone(DEFAULT_CONFIG),
         normalizeCurveId: normalizeCurveId,
         sanitizeConfig: sanitizeConfig,
         sanitizeSettings: sanitizeSettings,
-        validate: validate
+        validate: validateStrict,
+        validateStrict: validateStrict
     };
 })();

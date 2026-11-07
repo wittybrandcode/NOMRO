@@ -48,9 +48,25 @@ var EasingRuntime = (function () {
         return evaluateConfig(config, t);
     }
 
+    function evaluateCounterState(counterState, t) {
+        counterState = counterState || {};
+        var settingsLike = {
+            schemaVersion: 2,
+            easing: counterState.easing || 'smoothOut',
+            easingConfig: counterState.easingConfig || {
+                mode: 'single',
+                singleCurveId: counterState.easing || 'smoothOut'
+            },
+            curveLibrary: []
+        };
+
+        return evaluateSettings(settingsLike, t);
+    }
+
     return {
         evaluateById: evaluateById,
         evaluateConfig: evaluateConfig,
-        evaluateSettings: evaluateSettings
+        evaluateSettings: evaluateSettings,
+        evaluateCounterState: evaluateCounterState
     };
 })();

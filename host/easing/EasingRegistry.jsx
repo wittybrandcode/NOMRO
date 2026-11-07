@@ -1,4 +1,4 @@
-﻿/**
+/**
  * NOMRO - Host Easing Registry
  * Clean registry facade for After Effects ExtendScript environment.
  * @module easing/EasingRegistry

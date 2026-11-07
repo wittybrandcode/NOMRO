@@ -88,6 +88,12 @@ var EasingDefaults = (function () {
         'easeInBack': 'overshoot'
     };
 
+    var LIMITS = {
+        MIN_PHASE: 0.05,
+        MAX_PHASE: 0.90,
+        MAX_PHASE_SUM: 0.95
+    };
+
     var DEFAULT_CURVE_ID = 'smoothOut';
 
     var DEFAULT_CONFIG = {
@@ -111,6 +117,7 @@ var EasingDefaults = (function () {
     }
 
     return {
+        LIMITS: Object.freeze ? Object.freeze(clone(LIMITS)) : LIMITS,
         GOLDEN_CURVES: GOLDEN_CURVES,
         LEGACY_ALIASES: LEGACY_ALIASES,
         DEFAULT_CURVE_ID: DEFAULT_CURVE_ID,

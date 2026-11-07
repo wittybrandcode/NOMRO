@@ -1,4 +1,4 @@
-﻿/**
+/**
  * NOMRO - Host Easing Expression Adapter
  * Unified, safe adapter for generating pure After Effects easing expressions.
  * @module easing/EasingExpressionAdapter

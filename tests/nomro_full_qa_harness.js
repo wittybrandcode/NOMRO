@@ -517,6 +517,23 @@ assert(indexHtmlContent.includes('id="easing-curve-switch"') &&
        !indexHtmlContent.includes('data-easing-mode="dual"'),
     'DEF-24: index.html contains streamlined 5-button segmented switch and eliminates dual-mode bloat');
 
+// DEF-25: EasingValidator.validateStrict & EasingRuntime.evaluateCounterState Contract
+const easingValidatorSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'easing', 'EasingValidator.js'), 'utf8');
+vm.runInContext(easingValidatorSrc, hostContext);
+
+assert(typeof hostContext.EasingValidator.validateStrict === 'function',
+    'DEF-25: EasingValidator exports validateStrict function');
+const validRes = hostContext.EasingValidator.validateStrict(
+    hostContext.EasingValidator.sanitizeSettings({ easing: 'smoothOut' })
+);
+assert(validRes.valid === true && validRes.errors.length === 0,
+    'DEF-25: EasingValidator.validateStrict passes for sanitized settings');
+assert(typeof hostContext.EasingRuntime.evaluateCounterState === 'function',
+    'DEF-25: EasingRuntime exports evaluateCounterState function');
+const counterEval = hostContext.EasingRuntime.evaluateCounterState({ easing: 'smoothOut' }, 0.5);
+assert(Math.abs(counterEval - 0.875) < 1e-6,
+    'DEF-25: evaluateCounterState evaluates accurate progress for counter state');
+
 // -------------------------------------------------------------------
 // MASTER SUMMARY REPORT
 // -------------------------------------------------------------------
