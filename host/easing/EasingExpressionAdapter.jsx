@@ -1,16 +1,16 @@
 ﻿/**
  * NOMRO - Host Easing Expression Adapter
- * Unified API for easing expression generation.
+ * Unified, safe adapter for generating pure After Effects easing expressions.
  * @module easing/EasingExpressionAdapter
  */
 
 NOMRO.easingAdapter = NOMRO.easingAdapter || {};
 
 NOMRO.easingAdapter.getSingleExpression = function (curveId, legacyEasing, curveLibrary) {
-    var resolvedId = curveId || legacyEasing || 'linear';
+    var resolvedId = curveId || legacyEasing || 'smoothOut';
 
-    if (NOMRO.easing && NOMRO.easing._curveExpression) {
-        return NOMRO.easing._curveExpression(resolvedId, curveLibrary, 't');
+    if (NOMRO.easing && NOMRO.easing.get) {
+        return NOMRO.easing.get(resolvedId);
     }
 
     if (NOMRO.easingRegistry && NOMRO.easingRegistry.has(resolvedId)) {
@@ -24,8 +24,7 @@ NOMRO.easingAdapter.getDualExpression = function (dualConfig, curveLibrary) {
     if (NOMRO.easing && NOMRO.easing.getDualExpression) {
         return NOMRO.easing.getDualExpression(dualConfig || {}, curveLibrary);
     }
-
-    return 't';
+    return '(1 - Math.pow(1 - t, 3))';
 };
 
 NOMRO.easingAdapter.getExpressionFromConfig = function (easingConfig, legacyEasing, curveLibrary) {
@@ -33,10 +32,9 @@ NOMRO.easingAdapter.getExpressionFromConfig = function (easingConfig, legacyEasi
         return NOMRO.easing.getFromConfig(easingConfig, legacyEasing, curveLibrary);
     }
 
-    if (easingConfig && easingConfig.mode === 'dual') {
-        return NOMRO.easingAdapter.getDualExpression(easingConfig.dual || {}, curveLibrary);
-    }
+    var singleId = (easingConfig && easingConfig.singleCurveId)
+        ? easingConfig.singleCurveId
+        : (legacyEasing || 'smoothOut');
 
-    var singleId = easingConfig && easingConfig.singleCurveId ? easingConfig.singleCurveId : legacyEasing;
     return NOMRO.easingAdapter.getSingleExpression(singleId, legacyEasing, curveLibrary);
 };

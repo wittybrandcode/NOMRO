@@ -482,6 +482,41 @@ assert(indexHtmlContent.includes('id="timer-sign"'),
 assert(compactCssCode.includes('.status-dot.status--ready') && compactCssCode.includes('.status-dot.status--linked'),
     'DEF-20: compact.css contains dynamic status bar modifier classes');
 
+// DEF-21: 5 Golden Curves System & Mathematical Parity
+const easingDefaultsSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'easing', 'EasingDefaults.js'), 'utf8');
+const easingRegistrySrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'easing', 'EasingRegistry.js'), 'utf8');
+const easingRuntimeSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'easing', 'EasingRuntime.js'), 'utf8');
+vm.runInContext(easingDefaultsSrc, hostContext);
+vm.runInContext(easingRegistrySrc, hostContext);
+vm.runInContext(easingRuntimeSrc, hostContext);
+
+assert(hostContext.EasingDefaults.GOLDEN_CURVES.length === 5,
+    'DEF-21: EasingDefaults defines exactly the 5 Golden Curves');
+assert(Math.abs(hostContext.EasingRuntime.evaluateById('smoothOut', 0.5) - 0.875) < 1e-6,
+    'DEF-21: Smooth Out evaluates exact cubic deceleration (t=0.5 -> 0.875)');
+
+// DEF-22: Backward Compatibility & Legacy Alias Resolution
+assert(hostContext.EasingDefaults.resolveCurveId('easeOutQuad') === 'smoothOut' &&
+       hostContext.EasingDefaults.resolveCurveId('back') === 'overshoot' &&
+       hostContext.EasingDefaults.resolveCurveId('easeOutExpo') === 'snappyOut',
+    'DEF-22: EasingDefaults resolves legacy curve aliases to corresponding Golden Curves');
+assert(hostContext.NOMRO.easing.get('easeOutQuad') === '(1 - Math.pow(1 - t, 3))',
+    'DEF-22: Host EasingLib seamlessly resolves legacy alias easeOutQuad to smoothOut');
+
+// DEF-23: Ultra-Fast AE Expression Generation (No Newton-Raphson bloat)
+const smoothExpr = hostContext.NOMRO.expressions.generateEmbedded({
+    start: 0, end: 100, duration: 2, easing: 'smoothOut'
+});
+assert(smoothExpr.includes('(1 - Math.pow(1 - t, 3))') && !smoothExpr.includes('solveX'),
+    'DEF-23: AE counter expression contains pure cubic formula without Newton-Raphson iterative loops');
+
+// DEF-24: Streamlined One-Click UI DOM Contract
+assert(indexHtmlContent.includes('id="easing-curve-switch"') &&
+       indexHtmlContent.includes('data-easing="smoothOut"') &&
+       indexHtmlContent.includes('data-easing="snappyOut"') &&
+       !indexHtmlContent.includes('data-easing-mode="dual"'),
+    'DEF-24: index.html contains streamlined 5-button segmented switch and eliminates dual-mode bloat');
+
 // -------------------------------------------------------------------
 // MASTER SUMMARY REPORT
 // -------------------------------------------------------------------

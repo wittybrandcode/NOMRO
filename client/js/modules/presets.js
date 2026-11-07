@@ -158,14 +158,7 @@ var PresetsModule = (function () {
             }
             var easingConfig = settings.easingConfig || {
                 mode: 'single',
-                singleCurveId: settings.easing || _state.counter.easing || 'linear',
-                dual: {
-                    inCurveId: 'easeIn',
-                    outCurveId: 'easeOut',
-                    inPct: 0.2,
-                    outPct: 0.2,
-                    middleMode: 'linear'
-                }
+                singleCurveId: settings.easing || _state.counter.easing || 'smoothOut'
             };
 
             if (typeof EasingValidator !== 'undefined') {

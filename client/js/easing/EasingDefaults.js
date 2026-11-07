@@ -1,88 +1,121 @@
 /**
  * NOMRO - Easing Defaults & Shared Constants
- * Single source of truth for easing limits, defaults, and bezier templates.
+ * Single source of truth for the 5 Golden Easing Curves and legacy aliases.
  * @module easing/EasingDefaults
  */
 var EasingDefaults = (function () {
     'use strict';
 
-    var LIMITS = {
-        MIN_PHASE: 0.05,
-        MAX_PHASE: 0.90,
-        MAX_PHASE_SUM: 0.95
+    // The 5 Golden Curves curated specifically for numbers & typography animation
+    var GOLDEN_CURVES = [
+        {
+            id: 'smoothOut',
+            name: 'Smooth Out',
+            shortName: 'Smooth',
+            description: 'Graceful deceleration to landing (تباطؤ تدريجي ناعم - الموصى به)',
+            formula: '1 - (1 - t)^3',
+            isDefault: true
+        },
+        {
+            id: 'snappyOut',
+            name: 'Snappy Out',
+            shortName: 'Snappy',
+            description: 'Fast explosive burst & quick settle (تسارع قوي وهبوط سريع)',
+            formula: '1 - (1 - t)^5'
+        },
+        {
+            id: 'easeInOut',
+            name: 'Ease In-Out',
+            shortName: 'In-Out',
+            description: 'Balanced acceleration & deceleration (انسيابي متوازن)',
+            formula: 'Symmetric S-Curve'
+        },
+        {
+            id: 'linear',
+            name: 'Linear',
+            shortName: 'Linear',
+            description: 'Constant uniform speed (سرعة ثابتة منتظمة)',
+            formula: 't'
+        },
+        {
+            id: 'overshoot',
+            name: 'Spring',
+            shortName: 'Spring',
+            description: 'Dynamic overshoot & elastic settle (ارتداد وتجاوز مرن)',
+            formula: 'Back Out (s = 1.70158)'
+        }
+    ];
+
+    // Canonical map for legacy presets and After Effects project backwards compatibility
+    var LEGACY_ALIASES = {
+        // Standard easeOut aliases -> smoothOut
+        'easeOut': 'smoothOut',
+        'easeOutQuad': 'smoothOut',
+        'easeOutCubic': 'smoothOut',
+        'easeOutSine': 'smoothOut',
+
+        // High energy / snappy aliases -> snappyOut
+        'easeOutQuart': 'snappyOut',
+        'easeOutQuint': 'snappyOut',
+        'easeOutExpo': 'snappyOut',
+        'easeOutCirc': 'snappyOut',
+
+        // Ease In-Out aliases -> easeInOut
+        'easeInOutQuad': 'easeInOut',
+        'easeInOutCubic': 'easeInOut',
+        'easeInOutSine': 'easeInOut',
+        'easeInOutQuart': 'easeInOut',
+        'easeInOutQuint': 'easeInOut',
+        'easeInOutExpo': 'easeInOut',
+        'easeInOutCirc': 'easeInOut',
+
+        // Overshoot / Spring aliases -> overshoot
+        'back': 'overshoot',
+        'easeOutBack': 'overshoot',
+        'easeInOutBack': 'overshoot',
+        'bounce': 'overshoot',
+        'elastic': 'overshoot',
+
+        // EaseIn aliases
+        'easeIn': 'easeIn',
+        'easeInQuad': 'easeIn',
+        'easeInCubic': 'easeIn',
+        'easeInSine': 'easeIn',
+        'easeInQuart': 'easeIn',
+        'easeInQuint': 'easeIn',
+        'easeInExpo': 'easeIn',
+        'easeInCirc': 'easeIn',
+        'easeInBack': 'overshoot'
     };
 
-    var DEFAULT_DUAL = {
-        inCurveId: 'easeIn',
-        outCurveId: 'easeOut',
-        inPct: 0.20,
-        outPct: 0.20,
-        middleMode: 'linear'
-    };
+    var DEFAULT_CURVE_ID = 'smoothOut';
 
     var DEFAULT_CONFIG = {
         mode: 'single',
-        singleCurveId: 'linear',
-        dual: {
-            inCurveId: DEFAULT_DUAL.inCurveId,
-            outCurveId: DEFAULT_DUAL.outCurveId,
-            inPct: DEFAULT_DUAL.inPct,
-            outPct: DEFAULT_DUAL.outPct,
-            middleMode: DEFAULT_DUAL.middleMode
-        }
+        singleCurveId: DEFAULT_CURVE_ID
     };
-
-    var BEZIER_TEMPLATES = [
-        // Sine
-        ['easeInSine', 'easeInSine', [0.12, 0.00, 0.39, 0.00], 'sine'],
-        ['easeOutSine', 'easeOutSine', [0.61, 1.00, 0.88, 1.00], 'sine'],
-        ['easeInOutSine', 'easeInOutSine', [0.37, 0.00, 0.63, 1.00], 'sine'],
-
-        // Power / Quad
-        ['easeInQuad', 'easeInQuad', [0.11, 0.00, 0.50, 0.00], 'power'],
-        ['easeOutQuad', 'easeOutQuad', [0.50, 1.00, 0.89, 1.00], 'power'],
-        ['easeInOutQuad', 'easeInOutQuad', [0.45, 0.00, 0.55, 1.00], 'power'],
-
-        // Power / Cubic
-        ['easeInCubic', 'easeInCubic', [0.32, 0.00, 0.67, 0.00], 'power'],
-        ['easeOutCubic', 'easeOutCubic', [0.33, 1.00, 0.68, 1.00], 'power'],
-        ['easeInOutCubic', 'easeInOutCubic', [0.65, 0.00, 0.35, 1.00], 'power'],
-
-        // Power / Quart
-        ['easeInQuart', 'easeInQuart', [0.50, 0.00, 0.75, 0.00], 'power'],
-        ['easeOutQuart', 'easeOutQuart', [0.25, 1.00, 0.50, 1.00], 'power'],
-        ['easeInOutQuart', 'easeInOutQuart', [0.76, 0.00, 0.24, 1.00], 'power'],
-
-        // Power / Quint
-        ['easeInQuint', 'easeInQuint', [0.64, 0.00, 0.78, 0.00], 'power'],
-        ['easeOutQuint', 'easeOutQuint', [0.22, 1.00, 0.36, 1.00], 'power'],
-        ['easeInOutQuint', 'easeInOutQuint', [0.83, 0.00, 0.17, 1.00], 'power'],
-
-        // Expo
-        ['easeInExpo', 'easeInExpo', [0.70, 0.00, 0.84, 0.00], 'expo_circ'],
-        ['easeOutExpo', 'easeOutExpo', [0.16, 1.00, 0.30, 1.00], 'expo_circ'],
-        ['easeInOutExpo', 'easeInOutExpo', [0.87, 0.00, 0.13, 1.00], 'expo_circ'],
-
-        // Circ
-        ['easeInCirc', 'easeInCirc', [0.55, 0.00, 1.00, 0.45], 'expo_circ'],
-        ['easeOutCirc', 'easeOutCirc', [0.00, 0.55, 0.45, 1.00], 'expo_circ'],
-        ['easeInOutCirc', 'easeInOutCirc', [0.85, 0.00, 0.15, 1.00], 'expo_circ'],
-
-        // Back Advanced
-        ['easeInBack', 'easeInBack', [0.36, 0.00, 0.66, -0.56], 'back_adv'],
-        ['easeOutBack', 'easeOutBack', [0.34, 1.56, 0.64, 1.00], 'back_adv'],
-        ['easeInOutBack', 'easeInOutBack', [0.68, -0.60, 0.32, 1.60], 'back_adv']
-    ];
 
     function clone(obj) {
         return JSON.parse(JSON.stringify(obj));
     }
 
+    function resolveCurveId(id) {
+        if (!id || typeof id !== 'string') return DEFAULT_CURVE_ID;
+        for (var i = 0; i < GOLDEN_CURVES.length; i++) {
+            if (GOLDEN_CURVES[i].id === id) return id;
+        }
+        if (LEGACY_ALIASES[id]) {
+            return LEGACY_ALIASES[id];
+        }
+        return DEFAULT_CURVE_ID;
+    }
+
     return {
-        LIMITS: Object.freeze ? Object.freeze(clone(LIMITS)) : LIMITS,
-        DEFAULT_DUAL: Object.freeze ? Object.freeze(clone(DEFAULT_DUAL)) : DEFAULT_DUAL,
+        GOLDEN_CURVES: GOLDEN_CURVES,
+        LEGACY_ALIASES: LEGACY_ALIASES,
+        DEFAULT_CURVE_ID: DEFAULT_CURVE_ID,
         DEFAULT_CONFIG: Object.freeze ? Object.freeze(clone(DEFAULT_CONFIG)) : DEFAULT_CONFIG,
-        BEZIER_TEMPLATES: BEZIER_TEMPLATES,
+        resolveCurveId: resolveCurveId,
         clone: clone
     };
 })();

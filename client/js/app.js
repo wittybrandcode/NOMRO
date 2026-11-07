@@ -20,17 +20,10 @@
                 start: 0,
                 end: 1000,
                 duration: 2,
-                easing: 'linear',
+                easing: 'smoothOut',
                 easingConfig: {
                     mode: 'single',
-                    singleCurveId: 'linear',
-                    dual: {
-                        inCurveId: 'easeIn',
-                        outCurveId: 'easeOut',
-                        inPct: 0.2,
-                        outPct: 0.2,
-                        middleMode: 'linear'
-                    }
+                    singleCurveId: 'smoothOut'
                 },
                 curveLibrary: [],
                 format: 'normal',
@@ -110,15 +103,9 @@
             previewResetBtn: document.getElementById('timer-reset-preview'),
             timerToggleMonospaceBtn: document.getElementById('timer-toggle-monospace-btn'),
 
-            // Easing
+            // Easing (5 Golden Curves)
             singleEasingCurve: document.getElementById('single-easing-curve'),
-            easingModeButtons: document.querySelectorAll('[data-easing-mode]'),
-            easingPanels: document.querySelectorAll('[data-easing-panel]'),
-            easeInCurve: document.getElementById('ease-in-curve'),
-            easeOutCurve: document.getElementById('ease-out-curve'),
-            easeInPct: document.getElementById('ease-in-pct'),
-            easeOutPct: document.getElementById('ease-out-pct'),
-            middleMode: document.getElementById('middle-mode'),
+            easingButtons: document.querySelectorAll('[data-easing]'),
 
             // Format
             formatSegments: document.querySelectorAll('[data-format]'),
@@ -729,17 +716,10 @@
             start: 0,
             end: 1000,
             duration: 2,
-            easing: 'linear',
+            easing: 'smoothOut',
             easingConfig: {
                 mode: 'single',
-                singleCurveId: 'linear',
-                dual: {
-                    inCurveId: 'easeIn',
-                    outCurveId: 'easeOut',
-                    inPct: 0.2,
-                    outPct: 0.2,
-                    middleMode: 'linear'
-                }
+                singleCurveId: 'smoothOut'
             },
             curveLibrary: [],
             format: 'normal',

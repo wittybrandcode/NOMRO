@@ -861,16 +861,14 @@ body {
     color: #dcdce8;
 }
 
-/* Dual Easing Grid */
-.dual-easing-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px;
-    margin-top: 4px;
+/* Easing Curve Switch (5 Golden Curves) */
+.easing-curve-switch {
+    margin-top: 2px;
 }
 
-.dual-middle-mode {
-    grid-column: 1 / -1;
+.easing-curve-switch .segment-compact {
+    font-size: 9.5px;
+    letter-spacing: 0.2px;
 }
 
 .input-label-compact {

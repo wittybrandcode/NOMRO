@@ -256,257 +256,119 @@ var UIControlsModule = (function () {
     }
 
     // ========================================
-    // EASING
+    // EASING (5 GOLDEN CURVES)
     // ========================================
     function _ensureEasingConfig() {
         if (!_state.counter.easingConfig) {
             _state.counter.easingConfig = {
                 mode: 'single',
-                singleCurveId: _state.counter.easing || 'linear',
-                dual: {
-                    inCurveId: 'easeIn',
-                    outCurveId: 'easeOut',
-                    inPct: 0.2,
-                    outPct: 0.2,
-                    middleMode: 'linear'
-                }
+                singleCurveId: _state.counter.easing || 'smoothOut'
             };
-        }
-
-        if (!_state.counter.curveLibrary || Object.prototype.toString.call(_state.counter.curveLibrary) !== '[object Array]') {
-            _state.counter.curveLibrary = [];
         }
 
         if (typeof EasingValidator !== 'undefined') {
             _state.counter.easingConfig = EasingValidator.sanitizeConfig(_state.counter.easingConfig);
         }
+
+        _state.counter.easing = _state.counter.easingConfig.singleCurveId;
     }
 
-    function _setEasingPanels(mode) {
-        var normalizedMode = mode === 'dual' ? 'dual' : 'single';
-
-        if (_elements.easingModeButtons) {
-            _elements.easingModeButtons.forEach(function (btn) {
-                btn.classList.toggle('active', btn.getAttribute('data-easing-mode') === normalizedMode);
-            });
+    function _syncEasingUI(selectedCurve) {
+        var resolved = 'smoothOut';
+        if (typeof EasingDefaults !== 'undefined' && EasingDefaults.resolveCurveId) {
+            resolved = EasingDefaults.resolveCurveId(selectedCurve);
+        } else {
+            resolved = selectedCurve || 'smoothOut';
         }
 
-        if (_elements.easingPanels) {
-            _elements.easingPanels.forEach(function (panel) {
-                panel.classList.toggle('active', panel.getAttribute('data-easing-panel') === normalizedMode);
-            });
-        }
-
-        _state.counter.easingUiMode = normalizedMode;
-    }
-
-    function _appendCurveOption(parent, value, label) {
-        var option = document.createElement('option');
-        option.value = value;
-        option.textContent = label;
-        parent.appendChild(option);
-    }
-
-    function _getCurveGroups() {
-        if (typeof EasingRegistry === 'undefined' || typeof EasingRegistry.list !== 'function') {
-            return [
-                {
-                    label: 'Core',
-                    options: [
-                        { id: 'linear', label: 'Linear' },
-                        { id: 'easeIn', label: 'Ease In' },
-                        { id: 'easeOut', label: 'Ease Out' },
-                        { id: 'easeInOut', label: 'Ease In Out' },
-                        { id: 'bounce', label: 'Bounce' },
-                        { id: 'elastic', label: 'Elastic' },
-                        { id: 'back', label: 'Back (Legacy)' }
-                    ]
+        var buttons = document.querySelectorAll('[data-easing]');
+        if (buttons && buttons.length) {
+            for (var i = 0; i < buttons.length; i++) {
+                var btn = buttons[i];
+                var curveId = btn.getAttribute('data-easing');
+                if (curveId === resolved) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
                 }
-            ];
-        }
-
-        var allCurves = EasingRegistry.list('builtIn');
-        var groupMap = {
-            'core': { label: 'Core', options: [] },
-            'sine': { label: 'Sine', options: [] },
-            'power': { label: 'Power', options: [] },
-            'expo_circ': { label: 'Expo / Circ', options: [] },
-            'back_adv': { label: 'Back Advanced', options: [] }
-        };
-
-        var labelOverrides = {
-            'back': 'Back (Legacy)'
-        };
-
-        for (var i = 0; i < allCurves.length; i++) {
-            var curve = allCurves[i];
-            var sub = curve.subcategory || 'core';
-            if (groupMap[sub]) {
-                var label = labelOverrides[curve.id] || curve.name || curve.id;
-                groupMap[sub].options.push({ id: curve.id, label: label });
             }
         }
 
-        var result = [];
-        var order = ['core', 'sine', 'power', 'expo_circ', 'back_adv'];
-        for (var j = 0; j < order.length; j++) {
-            var gKey = order[j];
-            if (groupMap[gKey] && groupMap[gKey].options.length > 0) {
-                result.push(groupMap[gKey]);
-            }
+        if (_elements.singleEasingCurve) {
+            _elements.singleEasingCurve.value = resolved;
         }
-
-        return result;
-    }
-
-    function _populateCurveSelect(selectEl, selectedId) {
-        if (!selectEl) return;
-
-        var groups = _getCurveGroups();
-        var seen = {};
-        var i;
-        var j;
-        selectEl.innerHTML = '';
-
-        for (i = 0; i < groups.length; i++) {
-            var group = document.createElement('optgroup');
-            group.label = groups[i].label;
-            for (j = 0; j < groups[i].options.length; j++) {
-                var opt = groups[i].options[j];
-                if (seen[opt.id]) continue;
-                seen[opt.id] = true;
-                _appendCurveOption(group, opt.id, opt.label);
-            }
-            selectEl.appendChild(group);
-        }
-
-        var library = (_state.counter && _state.counter.curveLibrary) ? _state.counter.curveLibrary : [];
-        var customGroup = null;
-        for (i = 0; i < library.length; i++) {
-            var curve = library[i];
-            if (!curve || curve.type !== 'bezier' || !curve.id || seen[curve.id]) continue;
-            if (!customGroup) {
-                customGroup = document.createElement('optgroup');
-                customGroup.label = 'Legacy Custom';
-            }
-            seen[curve.id] = true;
-            _appendCurveOption(customGroup, curve.id, curve.name || curve.id);
-        }
-
-        if (customGroup) {
-            selectEl.appendChild(customGroup);
-        }
-
-        selectEl.value = selectedId || 'linear';
-        if (selectEl.value !== (selectedId || 'linear')) {
-            selectEl.value = 'linear';
-        }
-    }
-
-    function _syncSingleInput(selectedCurve) {
-        _populateCurveSelect(_elements.singleEasingCurve, selectedCurve || 'linear');
-    }
-
-    function _syncDualInputs(config) {
-        var dual = (config && config.dual) ? config.dual : {};
-        _populateCurveSelect(_elements.easeInCurve, dual.inCurveId || 'easeIn');
-        _populateCurveSelect(_elements.easeOutCurve, dual.outCurveId || 'easeOut');
-        if (_elements.easeInPct) _elements.easeInPct.value = (dual.inPct !== undefined) ? dual.inPct : 0.2;
-        if (_elements.easeOutPct) _elements.easeOutPct.value = (dual.outPct !== undefined) ? dual.outPct : 0.2;
-        if (_elements.middleMode) _elements.middleMode.value = dual.middleMode || 'linear';
     }
 
     function applyEasingConfig(config, legacyCurve, curveLibrary) {
         _ensureEasingConfig();
 
+        var candidate = legacyCurve || _state.counter.easing || 'smoothOut';
+        if (config && typeof config === 'object') {
+            if (config.mode === 'dual' && config.dual && config.dual.outCurveId) {
+                candidate = config.dual.outCurveId;
+            } else if (config.singleCurveId) {
+                candidate = config.singleCurveId;
+            }
+        }
+
+        var resolved = 'smoothOut';
+        if (typeof EasingDefaults !== 'undefined' && EasingDefaults.resolveCurveId) {
+            resolved = EasingDefaults.resolveCurveId(candidate);
+        } else {
+            resolved = candidate;
+        }
+
         var normalized = {
             mode: 'single',
-            singleCurveId: legacyCurve || _state.counter.easing || 'linear',
-            dual: (_state.counter.easingConfig && _state.counter.easingConfig.dual)
-                ? _state.counter.easingConfig.dual
-                : null
+            singleCurveId: resolved
         };
 
-        if (config && typeof config === 'object') {
-            normalized = config;
-        }
-
-        if (typeof EasingValidator !== 'undefined') {
-            normalized = EasingValidator.sanitizeConfig(normalized);
-        }
-
         _state.counter.easingConfig = normalized;
+        _state.counter.easing = resolved;
+        _state.counter.curveLibrary = [];
 
-        if (curveLibrary && Object.prototype.toString.call(curveLibrary) === '[object Array]') {
-            _state.counter.curveLibrary = curveLibrary;
-        }
-
-        var selectedCurve = normalized.mode === 'single'
-            ? normalized.singleCurveId
-            : (legacyCurve || normalized.dual.outCurveId || 'linear');
-
-        _state.counter.easing = selectedCurve;
-        _syncSingleInput(normalized.singleCurveId);
-        _syncDualInputs(normalized);
-        _setEasingPanels(normalized.mode);
+        _syncEasingUI(resolved);
     }
 
     function initEasing() {
         _ensureEasingConfig();
 
+        // 1. One-click Segmented Buttons for the 5 Golden Curves
+        var buttons = document.querySelectorAll('[data-easing]');
+        if (buttons && buttons.length) {
+            for (var i = 0; i < buttons.length; i++) {
+                (function (btn) {
+                    btn.addEventListener('click', function () {
+                        var curveId = btn.getAttribute('data-easing');
+                        applyEasingConfig({
+                            mode: 'single',
+                            singleCurveId: curveId
+                        }, curveId);
+
+                        if (_callbacks.onUpdatePreview) {
+                            _callbacks.onUpdatePreview();
+                        }
+                    });
+                })(buttons[i]);
+            }
+        }
+
+        // 2. Synchronized change listener on hidden/fallback select for presets
         if (_elements.singleEasingCurve) {
             _elements.singleEasingCurve.addEventListener('change', function () {
-                var selected = this.value || 'linear';
+                var selected = this.value || 'smoothOut';
                 applyEasingConfig({
                     mode: 'single',
-                    singleCurveId: selected,
-                    dual: _state.counter.easingConfig.dual
+                    singleCurveId: selected
                 }, selected);
 
-                if (_callbacks.onUpdatePreview) _callbacks.onUpdatePreview();
+                if (_callbacks.onUpdatePreview) {
+                    _callbacks.onUpdatePreview();
+                }
             });
         }
 
-        if (_elements.easingModeButtons) {
-            _elements.easingModeButtons.forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    var mode = btn.getAttribute('data-easing-mode') || 'single';
-                    applyEasingConfig({
-                        mode: mode,
-                        singleCurveId: _state.counter.easingConfig.singleCurveId,
-                        dual: _state.counter.easingConfig.dual
-                    }, _state.counter.easing);
-
-                    if (_callbacks.onUpdatePreview) _callbacks.onUpdatePreview();
-                });
-            });
-        }
-
-        var onDualChanged = function () {
-            var dualConfig = {
-                inCurveId: _elements.easeInCurve ? _elements.easeInCurve.value : 'easeIn',
-                outCurveId: _elements.easeOutCurve ? _elements.easeOutCurve.value : 'easeOut',
-                inPct: _elements.easeInPct ? parseFloat(_elements.easeInPct.value) : 0.2,
-                outPct: _elements.easeOutPct ? parseFloat(_elements.easeOutPct.value) : 0.2,
-                middleMode: _elements.middleMode ? _elements.middleMode.value : 'linear'
-            };
-
-            applyEasingConfig({
-                mode: 'dual',
-                singleCurveId: _state.counter.easingConfig.singleCurveId,
-                dual: dualConfig
-            }, dualConfig.outCurveId);
-
-            if (_callbacks.onUpdatePreview) _callbacks.onUpdatePreview();
-        };
-
-        if (_elements.easeInCurve) _elements.easeInCurve.addEventListener('change', onDualChanged);
-        if (_elements.easeOutCurve) _elements.easeOutCurve.addEventListener('change', onDualChanged);
-        if (_elements.easeInPct) _elements.easeInPct.addEventListener('input', onDualChanged);
-        if (_elements.easeOutPct) _elements.easeOutPct.addEventListener('input', onDualChanged);
-        if (_elements.middleMode) _elements.middleMode.addEventListener('change', onDualChanged);
-
-        applyEasingConfig(_state.counter.easingConfig, _state.counter.easing, _state.counter.curveLibrary);
+        applyEasingConfig(_state.counter.easingConfig, _state.counter.easing);
     }
 
     function initFormat() {

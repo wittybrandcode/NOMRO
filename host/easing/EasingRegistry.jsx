@@ -1,6 +1,6 @@
 ﻿/**
  * NOMRO - Host Easing Registry
- * Lightweight registry facade around NOMRO.easing._defs.
+ * Clean registry facade for After Effects ExtendScript environment.
  * @module easing/EasingRegistry
  */
 
@@ -20,23 +20,28 @@ NOMRO.easingRegistry.register = function (id, expressionCode) {
 };
 
 NOMRO.easingRegistry.has = function (id) {
+    if (NOMRO.easing && NOMRO.easing.has) {
+        return NOMRO.easing.has(id);
+    }
     var defs = NOMRO.easingRegistry._getDefs();
     return defs[id] !== undefined;
 };
 
 NOMRO.easingRegistry.get = function (id) {
+    if (NOMRO.easing && NOMRO.easing.get) {
+        return NOMRO.easing.get(id);
+    }
     var defs = NOMRO.easingRegistry._getDefs();
-    return defs[id] || defs.linear || 't';
+    return defs[id] || 't';
 };
 
 NOMRO.easingRegistry.list = function () {
-    var defs = NOMRO.easingRegistry._getDefs();
+    var golden = ['smoothOut', 'snappyOut', 'easeInOut', 'linear', 'overshoot'];
     var out = [];
 
-    for (var key in defs) {
-        if (defs.hasOwnProperty(key)) {
-            out.push({ id: key, expressionCode: defs[key] });
-        }
+    for (var i = 0; i < golden.length; i++) {
+        var key = golden[i];
+        out.push({ id: key, expressionCode: NOMRO.easingRegistry.get(key) });
     }
 
     return out;

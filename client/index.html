@@ -227,57 +227,22 @@
                         <span>Easing</span>
                     </div>
 
-                    <div class="segmented-control-compact easing-mode-switch">
-                        <button class="segment-compact active" data-easing-mode="single" title="Single Curve Mode: Unified motion curve (منحنى حركة موحد)">Single</button>
-                        <button class="segment-compact" data-easing-mode="dual" title="Entry/Exit Curve Mode: Independent acceleration & deceleration (منحنى دخول وخروج منفصل)">Entry/Exit</button>
+                    <div class="segmented-control-compact easing-curve-switch" id="easing-curve-switch" title="Select Easing Curve (اختر منحنى الحركة)">
+                        <button type="button" class="segment-compact active" data-easing="smoothOut" title="Smooth Out: Graceful deceleration to landing (تباطؤ تدريجي ناعم - الموصى به)">Smooth</button>
+                        <button type="button" class="segment-compact" data-easing="snappyOut" title="Snappy Out: Fast explosive burst into landing (تسارع قوي وهبوط سريع)">Snappy</button>
+                        <button type="button" class="segment-compact" data-easing="easeInOut" title="Ease In-Out: Balanced acceleration & deceleration (انسيابي متوازن)">In-Out</button>
+                        <button type="button" class="segment-compact" data-easing="linear" title="Linear: Constant uniform speed (سرعة ثابتة منتظمة)">Linear</button>
+                        <button type="button" class="segment-compact" data-easing="overshoot" title="Spring: Dynamic overshoot and settle (ارتداد وتجاوز مرن)">Spring</button>
                     </div>
 
-                    <div class="easing-mode-panel active" data-easing-panel="single">
-                        <div class="input-group-compact easing-template-group">
-                            <label class="input-label-compact" title="Curve Template (قالب المنحنى)">Curve Template</label>
-                            <div class="input-wrapper-compact format-select-wrapper">
-                                <select class="input-field-compact format-select" id="single-easing-curve" title="Select Easing Curve Template (اختر قالب منحنى الحركة)"></select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="easing-mode-panel" data-easing-panel="dual">
-                        <div class="dual-easing-grid">
-                            <div class="input-group-compact">
-                                <label class="input-label-compact" title="Entry Acceleration Curve (منحنى تسارع البداية)">Entry Curve</label>
-                                <div class="input-wrapper-compact format-select-wrapper">
-                                    <select class="input-field-compact format-select" id="ease-in-curve" title="Entry Curve: Acceleration curve during initial phase (منحنى تسارع البداية)"></select>
-                                </div>
-                            </div>
-                            <div class="input-group-compact">
-                                <label class="input-label-compact" title="Exit Deceleration Curve (منحنى تباطؤ النهاية)">Exit Curve</label>
-                                <div class="input-wrapper-compact format-select-wrapper">
-                                    <select class="input-field-compact format-select" id="ease-out-curve" title="Exit Curve: Deceleration curve during final phase (منحنى تباطؤ النهاية)"></select>
-                                </div>
-                            </div>
-                            <div class="input-group-compact">
-                                <label class="input-label-compact" title="Entry Duration Percentage (نسبة مدة الدخول)">Entry %</label>
-                                <div class="input-wrapper-compact">
-                                    <input type="text" inputmode="decimal" class="input-field-compact" id="ease-in-pct" value="0.20" min="0.05" max="0.90" step="0.05" title="Entry Phase Percentage (0.05 - 0.90)">
-                                </div>
-                            </div>
-                            <div class="input-group-compact">
-                                <label class="input-label-compact" title="Exit Duration Percentage (نسبة مدة الخروج)">Exit %</label>
-                                <div class="input-wrapper-compact">
-                                    <input type="text" inputmode="decimal" class="input-field-compact" id="ease-out-pct" value="0.20" min="0.05" max="0.90" step="0.05" title="Exit Phase Percentage (0.05 - 0.90)">
-                                </div>
-                            </div>
-                            <div class="input-group-compact dual-middle-mode">
-                                <label class="input-label-compact" title="Middle Phase Behavior (سلوك المرحلة الوسطى)">Middle Mode</label>
-                                <div class="input-wrapper-compact format-select-wrapper">
-                                    <select class="input-field-compact format-select" id="middle-mode" title="Middle Mode: Transition behavior between entry and exit (نمط الحركة في المرحلة الوسطى)">
-                                        <option value="linear" selected>Linear</option>
-                                        <option value="easeInOut">Ease In Out</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Hidden synchronized element for full backward compatibility with scripts and presets -->
+                    <select id="single-easing-curve" style="display: none;" title="Easing Curve">
+                        <option value="smoothOut" selected>Smooth Out</option>
+                        <option value="snappyOut">Snappy Out</option>
+                        <option value="easeInOut">Ease In Out</option>
+                        <option value="linear">Linear</option>
+                        <option value="overshoot">Spring / Overshoot</option>
+                    </select>
                 </div>
                 <!-- Format Options -->
                 <div class="card card-compact">
