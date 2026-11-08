@@ -2331,3 +2331,157 @@ body {
     border: 1px dashed var(--border-subtle);
 }
 
+/* ============================================================
+   MARKER TIMELINE RULER & QUICK CREATOR (v4.2.0)
+   ============================================================ */
+
+.nodes-marker-ruler-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    padding: 6px 8px;
+    margin-bottom: 8px;
+}
+
+.nodes-ruler-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 9px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.nodes-marker-ruler-rail {
+    position: relative;
+    height: 28px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-subtle);
+    overflow: hidden;
+}
+
+.nodes-ruler-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.nodes-ruler-pin {
+    position: absolute;
+    top: 2px;
+    transform: translateX(-50%);
+    cursor: pointer;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+    transition: transform 0.1s ease;
+}
+
+.nodes-ruler-pin:hover {
+    transform: translateX(-50%) scale(1.15);
+    z-index: 5;
+}
+
+.ruler-pin-head {
+    font-size: 8px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    padding: 1px 3px;
+    border: 1px solid;
+    line-height: 1;
+}
+
+.ruler-pin-stem {
+    width: 1px;
+    height: 11px;
+    background: currentColor;
+    opacity: 0.8;
+}
+
+.nodes-ruler-pin.type-number .ruler-pin-head {
+    color: #8bb2ff;
+    border-color: #5b8def;
+    background: #181d29;
+}
+.nodes-ruler-pin.type-number .ruler-pin-stem {
+    background: #5b8def;
+}
+
+.nodes-ruler-pin.type-time .ruler-pin-head {
+    color: #34d399;
+    border-color: #10b981;
+    background: #13241b;
+}
+.nodes-ruler-pin.type-time .ruler-pin-stem {
+    background: #10b981;
+}
+
+.nodes-ruler-pin.type-text .ruler-pin-head {
+    color: #c084fc;
+    border-color: #a855f7;
+    background: #21152d;
+}
+.nodes-ruler-pin.type-text .ruler-pin-stem {
+    background: #a855f7;
+}
+
+.nodes-ruler-pin.type-delta .ruler-pin-head {
+    color: #fbbf24;
+    border-color: #f59e0b;
+    background: #281d11;
+}
+.nodes-ruler-pin.type-delta .ruler-pin-stem {
+    background: #f59e0b;
+}
+
+.nodes-ruler-hold {
+    position: absolute;
+    top: 10px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 2;
+    pointer-events: none;
+}
+
+.nodes-marker-creator {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    padding: 6px 8px;
+    margin-bottom: 8px;
+}
+
+.marker-quick-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.btn-add-marker-quick {
+    height: 26px;
+    padding: 0 10px;
+    background: var(--btn-solid-bg);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    color: var(--text-bright);
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: all 0.1s ease;
+}
+
+.btn-add-marker-quick:hover {
+    background: var(--btn-solid-hover);
+    border-color: #5b8def;
+    color: #8bb2ff;
+}
+
+

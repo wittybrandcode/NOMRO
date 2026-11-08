@@ -162,6 +162,66 @@ var Bridge = (function () {
     }
 
     /**
+     * Add a single node marker to active layer
+     * @param {string|Object} layerRef
+     * @param {Object} node
+     * @param {number|null} [targetTime]
+     * @param {Function} callback - Callback(err, result)
+     */
+    function addNodeMarker(layerRef, node, targetTime, callback) {
+        if (typeof targetTime === 'function') {
+            callback = targetTime;
+            targetTime = null;
+        }
+        callback = callback || function () { };
+        var data = { layerRef: layerRef, node: node, time: targetTime };
+        var script = 'addNodeMarker(' + JSON.stringify(data) + ')';
+        evalScript(script, function (err, result) {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            try {
+                var parsed = JSON.parse(result);
+                if (parsed && parsed.success === false) {
+                    callback({ message: parsed.error || 'Add marker failed' }, null);
+                } else {
+                    callback(null, parsed ? parsed.data : result);
+                }
+            } catch (e) {
+                callback(null, result);
+            }
+        });
+    }
+
+    /**
+     * Sync/read all node markers from active layer
+     * @param {string|Object} layerRef
+     * @param {Function} callback - Callback(err, markers)
+     */
+    function syncNodeMarkers(layerRef, callback) {
+        callback = callback || function () { };
+        var data = { layerRef: layerRef };
+        var script = 'syncNodeMarkers(' + JSON.stringify(data) + ')';
+        evalScript(script, function (err, result) {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            try {
+                var parsed = JSON.parse(result);
+                if (parsed && parsed.success === false) {
+                    callback({ message: parsed.error || 'Sync markers failed' }, null);
+                } else {
+                    callback(null, parsed && parsed.data ? parsed.data.markers : []);
+                }
+            } catch (e) {
+                callback(null, []);
+            }
+        });
+    }
+
+    /**
      * Get host environment info
      * @returns {Object|null} Host info or null
      */
@@ -214,6 +274,8 @@ var Bridge = (function () {
         updateLayer: updateLayer,
         hasActiveComp: hasActiveComp,
         getCompPlayheadTime: getCompPlayheadTime,
+        addNodeMarker: addNodeMarker,
+        syncNodeMarkers: syncNodeMarkers,
         getHostInfo: getHostInfo,
         getThemeColors: getThemeColors
     };

@@ -272,6 +272,58 @@ runTest('LayerResolver recognizes nodes family and detectLayerType', function ()
 });
 
 // -------------------------------------------------------------
+// [SUITE 5] NodeMarkerService & Marker System Integration
+// -------------------------------------------------------------
+console.log('\n[SUITE 5] Testing NodeMarkerService & Marker Operations...');
+
+var markerServicePath = path.join(BASE_DIR, 'host/services/NodeMarkerService.jsx');
+var markerServiceContent = fs.readFileSync(markerServicePath, 'utf8');
+
+runTest('NodeMarkerService file exists and defines NOMRO.markers methods', function () {
+    assert.ok(markerServiceContent.indexOf('NOMRO.markers.getMarkerLabelForType') !== -1);
+    assert.ok(markerServiceContent.indexOf('NOMRO.markers.buildMarkerPayload') !== -1);
+    assert.ok(markerServiceContent.indexOf('NOMRO.markers.writeNodeMarkers') !== -1);
+    assert.ok(markerServiceContent.indexOf('NOMRO.markers.addNodeMarker') !== -1);
+    assert.ok(markerServiceContent.indexOf('NOMRO.markers.readNodeMarkers') !== -1);
+});
+
+runTest('NodeMarkerService assigns correct color labels for each node type', function () {
+    var NOMRO = { helpers: {} };
+    eval(markerServiceContent);
+
+    assert.strictEqual(NOMRO.markers.getMarkerLabelForType('number'), 8);  // Blue
+    assert.strictEqual(NOMRO.markers.getMarkerLabelForType('time'), 9);    // Green
+    assert.strictEqual(NOMRO.markers.getMarkerLabelForType('text'), 10);   // Purple
+    assert.strictEqual(NOMRO.markers.getMarkerLabelForType('delta'), 11);  // Orange
+});
+
+runTest('Bridge.js exports addNodeMarker and syncNodeMarkers', function () {
+    var bridgePath = path.join(BASE_DIR, 'client/js/bridge/Bridge.js');
+    var bridgeContent = fs.readFileSync(bridgePath, 'utf8');
+    assert.ok(bridgeContent.indexOf('addNodeMarker') !== -1);
+    assert.ok(bridgeContent.indexOf('syncNodeMarkers') !== -1);
+});
+
+runTest('index.html contains marker quick creator and timeline ruler', function () {
+    assert.ok(htmlContent.indexOf('id="nodes-marker-ruler-rail"') !== -1);
+    assert.ok(htmlContent.indexOf('id="btn-quick-add-marker"') !== -1);
+    assert.ok(htmlContent.indexOf('id="btn-sync-markers-from-layer"') !== -1);
+    assert.ok(htmlContent.indexOf('id="btn-write-markers-to-layer"') !== -1);
+});
+
+runTest('compact.css contains styling for marker ruler and quick creator', function () {
+    assert.ok(cssContent.indexOf('.nodes-marker-ruler-box') !== -1);
+    assert.ok(cssContent.indexOf('.nodes-ruler-pin') !== -1);
+    assert.ok(cssContent.indexOf('.btn-add-marker-quick') !== -1);
+});
+
+runTest('NodesModule exports marker system methods', function () {
+    assert.strictEqual(typeof NodesModule.quickAddMarker, 'function');
+    assert.strictEqual(typeof NodesModule.syncMarkersFromLayer, 'function');
+    assert.strictEqual(typeof NodesModule.writeMarkersToLayer, 'function');
+});
+
+// -------------------------------------------------------------
 // Summary
 // -------------------------------------------------------------
 console.log('\n===============================================================');

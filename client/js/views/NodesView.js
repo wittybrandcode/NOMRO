@@ -65,22 +65,22 @@ var NodesView = (function () {
             // Header bar
             html += '<div class="node-card-header">';
             html += '  <div class="node-header-left">';
-            html += '    <span class="node-badge ' + typeColorClass + '">#' + (index + 1) + '</span>';
+            html += '    <span class="node-badge ' + typeColorClass + '">📍 M#' + (index + 1) + '</span>';
             html += '    <span class="node-type-label">' + (node.type ? node.type.toUpperCase() : 'NUM') + '</span>';
             html += '  </div>';
             html += '  <div class="node-header-right">';
-            html += '    <div class="node-time-box" title="Waypoint Time in Seconds">';
+            html += '    <div class="node-time-box" title="Marker Time in Seconds">';
             html += '      <span class="node-time-icon">⏱️</span>';
             html += '      <input type="number" class="node-input-time" data-field="time" step="0.1" min="0" value="' + parseFloat((node.time || 0).toFixed(2)) + '" title="Waypoint Time (seconds)">';
             html += '      <span class="node-unit">s</span>';
             html += '    </div>';
             if (handlers.onCaptureTime) {
-                html += '    <button type="button" class="btn-node-icon btn-capture-time" title="Capture Playhead Time from Comp" data-action="capture">';
+                html += '    <button type="button" class="btn-node-icon btn-capture-time" title="Capture Playhead Time from Comp (التقاط توقيت المؤشر)" data-action="capture">';
                 html += '      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
                 html += '    </button>';
             }
             if (!isMinNodes) {
-                html += '    <button type="button" class="btn-node-icon btn-delete-node" title="Delete Node" data-action="delete">';
+                html += '    <button type="button" class="btn-node-icon btn-delete-node" title="Delete Marker" data-action="delete">';
                 html += '      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
                 html += '    </button>';
             }
@@ -273,8 +273,58 @@ var NodesView = (function () {
         }
     }
 
+    /**
+     * Render visual marker timeline ruler
+     * @param {HTMLElement} container
+     * @param {Array} sequence
+     * @param {Function} onMarkerClick
+     */
+    function renderMarkerRuler(container, sequence, onMarkerClick) {
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!sequence || sequence.length === 0) return;
+
+        var maxTime = Math.max(1, sequence[sequence.length - 1].time || 0);
+
+        var track = document.createElement('div');
+        track.className = 'nodes-ruler-track';
+
+        sequence.forEach(function (node, index) {
+            var pct = Math.min(100, Math.max(0, ((node.time || 0) / maxTime) * 100));
+            var pin = document.createElement('div');
+            pin.className = 'nodes-ruler-pin type-' + (node.type || 'number');
+            pin.style.left = pct.toFixed(1) + '%';
+            pin.setAttribute('data-node-id', node.id);
+            pin.setAttribute('title', '#' + (index + 1) + ' [' + (node.type || 'NUM').toUpperCase() + ': ' + node.value + '] at ' + (node.time || 0) + 's');
+
+            var pinHtml = '<span class="ruler-pin-head">#' + (index + 1) + '</span><span class="ruler-pin-stem"></span>';
+            pin.innerHTML = pinHtml;
+
+            pin.addEventListener('click', function () {
+                if (onMarkerClick) onMarkerClick(node.id, index);
+            });
+
+            track.appendChild(pin);
+
+            // Hold bar
+            if (node.hold && parseFloat(node.hold) > 0) {
+                var holdPct = Math.min(100 - pct, ((parseFloat(node.hold) || 0) / maxTime) * 100);
+                var holdBar = document.createElement('div');
+                holdBar.className = 'nodes-ruler-hold';
+                holdBar.style.left = pct.toFixed(1) + '%';
+                holdBar.style.width = holdPct.toFixed(1) + '%';
+                holdBar.setAttribute('title', 'Hold pause: ' + node.hold + 's');
+                track.appendChild(holdBar);
+            }
+        });
+
+        container.appendChild(track);
+    }
+
     return {
         renderNodeList: renderNodeList,
+        renderMarkerRuler: renderMarkerRuler,
         highlightActiveNode: highlightActiveNode,
         formatTime: _formatTime
     };
@@ -283,3 +333,4 @@ var NodesView = (function () {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = NodesView;
 }
+

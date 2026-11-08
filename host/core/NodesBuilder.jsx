@@ -53,17 +53,24 @@ NOMRO.core.buildNodesSequence = function (comp, settings) {
         // 2. Add Controls
         NOMRO.core.addSlider(textLayer, 'NOMRO_Ease', settings.easeStrength !== undefined ? settings.easeStrength : 75);
 
-        // 3. Clear existing markers and add node markers
-        var markers = textLayer.property('Marker');
-        var startTime = textLayer.inPoint;
+        // 3. Clear existing markers and add node markers with visual colors and hold durations
+        if (NOMRO.markers && NOMRO.markers.writeNodeMarkers) {
+            NOMRO.markers.writeNodeMarkers(textLayer, nodes);
+        } else {
+            var markers = textLayer.property('Marker');
+            var startTime = textLayer.inPoint;
 
-        for (var i = 0; i < nodes.length; i++) {
-            var node = nodes[i];
-            var mTime = startTime + (parseFloat(node.time) || 0);
-            var payload = _buildMarkerPayload(node);
-            var markerVal = new MarkerValue(payload);
-            markerVal.comment = payload;
-            markers.setValueAtTime(mTime, markerVal);
+            for (var i = 0; i < nodes.length; i++) {
+                var node = nodes[i];
+                var mTime = startTime + (parseFloat(node.time) || 0);
+                var payload = _buildMarkerPayload(node);
+                var markerVal = new MarkerValue(payload);
+                markerVal.comment = payload;
+                if (node.hold && parseFloat(node.hold) > 0) {
+                    markerVal.duration = parseFloat(node.hold);
+                }
+                markers.setValueAtTime(mTime, markerVal);
+            }
         }
 
         // 4. Apply Expression
@@ -104,3 +111,4 @@ NOMRO.core.buildNodesSequence = function (comp, settings) {
         throw e;
     }
 };
+

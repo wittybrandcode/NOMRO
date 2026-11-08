@@ -204,3 +204,4 @@ var NodeSequence = (function () {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = NodeSequence;
 }
+

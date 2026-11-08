@@ -138,6 +138,7 @@ NOMRO.helpers.withUndoGroup = function (groupName, callback) {
 #include "services/LayerResolver.jsx"
 #include "services/SettingsExtractor.jsx"
 #include "services/LayerUpdater.jsx"
+#include "services/NodeMarkerService.jsx"
 #include "easing/EasingLib.jsx"
 #include "easing/EasingRegistry.jsx"
 #include "easing/EasingExpressionAdapter.jsx"
@@ -296,16 +297,21 @@ function updateLayer(data) {
 
             if (isNodes) {
                 if (settings.nodes && settings.nodes.length) {
-                    NOMRO.helpers.clearMarkers(layer);
-                    var markers = layer.property('Marker');
-                    var startTime = layer.inPoint;
-                    for (var ni = 0; ni < settings.nodes.length; ni++) {
-                        var nd = settings.nodes[ni];
-                        var mTime = startTime + (parseFloat(nd.time) || 0);
-                        var payload = (typeof _buildMarkerPayload === 'function') ? _buildMarkerPayload(nd) : ('NUM:' + (nd.value !== undefined ? nd.value : 0));
-                        var markerVal = new MarkerValue(payload);
-                        markerVal.comment = payload;
-                        markers.setValueAtTime(mTime, markerVal);
+                    if (NOMRO.markers && NOMRO.markers.writeNodeMarkers) {
+                        NOMRO.markers.writeNodeMarkers(layer, settings.nodes);
+                    } else {
+                        NOMRO.helpers.clearMarkers(layer);
+                        var markers = layer.property('Marker');
+                        var startTime = layer.inPoint;
+                        for (var ni = 0; ni < settings.nodes.length; ni++) {
+                            var nd = settings.nodes[ni];
+                            var mTime = startTime + (parseFloat(nd.time) || 0);
+                            var payload = (typeof _buildMarkerPayload === 'function') ? _buildMarkerPayload(nd) : ('NUM:' + (nd.value !== undefined ? nd.value : 0));
+                            var markerVal = new MarkerValue(payload);
+                            markerVal.comment = payload;
+                            if (nd.hold && parseFloat(nd.hold) > 0) markerVal.duration = parseFloat(nd.hold);
+                            markers.setValueAtTime(mTime, markerVal);
+                        }
                     }
                 }
                 expr = NOMRO.expressions.generateNodesExpression(settings);
@@ -362,6 +368,59 @@ function getCurrentCompTime() {
         return NOMRO.helpers.createResponse(true, { time: comp.time, fps: comp.frameRate });
     } catch (e) {
         NOMRO.helpers.logError('Get Current Comp Time', e);
+        return NOMRO.helpers.createResponse(false, null, e.message);
+    }
+}
+
+/**
+ * Add a single node marker to active layer at playhead or specified time
+ * @param {string|Object} data - { layerRef, node, time }
+ * @returns {string} JSON response
+ */
+function addNodeMarker(data) {
+    try {
+        if (typeof data === 'string') {
+            data = NOMRO.helpers.safeParse(data, {});
+        }
+        var comp = NOMRO.validators.getActiveComp();
+        var layer = NOMRO.validators.findLayerByReference(comp, data.layerRef || data);
+        var node = data.node || {};
+        var addedNode = NOMRO.markers.addNodeMarker(comp, layer, node, data.time);
+
+        // Re-evaluate Source Text expression
+        var settings = NOMRO.helpers.readExpressionConfig(layer);
+        var markers = NOMRO.markers.readNodeMarkers(layer);
+        var expr = NOMRO.expressions.generateNodesExpression(settings);
+        layer.property('Source Text').expression = expr;
+
+        return NOMRO.helpers.createResponse(true, {
+            node: addedNode,
+            markers: markers
+        });
+    } catch (e) {
+        NOMRO.helpers.logError('Add Node Marker', e);
+        return NOMRO.helpers.createResponse(false, null, e.message);
+    }
+}
+
+/**
+ * Read all node markers from active layer
+ * @param {string|Object} data - { layerRef }
+ * @returns {string} JSON response
+ */
+function syncNodeMarkers(data) {
+    try {
+        if (typeof data === 'string') {
+            data = NOMRO.helpers.safeParse(data, {});
+        }
+        var comp = NOMRO.validators.getActiveComp();
+        var layer = NOMRO.validators.findLayerByReference(comp, data.layerRef || data);
+        var markers = NOMRO.markers.readNodeMarkers(layer);
+        return NOMRO.helpers.createResponse(true, {
+            markers: markers
+        });
+    } catch (e) {
+        NOMRO.helpers.logError('Sync Node Markers', e);
         return NOMRO.helpers.createResponse(false, null, e.message);
     }
 }

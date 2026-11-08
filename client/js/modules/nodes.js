@@ -51,8 +51,15 @@ var NodesModule = (function () {
     function _cacheElements() {
         if (typeof document === 'undefined') return;
         _elements.nodesContainer = document.getElementById('nodes-list-container');
+        _elements.markerRuler = document.getElementById('nodes-marker-ruler-rail');
         _elements.btnAddNode = document.getElementById('btn-add-node');
         _elements.btnCapturePlayhead = document.getElementById('btn-capture-playhead-global');
+        _elements.btnSyncMarkersFromLayer = document.getElementById('btn-sync-markers-from-layer');
+        _elements.btnWriteMarkersToLayer = document.getElementById('btn-write-markers-to-layer');
+        _elements.quickMarkerType = document.getElementById('input-quick-marker-type');
+        _elements.quickMarkerVal = document.getElementById('input-quick-marker-val');
+        _elements.quickMarkerHold = document.getElementById('input-quick-marker-hold');
+        _elements.btnQuickAddMarker = document.getElementById('btn-quick-add-marker');
         _elements.previewNodesVal = document.getElementById('preview-nodes-val');
         _elements.previewNodesProgress = document.getElementById('preview-nodes-progress-fill');
         _elements.previewNodesStage = document.getElementById('preview-nodes-stage-indicator');
@@ -73,6 +80,40 @@ var NodesModule = (function () {
         if (_elements.btnAddNode) {
             _elements.btnAddNode.addEventListener('click', function () {
                 addNode();
+            });
+        }
+
+        // Quick Marker Add Button
+        if (_elements.btnQuickAddMarker) {
+            _elements.btnQuickAddMarker.addEventListener('click', function () {
+                quickAddMarker();
+            });
+        }
+
+        // Quick Marker Type Change (adjust placeholder)
+        if (_elements.quickMarkerType) {
+            _elements.quickMarkerType.addEventListener('change', function () {
+                var t = _elements.quickMarkerType.value;
+                if (_elements.quickMarkerVal) {
+                    if (t === 'time') _elements.quickMarkerVal.placeholder = '00:01:00';
+                    else if (t === 'text') _elements.quickMarkerVal.placeholder = 'GOAL!';
+                    else if (t === 'delta') _elements.quickMarkerVal.placeholder = '+100';
+                    else _elements.quickMarkerVal.placeholder = '1000';
+                }
+            });
+        }
+
+        // Sync Markers from Layer
+        if (_elements.btnSyncMarkersFromLayer) {
+            _elements.btnSyncMarkersFromLayer.addEventListener('click', function () {
+                syncMarkersFromLayer();
+            });
+        }
+
+        // Write Markers to Layer
+        if (_elements.btnWriteMarkersToLayer) {
+            _elements.btnWriteMarkersToLayer.addEventListener('click', function () {
+                writeMarkersToLayer();
             });
         }
 
@@ -121,9 +162,10 @@ var NodesModule = (function () {
     }
 
     /**
-     * Render nodes list view
+     * Render nodes list view and timeline marker ruler
      */
     function render() {
+        if (typeof document === 'undefined') return;
         if (!_elements.nodesContainer || typeof NodesView === 'undefined') return;
 
         NodesView.renderNodeList(_elements.nodesContainer, _state.nodes.sequence, {
@@ -133,6 +175,174 @@ var NodesModule = (function () {
                 captureCompPlayhead(nodeId);
             }
         });
+
+        if (_elements.markerRuler && NodesView.renderMarkerRuler) {
+            NodesView.renderMarkerRuler(_elements.markerRuler, _state.nodes.sequence, function (nodeId, index) {
+                if (typeof NodesView.highlightActiveNode === 'function') {
+                    NodesView.highlightActiveNode(_elements.nodesContainer, index);
+                }
+                var targetCard = _elements.nodesContainer.querySelector('[data-node-id="' + nodeId + '"]');
+                if (targetCard && targetCard.scrollIntoView) {
+                    targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        }
+    }
+
+    /**
+     * Quick add marker at current AE playhead time
+     */
+    function quickAddMarker() {
+        var type = _elements.quickMarkerType ? _elements.quickMarkerType.value : 'number';
+        var valStr = _elements.quickMarkerVal ? _elements.quickMarkerVal.value.trim() : '0';
+        var hold = _elements.quickMarkerHold ? (parseFloat(_elements.quickMarkerHold.value) || 0) : 0;
+
+        var val = valStr;
+        if (type === 'number') {
+            try {
+                if (/^[0-9+\-*/. ()]+$/.test(valStr)) {
+                    var evaluated = Function('"use strict";return (' + valStr + ')')();
+                    if (typeof evaluated === 'number' && !isNaN(evaluated)) val = evaluated;
+                } else {
+                    val = parseFloat(valStr) || 0;
+                }
+            } catch (e) {
+                val = parseFloat(valStr) || 0;
+            }
+        }
+
+        // Get playhead time from comp
+        if (typeof Bridge !== 'undefined' && Bridge.getCompPlayheadTime) {
+            Bridge.getCompPlayheadTime(function (err, compTime) {
+                var t = (!err && typeof compTime === 'number') ? parseFloat(compTime.toFixed(2)) : 0;
+                _insertAndSyncMarker({
+                    type: type,
+                    value: val,
+                    time: t,
+                    hold: hold,
+                    easing: _state.nodes.easing || 'smoothOut'
+                });
+            });
+        } else {
+            // Browser mock mode
+            var seq = _state.nodes.sequence;
+            var mockTime = seq.length > 0 ? (parseFloat(seq[seq.length - 1].time) || 0) + 2 : 0;
+            _insertAndSyncMarker({
+                type: type,
+                value: val,
+                time: mockTime,
+                hold: hold,
+                easing: 'smoothOut'
+            });
+        }
+    }
+
+    /**
+     * Insert marker into sequence and optionally sync with AE layer
+     * @private
+     */
+    function _insertAndSyncMarker(nodeData) {
+        var newNode = (typeof NodeSequence !== 'undefined')
+            ? NodeSequence.createNode(nodeData)
+            : nodeData;
+
+        // If a layer is linked in AE, add marker immediately onto AE layer
+        var linkedInfo = (typeof ModeModule !== 'undefined') ? ModeModule.getLinkedLayerInfo() : null;
+        if (linkedInfo && typeof Bridge !== 'undefined' && Bridge.addNodeMarker) {
+            Bridge.addNodeMarker(linkedInfo, newNode, newNode.time, function (err, result) {
+                if (!err) {
+                    if (typeof MessagesModule !== 'undefined') {
+                        MessagesModule.showToast('Marker #' + newNode.id + ' placed on layer at ' + newNode.time + 's', 'success');
+                    }
+                }
+            });
+        }
+
+        _state.nodes.sequence.push(newNode);
+        _state.nodes.sequence = (typeof NodeSequence !== 'undefined')
+            ? NodeSequence.sortNodes(_state.nodes.sequence)
+            : _state.nodes.sequence;
+
+        render();
+        updatePreviewAtTime(newNode.time);
+
+        if (typeof MessagesModule !== 'undefined') {
+            MessagesModule.showToast('Marker added at ' + newNode.time + 's', 'success');
+        }
+    }
+
+    /**
+     * Sync and read all markers directly from the active AE layer
+     */
+    function syncMarkersFromLayer() {
+        var linkedInfo = (typeof ModeModule !== 'undefined') ? ModeModule.getLinkedLayerInfo() : null;
+        if (!linkedInfo) {
+            if (typeof MessagesModule !== 'undefined') {
+                MessagesModule.showToast('Please select a NOMRO sequence layer first', 'warning');
+            }
+            return;
+        }
+
+        if (typeof Bridge !== 'undefined' && Bridge.syncNodeMarkers) {
+            Bridge.syncNodeMarkers(linkedInfo, function (err, markers) {
+                if (err || !markers || markers.length === 0) {
+                    if (typeof MessagesModule !== 'undefined') {
+                        MessagesModule.showToast('No markers found on selected layer', 'warning');
+                    }
+                    return;
+                }
+
+                var reconstructed = [];
+                for (var m = 0; m < markers.length; m++) {
+                    var mk = markers[m];
+                    var node = (typeof NodeSequence !== 'undefined')
+                        ? NodeSequence.fromMarkerComment(mk.comment, mk.time)
+                        : { type: 'number', value: mk.comment, time: mk.time, hold: 0 };
+                    if (mk.duration && parseFloat(mk.duration) > 0) {
+                        node.hold = parseFloat(mk.duration);
+                    }
+                    reconstructed.push(node);
+                }
+
+                if (reconstructed.length >= 2) {
+                    _state.nodes.sequence = (typeof NodeSequence !== 'undefined')
+                        ? NodeSequence.sortNodes(reconstructed)
+                        : reconstructed;
+                    render();
+                    resetPreview();
+                    if (typeof MessagesModule !== 'undefined') {
+                        MessagesModule.showToast('Synced ' + reconstructed.length + ' markers from layer!', 'success');
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Write/re-bake all UI markers to the active AE layer
+     */
+    function writeMarkersToLayer() {
+        var linkedInfo = (typeof ModeModule !== 'undefined') ? ModeModule.getLinkedLayerInfo() : null;
+        if (!linkedInfo) {
+            if (typeof MessagesModule !== 'undefined') {
+                MessagesModule.showToast('Please select or create a sequence layer first', 'warning');
+            }
+            return;
+        }
+
+        if (typeof Bridge !== 'undefined' && Bridge.updateLayer) {
+            Bridge.updateLayer(linkedInfo, getSettings(), function (err, result) {
+                if (err) {
+                    if (typeof MessagesModule !== 'undefined') {
+                        MessagesModule.showToast('Error writing markers to layer', 'error');
+                    }
+                } else {
+                    if (typeof MessagesModule !== 'undefined') {
+                        MessagesModule.showToast('All markers updated on layer!', 'success');
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -585,6 +795,9 @@ var NodesModule = (function () {
         init: init,
         render: render,
         addNode: addNode,
+        quickAddMarker: quickAddMarker,
+        syncMarkersFromLayer: syncMarkersFromLayer,
+        writeMarkersToLayer: writeMarkersToLayer,
         removeNode: removeNode,
         updateNode: updateNode,
         captureCompPlayhead: captureCompPlayhead,
