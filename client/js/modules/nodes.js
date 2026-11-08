@@ -58,8 +58,11 @@ var NodesModule = (function () {
         _elements.btnWriteMarkersToLayer = document.getElementById('btn-write-markers-to-layer');
         _elements.quickMarkerType = document.getElementById('input-quick-marker-type');
         _elements.quickMarkerVal = document.getElementById('input-quick-marker-val');
+        _elements.quickMarkerTime = document.getElementById('input-quick-marker-time');
+        _elements.btnQuickCaptureCTI = document.getElementById('btn-quick-capture-cti');
         _elements.quickMarkerHold = document.getElementById('input-quick-marker-hold');
         _elements.btnQuickAddMarker = document.getElementById('btn-quick-add-marker');
+        _elements.rulerSub = document.getElementById('nodes-ruler-sub');
         _elements.previewNodesVal = document.getElementById('preview-nodes-val');
         _elements.previewNodesProgress = document.getElementById('preview-nodes-progress-fill');
         _elements.previewNodesStage = document.getElementById('preview-nodes-stage-indicator');
@@ -87,6 +90,26 @@ var NodesModule = (function () {
         if (_elements.btnQuickAddMarker) {
             _elements.btnQuickAddMarker.addEventListener('click', function () {
                 quickAddMarker();
+            });
+        }
+
+        // Quick CTI Capture Button
+        if (_elements.btnQuickCaptureCTI) {
+            _elements.btnQuickCaptureCTI.addEventListener('click', function () {
+                if (typeof Bridge !== 'undefined' && Bridge.getCompPlayheadTime) {
+                    Bridge.getCompPlayheadTime(function (err, compTime) {
+                        if (!err && typeof compTime === 'number') {
+                            if (_elements.quickMarkerTime) {
+                                _elements.quickMarkerTime.value = parseFloat(compTime.toFixed(2));
+                            }
+                            if (typeof MessagesModule !== 'undefined') {
+                                MessagesModule.showToast('Playhead time captured: ' + compTime.toFixed(2) + 's', 'info');
+                            }
+                        }
+                    });
+                } else {
+                    if (_elements.quickMarkerTime) _elements.quickMarkerTime.value = 2.5;
+                }
             });
         }
 
@@ -185,7 +208,15 @@ var NodesModule = (function () {
                 if (targetCard && targetCard.scrollIntoView) {
                     targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
+            }, function (scrubTime) {
+                updatePreviewAtTime(scrubTime);
             });
+        }
+
+        if (_elements.rulerSub && _state.nodes && _state.nodes.sequence) {
+            var seq = _state.nodes.sequence;
+            var maxT = seq.length > 0 ? (seq[seq.length - 1].time || 0) : 0;
+            _elements.rulerSub.textContent = seq.length + ' Markers • ' + maxT.toFixed(1) + 's Total';
         }
     }
 
@@ -211,6 +242,22 @@ var NodesModule = (function () {
             }
         }
 
+        // Check if an explicit time was entered in input-quick-marker-time
+        var explicitTime = _elements.quickMarkerTime ? parseFloat(_elements.quickMarkerTime.value) : NaN;
+        if (!isNaN(explicitTime) && explicitTime >= 0) {
+            _insertAndSyncMarker({
+                type: type,
+                value: val,
+                time: parseFloat(explicitTime.toFixed(2)),
+                hold: hold,
+                easing: _state.nodes.easing || 'smoothOut'
+            });
+            if (_elements.quickMarkerTime) {
+                _elements.quickMarkerTime.value = (explicitTime + 2.0).toFixed(1);
+            }
+            return;
+        }
+
         // Get playhead time from comp
         if (typeof Bridge !== 'undefined' && Bridge.getCompPlayheadTime) {
             Bridge.getCompPlayheadTime(function (err, compTime) {
@@ -222,6 +269,9 @@ var NodesModule = (function () {
                     hold: hold,
                     easing: _state.nodes.easing || 'smoothOut'
                 });
+                if (_elements.quickMarkerTime) {
+                    _elements.quickMarkerTime.value = (t + 2.0).toFixed(1);
+                }
             });
         } else {
             // Browser mock mode
@@ -234,6 +284,9 @@ var NodesModule = (function () {
                 hold: hold,
                 easing: 'smoothOut'
             });
+            if (_elements.quickMarkerTime) {
+                _elements.quickMarkerTime.value = (mockTime + 2.0).toFixed(1);
+            }
         }
     }
 
@@ -667,6 +720,15 @@ var NodesModule = (function () {
 
         if (typeof NodesView !== 'undefined' && _elements.nodesContainer) {
             NodesView.highlightActiveNode(_elements.nodesContainer, res.activeIndex);
+        }
+
+        // Smoothly position timeline ruler playhead needle
+        var needle = _elements.markerRuler ? _elements.markerRuler.querySelector('.ruler-playhead') : null;
+        if (needle) {
+            var seqList = _state.nodes.sequence;
+            var maxT = (seqList && seqList.length > 0) ? Math.max(0.001, seqList[seqList.length - 1].time || 0) : 1;
+            var normPct = Math.min(100, Math.max(0, (t / maxT) * 100));
+            needle.style.left = normPct.toFixed(2) + '%';
         }
     }
 

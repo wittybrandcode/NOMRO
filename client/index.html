@@ -835,9 +835,9 @@
             <!-- Nodes Tab Panel -->
             <section class="panel" id="panel-nodes">
 
-                <!-- 1. Live Preview Card -->
+                <!-- 1. Live Studio Preview & Interactive Ruler Card -->
                 <div class="card nodes-preview-card">
-                    <div class="nodes-preview-stage" title="Multi-Waypoint Live Preview (معاينة حية للمسار)">
+                    <div class="nodes-preview-stage" title="Multi-Waypoint Live Preview (معاينة حية لمسار الحركة)">
                         <span class="preview-nodes-number" id="preview-nodes-val">0</span>
                         <div class="preview-nodes-progress-rail">
                             <div class="preview-nodes-progress-fill" id="preview-nodes-progress-fill"></div>
@@ -845,72 +845,75 @@
                         <span class="preview-nodes-stage-indicator" id="preview-nodes-stage-indicator">Node 1 of 3 (0.0s)</span>
                     </div>
 
+                    <!-- Visual Marker Timeline Ruler (مسطرة مسار الماركرات البصرية) -->
+                    <div class="nodes-marker-ruler-box" id="nodes-marker-ruler-box" title="Visual Marker Track (مسار الماركرات الزمني)">
+                        <div class="nodes-ruler-label-row">
+                            <span class="nodes-ruler-title">TIMELINE MARKERS</span>
+                            <span class="nodes-ruler-sub" id="nodes-ruler-sub">3 Markers</span>
+                        </div>
+                        <div class="nodes-marker-ruler-rail" id="nodes-marker-ruler-rail" title="Click anywhere on ruler to scrub (انقر في أي مكان لتحريك المؤشر)">
+                            <!-- Rendered by NodesView.renderMarkerRuler with .ruler-playhead -->
+                        </div>
+                    </div>
+
+                    <!-- Transport & Quick Formatting Controls -->
                     <div class="preview-controls-row">
-                        <button class="btn-preview" id="nodes-reset-preview" title="Reset Preview (إعادة ضبط المعاينة)">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="1 4 1 10 7 10"></polyline>
-                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-                            </svg>
-                        </button>
-                        <button class="btn-preview btn-preview-play" id="nodes-play-preview" title="Play Preview (تشغيل المعاينة الحية)">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                            </svg>
-                        </button>
-                        <button class="btn-preview btn-preview-stop" id="nodes-stop-preview" title="Stop Preview (إيقاف المعاينة)" style="display: none;">
-                            <svg height="14" width="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="6" y="4" width="4" height="16"></rect>
-                                <rect x="14" y="4" width="4" height="16"></rect>
-                            </svg>
-                        </button>
+                        <div class="preview-controls-left">
+                            <button class="btn-preview" id="nodes-reset-preview" title="Reset Preview (إعادة ضبط المعاينة)">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="1 4 1 10 7 10"></polyline>
+                                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                                </svg>
+                            </button>
+                            <button class="btn-preview btn-preview-play" id="nodes-play-preview" title="Play Preview (تشغيل المعاينة الحية)">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </button>
+                            <button class="btn-preview btn-preview-stop" id="nodes-stop-preview" title="Stop Preview (إيقاف المعاينة)" style="display: none;">
+                                <svg height="14" width="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="6" y="4" width="4" height="16"></rect>
+                                    <rect x="14" y="4" width="4" height="16"></rect>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="preview-controls-right">
+                            <button type="button" class="btn-node-toolbar" id="nodes-toggle-monospace-btn" title="Toggle Monospaced Font (خط أحادي العرض لمنع الاهتزاز)">
+                                <span>[M]</span>
+                            </button>
+                            <button type="button" class="btn-node-toolbar active" id="nodes-toggle-commas-btn" title="Toggle Thousand Commas (تفعيل/تعطيل فواصل الآلاف)">
+                                <span>1,000</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 2. Visual Marker Timeline Ruler (مسطرة مسار الماركرات البصرية) -->
-                <div class="nodes-marker-ruler-box" id="nodes-marker-ruler-box" title="Visual Marker Track (مسار الماركرات الزمني)">
-                    <div class="nodes-ruler-label-row">
-                        <span class="nodes-ruler-title">TIMELINE MARKERS</span>
-                        <span class="nodes-ruler-sub" id="nodes-ruler-sub">3 Markers</span>
-                    </div>
-                    <div class="nodes-marker-ruler-rail" id="nodes-marker-ruler-rail">
-                        <!-- Rendered by NodesView.renderMarkerRuler -->
-                    </div>
-                </div>
-
-                <!-- 3. Quick Marker Creator Card (شريط إضافة الماركر الذكي) -->
+                <!-- 2. Smart Quick Marker Creator & Layer Sync Hub -->
                 <div class="card card-compact nodes-marker-creator">
-                    <div class="card-header-mini" title="Add Marker at Current Time (إضافة ماركر مباشر عند مؤشر التايملاين)">
+                    <div class="card-header-mini" title="Marker Waypoint Quick Bar & Layer Sync (إضافة ماركرات ومزامنة الطبقة)">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"></path>
                             <circle cx="12" cy="10" r="3"></circle>
                         </svg>
-                        <span>Add Marker at Playhead (CTI)</span>
+                        <span>Add Marker Waypoint & Sync</span>
                     </div>
-                    <div class="marker-quick-row">
-                        <select class="select-compact" id="input-quick-marker-type" title="Node Type (نوع العقدة)">
-                            <option value="number">Number</option>
-                            <option value="time">Time</option>
-                            <option value="text">Text</option>
-                            <option value="delta">Delta (±)</option>
-                        </select>
-                        <input type="text" class="input-field-compact" id="input-quick-marker-val" placeholder="Value..." value="1000" title="Marker Value (قيمة الماركر)">
-                        <div class="input-unit-compact" title="Hold Duration in Seconds (مدة الثبات)">
-                            <input type="number" class="input-field-compact input-short" id="input-quick-marker-hold" placeholder="0" step="0.5" min="0" value="0">
-                            <span>s</span>
-                        </div>
-                        <button type="button" class="btn-primary-compact btn-add-marker-quick" id="btn-quick-add-marker" title="Add Marker at Current Playhead Time (إضافة الماركر فوراً)">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            <span>+ Marker</span>
-                        </button>
-                    </div>
-                </div>
 
-                <!-- 4. Nodes Action Toolbar -->
-                <div class="nodes-toolbar">
-                    <div class="nodes-toolbar-left">
+                    <!-- Row A: Comp Sync Toolbar -->
+                    <div class="marker-sync-row">
+                        <button type="button" class="btn-node-toolbar" id="btn-sync-markers-from-layer" title="Sync & Read Markers from Selected Layer (قراءة الماركرات من الطبقة المحددة)">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
+                            <span>Read AE</span>
+                        </button>
+                        <button type="button" class="btn-node-toolbar" id="btn-write-markers-to-layer" title="Bake / Update All Markers on AE Layer (تحديث وتطبيق الماركرات على الطبقة)">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            </svg>
+                            <span>Bake AE</span>
+                        </button>
                         <button type="button" class="btn-node-toolbar" id="btn-capture-playhead-global" title="Capture Playhead Time from Comp (التقاط توقيت المؤشر)">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"></circle>
@@ -918,27 +921,40 @@
                             </svg>
                             <span>Capture CTI</span>
                         </button>
-                        <button type="button" class="btn-node-toolbar" id="btn-sync-markers-from-layer" title="Sync & Read Markers from Selected Layer (مزامنة الماركرات من الطبقة)">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="23 4 23 10 17 10"></polyline>
-                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                            </svg>
-                            <span>Sync AE</span>
-                        </button>
-                        <button type="button" class="btn-node-toolbar" id="btn-write-markers-to-layer" title="Bake / Write All Markers to Layer (تحديث الماركرات على الطبقة)">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                            </svg>
-                            <span>Write AE</span>
-                        </button>
                     </div>
-                    <div class="nodes-toolbar-right">
-                        <button type="button" class="btn-node-toolbar" id="nodes-toggle-monospace-btn" title="Toggle Monospaced Font (خط أحادي العرض)">
-                            <span>[M]</span>
+
+                    <!-- Row B: Fast Quick Marker Input Strip -->
+                    <div class="marker-quick-row">
+                        <select class="select-compact" id="input-quick-marker-type" title="Node Type (نوع العقدة)">
+                            <option value="number">Number</option>
+                            <option value="time">Time</option>
+                            <option value="text">Text</option>
+                            <option value="delta">Delta (±)</option>
+                        </select>
+                        <div class="quick-val-box">
+                            <input type="text" class="input-field-compact" id="input-quick-marker-val" placeholder="Value..." value="1000" title="Marker Value (قيمة الماركر)">
+                        </div>
+                        <div class="input-unit-compact quick-time-box" title="Marker Time in Seconds (وقت الماركر بالثواني)">
+                            <span class="node-time-icon">⏱️</span>
+                            <input type="number" class="input-short" id="input-quick-marker-time" placeholder="0.0" step="0.5" min="0" value="4.0" title="Marker Time (توقيت الماركر)">
+                            <span>s</span>
+                        </div>
+                        <button type="button" class="btn-node-icon" id="btn-quick-capture-cti" title="Get CTI from AE (جلب وقت المؤشر)">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
                         </button>
-                        <button type="button" class="btn-node-toolbar active" id="nodes-toggle-commas-btn" title="Toggle Thousand Commas (فواصل الآلاف)">
-                            <span>1,000</span>
+                        <div class="input-unit-compact" title="Hold Duration in Seconds (مدة الثبات)">
+                            <input type="number" class="input-short" id="input-quick-marker-hold" placeholder="0" step="0.5" min="0" value="0" title="Hold Pause (مدة الثبات)">
+                            <span>s</span>
+                        </div>
+                        <button type="button" class="btn-primary-compact btn-add-marker-quick" id="btn-quick-add-marker" title="Add Marker at Specified Time (إضافة الماركر)">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>+ Marker</span>
                         </button>
                     </div>
                 </div>

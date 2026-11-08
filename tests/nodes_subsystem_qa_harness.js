@@ -315,6 +315,57 @@ runTest('compact.css contains styling for marker ruler and quick creator', funct
     assert.ok(cssContent.indexOf('.nodes-marker-ruler-box') !== -1);
     assert.ok(cssContent.indexOf('.nodes-ruler-pin') !== -1);
     assert.ok(cssContent.indexOf('.btn-add-marker-quick') !== -1);
+    assert.ok(cssContent.indexOf('.select-compact') !== -1);
+    assert.ok(cssContent.indexOf('.input-unit-compact') !== -1);
+    assert.ok(cssContent.indexOf('.input-short') !== -1);
+    assert.ok(cssContent.indexOf('.ruler-playhead') !== -1);
+});
+
+runTest('index.html contains #input-quick-marker-time and #btn-quick-capture-cti', function () {
+    assert.ok(htmlContent.indexOf('id="input-quick-marker-time"') !== -1);
+    assert.ok(htmlContent.indexOf('id="btn-quick-capture-cti"') !== -1);
+});
+
+runTest('NodesView renders high-density card rows and ruler playhead needle', function () {
+    var NodesView = require(path.join(BASE_DIR, 'client/js/views/NodesView.js'));
+    assert.strictEqual(typeof NodesView.renderNodeList, 'function');
+    assert.strictEqual(typeof NodesView.renderMarkerRuler, 'function');
+
+    // Minimal Node.js mock for document
+    global.document = {
+        createElement: function (tag) {
+            return {
+                tagName: tag,
+                className: '',
+                style: {},
+                innerHTML: '',
+                setAttribute: function (k, v) { this[k] = v; },
+                getAttribute: function (k) { return this[k]; },
+                appendChild: function (child) { this.children = this.children || []; this.children.push(child); },
+                addEventListener: function () {},
+                querySelector: function () { return null; },
+                querySelectorAll: function () { return []; }
+            };
+        }
+    };
+
+    // Test renderNodeList with mock container
+    var mockListContainer = { innerHTML: '', appendChild: function (el) { this.children.push(el); }, children: [] };
+    var mockSeq = [
+        { id: 'n1', type: 'number', value: 100, time: 0, hold: 0.5, easing: 'smoothOut' },
+        { id: 'n2', type: 'time', value: '00:01:00', time: 2, hold: 0, easing: 'linear' }
+    ];
+    NodesView.renderNodeList(mockListContainer, mockSeq, {});
+    assert.ok(mockListContainer.children.length >= 2);
+    assert.ok(mockListContainer.children[0].innerHTML.indexOf('node-row-primary') !== -1);
+    assert.ok(mockListContainer.children[0].innerHTML.indexOf('node-row-secondary') !== -1);
+
+    // Test renderMarkerRuler with mock container
+    var mockRulerContainer = { innerHTML: '', appendChild: function (el) { this.children.push(el); }, children: [] };
+    NodesView.renderMarkerRuler(mockRulerContainer, mockSeq, null);
+    assert.ok(mockRulerContainer.children.length === 1);
+    var trackEl = mockRulerContainer.children[0];
+    assert.strictEqual(trackEl.className, 'nodes-ruler-track');
 });
 
 runTest('NodesModule exports marker system methods', function () {

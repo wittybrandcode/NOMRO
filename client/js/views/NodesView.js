@@ -62,76 +62,61 @@ var NodesView = (function () {
             var typeColorClass = 'type-' + (node.type || 'number');
 
             var html = '';
-            // Header bar
-            html += '<div class="node-card-header">';
-            html += '  <div class="node-header-left">';
-            html += '    <span class="node-badge ' + typeColorClass + '">📍 M#' + (index + 1) + '</span>';
-            html += '    <span class="node-type-label">' + (node.type ? node.type.toUpperCase() : 'NUM') + '</span>';
+            // Elevated High-Density Primary Row: Type, Value, Time, CTI & Delete
+            html += '<div class="node-row-primary">';
+            html += '  <span class="node-badge ' + typeColorClass + '" title="Waypoint Marker #' + (index + 1) + '">📍 #' + (index + 1) + '</span>';
+            html += '  <select class="node-select-type select-compact" data-field="type" title="Marker Value Type (نوع القيمة)">';
+            html += '    <option value="number"' + (node.type === 'number' ? ' selected' : '') + '>Number</option>';
+            html += '    <option value="time"' + (node.type === 'time' ? ' selected' : '') + '>Time</option>';
+            html += '    <option value="text"' + (node.type === 'text' ? ' selected' : '') + '>Text</option>';
+            html += '    <option value="delta"' + (node.type === 'delta' ? ' selected' : '') + '>Delta (±)</option>';
+            html += '  </select>';
+
+            var valPlaceholder = node.type === 'time' ? '00:01:00' : (node.type === 'text' ? 'Text label' : '0');
+            html += '  <div class="node-val-wrapper" title="Target Value (القيمة المستهدفة)">';
+            html += '    <input type="text" class="node-input-val input-field-compact" data-field="value" value="' + _escapeHtml(node.value) + '" placeholder="' + valPlaceholder + '">';
             html += '  </div>';
-            html += '  <div class="node-header-right">';
-            html += '    <div class="node-time-box" title="Marker Time in Seconds">';
-            html += '      <span class="node-time-icon">⏱️</span>';
-            html += '      <input type="number" class="node-input-time" data-field="time" step="0.1" min="0" value="' + parseFloat((node.time || 0).toFixed(2)) + '" title="Waypoint Time (seconds)">';
-            html += '      <span class="node-unit">s</span>';
-            html += '    </div>';
+
+            html += '  <div class="node-time-wrapper input-unit-compact" title="Marker Time in Seconds (توقيت الماركر بالثواني)">';
+            html += '    <span class="node-time-icon">⏱️</span>';
+            html += '    <input type="number" class="node-input-time input-short" data-field="time" step="0.1" min="0" value="' + parseFloat((node.time || 0).toFixed(2)) + '">';
+            html += '    <span class="node-unit">s</span>';
+            html += '  </div>';
+
             if (handlers.onCaptureTime) {
-                html += '    <button type="button" class="btn-node-icon btn-capture-time" title="Capture Playhead Time from Comp (التقاط توقيت المؤشر)" data-action="capture">';
-                html += '      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
-                html += '    </button>';
+                html += '  <button type="button" class="btn-node-icon btn-capture-time" title="Capture CTI Time from Comp (التقاط توقيت المؤشر)" data-action="capture">';
+                html += '    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
+                html += '  </button>';
             }
+
             if (!isMinNodes) {
-                html += '    <button type="button" class="btn-node-icon btn-delete-node" title="Delete Marker" data-action="delete">';
-                html += '      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
-                html += '    </button>';
+                html += '  <button type="button" class="btn-node-icon btn-delete-node" title="Delete Marker (حذف الماركر)" data-action="delete">';
+                html += '    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+                html += '  </button>';
             }
-            html += '  </div>';
             html += '</div>';
 
-            // Controls Body
-            html += '<div class="node-card-body">';
-
-            // Row 1: Type Selector & Value Input
-            html += '  <div class="node-field-row">';
-            html += '    <div class="node-col node-col-type">';
-            html += '      <label class="node-label">Type</label>';
-            html += '      <select class="node-select-type" data-field="type">';
-            html += '        <option value="number"' + (node.type === 'number' ? ' selected' : '') + '>Number</option>';
-            html += '        <option value="time"' + (node.type === 'time' ? ' selected' : '') + '>Time</option>';
-            html += '        <option value="text"' + (node.type === 'text' ? ' selected' : '') + '>Text</option>';
-            html += '        <option value="delta"' + (node.type === 'delta' ? ' selected' : '') + '>Delta (±)</option>';
-            html += '      </select>';
-            html += '    </div>';
-
-            html += '    <div class="node-col node-col-val">';
-            html += '      <label class="node-label">Value</label>';
-            var valPlaceholder = node.type === 'time' ? '00:01:00' : (node.type === 'text' ? 'Text label' : '0');
-            html += '      <input type="text" class="node-input-val" data-field="value" value="' + _escapeHtml(node.value) + '" placeholder="' + valPlaceholder + '">';
+            // Elevated Secondary Row: Hold Pause Duration & Easing Curve
+            html += '<div class="node-row-secondary">';
+            html += '  <div class="node-param-chip" title="Hold Pause Duration at this Waypoint (فترة الثبات بعد الوصول)">';
+            html += '    <span class="node-param-label">Hold</span>';
+            html += '    <div class="input-unit-compact param-unit-compact">';
+            html += '      <input type="number" class="node-input-hold input-short" data-field="hold" step="0.1" min="0" value="' + (parseFloat(node.hold) || 0) + '" placeholder="0.0">';
+            html += '      <span class="node-unit">s</span>';
             html += '    </div>';
             html += '  </div>';
 
-            // Row 2: Hold Duration & Segment Easing
-            html += '  <div class="node-field-row node-field-secondary">';
-            html += '    <div class="node-col">';
-            html += '      <label class="node-label">Hold Pause</label>';
-            html += '      <div class="node-input-unit-group">';
-            html += '        <input type="number" class="node-input-hold" data-field="hold" step="0.1" min="0" value="' + (parseFloat(node.hold) || 0) + '" placeholder="0.0">';
-            html += '        <span class="node-unit">s</span>';
-            html += '      </div>';
-            html += '    </div>';
-
-            html += '    <div class="node-col">';
-            html += '      <label class="node-label">Transition Ease</label>';
-            html += '      <select class="node-select-ease" data-field="easing">';
-            html += '        <option value="smoothOut"' + (node.easing === 'smoothOut' ? ' selected' : '') + '>Smooth Out</option>';
-            html += '        <option value="snappyOut"' + (node.easing === 'snappyOut' ? ' selected' : '') + '>Snappy Out</option>';
-            html += '        <option value="dramaticOut"' + (node.easing === 'dramaticOut' ? ' selected' : '') + '>Dramatic Out</option>';
-            html += '        <option value="bounceOut"' + (node.easing === 'bounceOut' ? ' selected' : '') + '>Bounce Out</option>';
-            html += '        <option value="elasticOut"' + (node.easing === 'elasticOut' ? ' selected' : '') + '>Elastic Out</option>';
-            html += '        <option value="linear"' + (node.easing === 'linear' ? ' selected' : '') + '>Linear</option>';
-            html += '      </select>';
-            html += '    </div>';
+            html += '  <div class="node-param-chip node-ease-chip" title="Transition Easing to Next Waypoint (منحنى الحركة نحو المحطة التالية)">';
+            html += '    <span class="node-param-label">Ease</span>';
+            html += '    <select class="node-select-ease select-compact" data-field="easing">';
+            html += '      <option value="smoothOut"' + (node.easing === 'smoothOut' ? ' selected' : '') + '>Smooth Out</option>';
+            html += '      <option value="snappyOut"' + (node.easing === 'snappyOut' ? ' selected' : '') + '>Snappy Out</option>';
+            html += '      <option value="dramaticOut"' + (node.easing === 'dramaticOut' ? ' selected' : '') + '>Dramatic Out</option>';
+            html += '      <option value="bounceOut"' + (node.easing === 'bounceOut' ? ' selected' : '') + '>Bounce Out</option>';
+            html += '      <option value="elasticOut"' + (node.easing === 'elasticOut' ? ' selected' : '') + '>Elastic Out</option>';
+            html += '      <option value="linear"' + (node.easing === 'linear' ? ' selected' : '') + '>Linear</option>';
+            html += '    </select>';
             html += '  </div>';
-
             html += '</div>';
 
             card.innerHTML = html;
@@ -278,8 +263,9 @@ var NodesView = (function () {
      * @param {HTMLElement} container
      * @param {Array} sequence
      * @param {Function} onMarkerClick
+     * @param {Function} [onScrub]
      */
-    function renderMarkerRuler(container, sequence, onMarkerClick) {
+    function renderMarkerRuler(container, sequence, onMarkerClick, onScrub) {
         if (!container) return;
         container.innerHTML = '';
 
@@ -290,18 +276,26 @@ var NodesView = (function () {
         var track = document.createElement('div');
         track.className = 'nodes-ruler-track';
 
+        // Playhead indicator needle
+        var playhead = document.createElement('div');
+        playhead.className = 'ruler-playhead';
+        playhead.style.left = '0%';
+        track.appendChild(playhead);
+
         sequence.forEach(function (node, index) {
             var pct = Math.min(100, Math.max(0, ((node.time || 0) / maxTime) * 100));
             var pin = document.createElement('div');
             pin.className = 'nodes-ruler-pin type-' + (node.type || 'number');
-            pin.style.left = pct.toFixed(1) + '%';
+            pin.style.left = pct.toFixed(2) + '%';
             pin.setAttribute('data-node-id', node.id);
+            pin.setAttribute('data-node-index', index);
             pin.setAttribute('title', '#' + (index + 1) + ' [' + (node.type || 'NUM').toUpperCase() + ': ' + node.value + '] at ' + (node.time || 0) + 's');
 
             var pinHtml = '<span class="ruler-pin-head">#' + (index + 1) + '</span><span class="ruler-pin-stem"></span>';
             pin.innerHTML = pinHtml;
 
-            pin.addEventListener('click', function () {
+            pin.addEventListener('click', function (e) {
+                e.stopPropagation();
                 if (onMarkerClick) onMarkerClick(node.id, index);
             });
 
@@ -312,12 +306,23 @@ var NodesView = (function () {
                 var holdPct = Math.min(100 - pct, ((parseFloat(node.hold) || 0) / maxTime) * 100);
                 var holdBar = document.createElement('div');
                 holdBar.className = 'nodes-ruler-hold';
-                holdBar.style.left = pct.toFixed(1) + '%';
-                holdBar.style.width = holdPct.toFixed(1) + '%';
+                holdBar.style.left = pct.toFixed(2) + '%';
+                holdBar.style.width = holdPct.toFixed(2) + '%';
                 holdBar.setAttribute('title', 'Hold pause: ' + node.hold + 's');
                 track.appendChild(holdBar);
             }
         });
+
+        if (typeof onScrub === 'function') {
+            container.onclick = function (e) {
+                if (e.target.closest('.nodes-ruler-pin')) return;
+                var rect = container.getBoundingClientRect();
+                var clickX = e.clientX - rect.left - 14;
+                var availWidth = Math.max(1, rect.width - 28);
+                var pct = Math.max(0, Math.min(1, clickX / availWidth));
+                onScrub(pct * maxTime);
+            };
+        }
 
         container.appendChild(track);
     }

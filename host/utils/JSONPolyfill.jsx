@@ -1,4 +1,4 @@
-﻿/**
+/**
  * NOMRO - JSON & String Polyfills for ExtendScript (ES3)
  * @module utils/JSONPolyfill
  */
