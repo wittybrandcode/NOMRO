@@ -26,6 +26,18 @@ NOMRO.utils.getActiveComp = function () {
 };
 
 /**
+ * Get current playhead time in active composition
+ * @returns {number} Time in seconds
+ */
+NOMRO.utils.getCompPlayheadTime = function () {
+    var comp = NOMRO.utils.getActiveComp();
+    if (comp) {
+        return comp.time;
+    }
+    return 0;
+};
+
+/**
  * Log message to console
  * @param {string} message
  */

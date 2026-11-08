@@ -49,6 +49,8 @@ var SyncModule = (function () {
         // Switch to correct tab based on counterType
         if (settings.counterType === 'timer') {
             if (_callbacks.switchTab) _callbacks.switchTab('timer');
+        } else if (settings.counterType === 'nodes') {
+            if (_callbacks.switchTab) _callbacks.switchTab('nodes');
         } else {
             if (_callbacks.switchTab) _callbacks.switchTab('counter');
         }
@@ -97,12 +99,15 @@ var SyncModule = (function () {
             }
         }
 
-        // 2. Counter Tab Settings
-        if (settings.counterType !== 'timer') {
-            _applyCounterSettings(settings);
-        } else {
-            // 3. Timer Tab Settings
+        // 2. Tab Settings Application
+        if (settings.counterType === 'nodes') {
+            if (typeof NodesModule !== 'undefined' && NodesModule.applySettings) {
+                NodesModule.applySettings(settings);
+            }
+        } else if (settings.counterType === 'timer') {
             _applyTimerSettings(settings);
+        } else {
+            _applyCounterSettings(settings);
         }
 
         // Native Properties (Logging)

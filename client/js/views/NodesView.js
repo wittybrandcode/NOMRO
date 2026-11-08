@@ -1,0 +1,285 @@
+/**
+ * NOMRO - Nodes View Component
+ * Renders interactive node cards, chain visualization, and multi-node preview
+ * @module views/NodesView
+ */
+var NodesView = (function () {
+    'use strict';
+
+    /**
+     * Escape HTML string
+     * @private
+     */
+    function _escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    /**
+     * Format time display helper (seconds to 00:00:00 or s)
+     * @param {number} sec
+     * @returns {string}
+     */
+    function _formatTime(sec) {
+        sec = Math.max(0, sec || 0);
+        var h = Math.floor(sec / 3600);
+        var m = Math.floor((sec % 3600) / 60);
+        var s = Math.floor(sec % 60);
+        var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+        return pad(h) + ':' + pad(m) + ':' + pad(s);
+    }
+
+    /**
+     * Render the list of node cards
+     * @param {HTMLElement} container
+     * @param {Array} sequence
+     * @param {Object} handlers
+     */
+    function renderNodeList(container, sequence, handlers) {
+        if (!container) return;
+        handlers = handlers || {};
+
+        container.innerHTML = '';
+
+        if (!sequence || sequence.length === 0) {
+            container.innerHTML = '<div class="nodes-empty">No nodes in sequence. Click "+ Add Node" to begin.</div>';
+            return;
+        }
+
+        var isMinNodes = sequence.length <= 2;
+
+        sequence.forEach(function (node, index) {
+            var card = document.createElement('div');
+            card.className = 'node-card' + (node.active ? ' node-card-active' : '');
+            card.setAttribute('data-node-id', node.id);
+            card.setAttribute('data-node-index', index);
+
+            var typeColorClass = 'type-' + (node.type || 'number');
+
+            var html = '';
+            // Header bar
+            html += '<div class="node-card-header">';
+            html += '  <div class="node-header-left">';
+            html += '    <span class="node-badge ' + typeColorClass + '">#' + (index + 1) + '</span>';
+            html += '    <span class="node-type-label">' + (node.type ? node.type.toUpperCase() : 'NUM') + '</span>';
+            html += '  </div>';
+            html += '  <div class="node-header-right">';
+            html += '    <div class="node-time-box" title="Waypoint Time in Seconds">';
+            html += '      <span class="node-time-icon">⏱️</span>';
+            html += '      <input type="number" class="node-input-time" data-field="time" step="0.1" min="0" value="' + parseFloat((node.time || 0).toFixed(2)) + '" title="Waypoint Time (seconds)">';
+            html += '      <span class="node-unit">s</span>';
+            html += '    </div>';
+            if (handlers.onCaptureTime) {
+                html += '    <button type="button" class="btn-node-icon btn-capture-time" title="Capture Playhead Time from Comp" data-action="capture">';
+                html += '      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
+                html += '    </button>';
+            }
+            if (!isMinNodes) {
+                html += '    <button type="button" class="btn-node-icon btn-delete-node" title="Delete Node" data-action="delete">';
+                html += '      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+                html += '    </button>';
+            }
+            html += '  </div>';
+            html += '</div>';
+
+            // Controls Body
+            html += '<div class="node-card-body">';
+
+            // Row 1: Type Selector & Value Input
+            html += '  <div class="node-field-row">';
+            html += '    <div class="node-col node-col-type">';
+            html += '      <label class="node-label">Type</label>';
+            html += '      <select class="node-select-type" data-field="type">';
+            html += '        <option value="number"' + (node.type === 'number' ? ' selected' : '') + '>Number</option>';
+            html += '        <option value="time"' + (node.type === 'time' ? ' selected' : '') + '>Time</option>';
+            html += '        <option value="text"' + (node.type === 'text' ? ' selected' : '') + '>Text</option>';
+            html += '        <option value="delta"' + (node.type === 'delta' ? ' selected' : '') + '>Delta (±)</option>';
+            html += '      </select>';
+            html += '    </div>';
+
+            html += '    <div class="node-col node-col-val">';
+            html += '      <label class="node-label">Value</label>';
+            var valPlaceholder = node.type === 'time' ? '00:01:00' : (node.type === 'text' ? 'Text label' : '0');
+            html += '      <input type="text" class="node-input-val" data-field="value" value="' + _escapeHtml(node.value) + '" placeholder="' + valPlaceholder + '">';
+            html += '    </div>';
+            html += '  </div>';
+
+            // Row 2: Hold Duration & Segment Easing
+            html += '  <div class="node-field-row node-field-secondary">';
+            html += '    <div class="node-col">';
+            html += '      <label class="node-label">Hold Pause</label>';
+            html += '      <div class="node-input-unit-group">';
+            html += '        <input type="number" class="node-input-hold" data-field="hold" step="0.1" min="0" value="' + (parseFloat(node.hold) || 0) + '" placeholder="0.0">';
+            html += '        <span class="node-unit">s</span>';
+            html += '      </div>';
+            html += '    </div>';
+
+            html += '    <div class="node-col">';
+            html += '      <label class="node-label">Transition Ease</label>';
+            html += '      <select class="node-select-ease" data-field="easing">';
+            html += '        <option value="smoothOut"' + (node.easing === 'smoothOut' ? ' selected' : '') + '>Smooth Out</option>';
+            html += '        <option value="snappyOut"' + (node.easing === 'snappyOut' ? ' selected' : '') + '>Snappy Out</option>';
+            html += '        <option value="dramaticOut"' + (node.easing === 'dramaticOut' ? ' selected' : '') + '>Dramatic Out</option>';
+            html += '        <option value="bounceOut"' + (node.easing === 'bounceOut' ? ' selected' : '') + '>Bounce Out</option>';
+            html += '        <option value="elasticOut"' + (node.easing === 'elasticOut' ? ' selected' : '') + '>Elastic Out</option>';
+            html += '        <option value="linear"' + (node.easing === 'linear' ? ' selected' : '') + '>Linear</option>';
+            html += '      </select>';
+            html += '    </div>';
+            html += '  </div>';
+
+            html += '</div>';
+
+            card.innerHTML = html;
+
+            // Attach event listeners
+            _attachCardListeners(card, node, index, sequence, handlers);
+
+            container.appendChild(card);
+
+            // Add connector indicator if not last
+            if (index < sequence.length - 1) {
+                var nextNode = sequence[index + 1];
+                var deltaT = Math.max(0, (nextNode.time || 0) - (node.time || 0)).toFixed(1);
+                var connector = document.createElement('div');
+                connector.className = 'node-connector';
+                connector.innerHTML = '<div class="node-connector-line"></div><span class="node-connector-delta">➔ Δ ' + deltaT + 's</span><div class="node-connector-line"></div>';
+                container.appendChild(connector);
+            }
+        });
+    }
+
+    /**
+     * Attach event listeners to card elements
+     * @private
+     */
+    function _attachCardListeners(card, node, index, sequence, handlers) {
+        // Change Type
+        var typeSelect = card.querySelector('.node-select-type');
+        if (typeSelect) {
+            typeSelect.addEventListener('change', function () {
+                var newType = typeSelect.value;
+                var defVal = 0;
+                if (newType === 'time') defVal = '00:01:00';
+                else if (newType === 'text') defVal = 'STAGE';
+                else if (newType === 'delta') defVal = '+100';
+
+                if (handlers.onUpdateNode) {
+                    handlers.onUpdateNode(node.id, { type: newType, value: defVal });
+                }
+            });
+        }
+
+        // Change Value
+        var valInput = card.querySelector('.node-input-val');
+        if (valInput) {
+            valInput.addEventListener('change', function () {
+                var raw = valInput.value.trim();
+                var val = raw;
+                if (node.type === 'number') {
+                    // Try evaluating math expression
+                    try {
+                        if (/^[0-9+\-*/. ()]+$/.test(raw)) {
+                            /* eslint-disable no-eval */
+                            var evaluated = Function('"use strict";return (' + raw + ')')();
+                            if (typeof evaluated === 'number' && !isNaN(evaluated)) {
+                                val = evaluated;
+                                valInput.value = val;
+                            }
+                        } else {
+                            val = parseFloat(raw) || 0;
+                        }
+                    } catch (e) {
+                        val = parseFloat(raw) || 0;
+                    }
+                }
+                if (handlers.onUpdateNode) {
+                    handlers.onUpdateNode(node.id, { value: val });
+                }
+            });
+        }
+
+        // Change Time
+        var timeInput = card.querySelector('.node-input-time');
+        if (timeInput) {
+            timeInput.addEventListener('change', function () {
+                var t = Math.max(0, parseFloat(timeInput.value) || 0);
+                if (handlers.onUpdateNode) {
+                    handlers.onUpdateNode(node.id, { time: t });
+                }
+            });
+        }
+
+        // Change Hold
+        var holdInput = card.querySelector('.node-input-hold');
+        if (holdInput) {
+            holdInput.addEventListener('change', function () {
+                var h = Math.max(0, parseFloat(holdInput.value) || 0);
+                if (handlers.onUpdateNode) {
+                    handlers.onUpdateNode(node.id, { hold: h });
+                }
+            });
+        }
+
+        // Change Easing
+        var easeSelect = card.querySelector('.node-select-ease');
+        if (easeSelect) {
+            easeSelect.addEventListener('change', function () {
+                if (handlers.onUpdateNode) {
+                    handlers.onUpdateNode(node.id, { easing: easeSelect.value });
+                }
+            });
+        }
+
+        // Capture Time
+        var btnCapture = card.querySelector('.btn-capture-time');
+        if (btnCapture) {
+            btnCapture.addEventListener('click', function () {
+                if (handlers.onCaptureTime) {
+                    handlers.onCaptureTime(node.id);
+                }
+            });
+        }
+
+        // Delete Node
+        var btnDelete = card.querySelector('.btn-delete-node');
+        if (btnDelete) {
+            btnDelete.addEventListener('click', function () {
+                if (handlers.onDeleteNode) {
+                    handlers.onDeleteNode(node.id);
+                }
+            });
+        }
+    }
+
+    /**
+     * Update active highlight in preview
+     * @param {HTMLElement} container
+     * @param {number} activeIndex
+     */
+    function highlightActiveNode(container, activeIndex) {
+        if (!container) return;
+        var cards = container.querySelectorAll('.node-card');
+        for (var i = 0; i < cards.length; i++) {
+            if (i === activeIndex) {
+                cards[i].classList.add('node-card-active');
+            } else {
+                cards[i].classList.remove('node-card-active');
+            }
+        }
+    }
+
+    return {
+        renderNodeList: renderNodeList,
+        highlightActiveNode: highlightActiveNode,
+        formatTime: _formatTime
+    };
+})();
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = NodesView;
+}

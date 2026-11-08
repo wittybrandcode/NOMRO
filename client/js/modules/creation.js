@@ -41,15 +41,25 @@ var CreationModule = (function () {
                 create('timer');
             });
         }
+
+        // Nodes-specific button
+        var btnNodes = document.getElementById('btn-create-nodes');
+        if (btnNodes) {
+            btnNodes.addEventListener('click', function () {
+                create('nodes');
+            });
+        }
     }
 
     /**
-     * Normalize type to update families: counter | timer
+     * Normalize type to update families: counter | timer | nodes
      * @param {string} type
      * @returns {string}
      */
     function _normalizeType(type) {
-        return type === 'timer' ? 'timer' : 'counter';
+        if (type === 'timer') return 'timer';
+        if (type === 'nodes') return 'nodes';
+        return 'counter';
     }
 
     /**
@@ -132,7 +142,13 @@ var CreationModule = (function () {
             }
 
             // Force type based on button clicked
-            settings.counterType = (type === 'timer') ? 'timer' : 'basic';
+            if (type === 'timer') {
+                settings.counterType = 'timer';
+            } else if (type === 'nodes') {
+                settings.counterType = 'nodes';
+            } else {
+                settings.counterType = 'basic';
+            }
 
             if (typeof EasingValidator !== 'undefined') {
                 settings = EasingValidator.sanitizeSettings(settings);

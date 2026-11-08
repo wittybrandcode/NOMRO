@@ -57,6 +57,17 @@
                 monospace: false,
                 easing: 'linear',
                 fps: 30
+            },
+            nodes: {
+                sequence: (typeof NodeSequence !== 'undefined') ? NodeSequence.getDefaultSequence() : [],
+                easing: 'smoothOut',
+                easeStrength: 75,
+                format: 'normal',
+                monospace: false,
+                commas: true,
+                decimals: false,
+                prefix: '',
+                suffix: ''
             }
         }
     };
@@ -175,6 +186,7 @@
             // Create button
             btnCreateCounter: document.getElementById('btn-create-counter'),
             btnCreateTimer: document.getElementById('btn-create-timer'),
+            btnCreateNodes: document.getElementById('btn-create-nodes'),
             loading: document.getElementById('loading'),
 
             // Messages
@@ -244,6 +256,14 @@
             Logger.log('App', 'TimerModule initialized');
         } else {
             Logger.error('App', 'TimerModule missing; timer features disabled');
+        }
+
+        // Initialize Nodes Module
+        if (typeof NodesModule !== 'undefined') {
+            NodesModule.init(elements, App.state);
+            Logger.log('App', 'NodesModule initialized');
+        } else {
+            Logger.warn('App', 'NodesModule missing; nodes features disabled');
         }
 
         // Initialize Presets Module
@@ -406,6 +426,7 @@
             var createButtons = [];
             if (elements.btnCreateCounter) createButtons.push(elements.btnCreateCounter);
             if (elements.btnCreateTimer) createButtons.push(elements.btnCreateTimer);
+            if (elements.btnCreateNodes) createButtons.push(elements.btnCreateNodes);
             Validator.initRealtimeValidation(elements, createButtons);
             Logger.log('App', 'Real-time validation initialized');
         }
@@ -520,6 +541,13 @@
             if (changed && typeof TimerModule !== 'undefined') {
                 TimerModule.updateDisplay();
                 Logger.log('Sync', 'Live timer slider values synced');
+            }
+        } else if (settings.counterType === 'nodes') {
+            if (typeof NodesModule !== 'undefined' && NodesModule.applySettings) {
+                if (settings.nodes || settings.markers) {
+                    NodesModule.applySettings(settings);
+                    Logger.log('Sync', 'Live node sequence synced');
+                }
             }
         } else {
             var s = App.state.counter;
@@ -677,7 +705,7 @@
     // ========================================
     function switchTab(tabId) {
         App.currentTab = tabId;
-        if (tabId === 'counter' || tabId === 'timer') {
+        if (tabId === 'counter' || tabId === 'timer' || tabId === 'nodes') {
             App.lastActiveSettingsTab = tabId;
         }
         if (typeof UIControlsModule !== 'undefined') {
@@ -701,6 +729,8 @@
         var targetTab = typeOverride || (App.currentTab === 'presets' ? App.lastActiveSettingsTab : App.currentTab);
         if (targetTab === 'timer' && typeof TimerModule !== 'undefined' && TimerModule.getSettings) {
             return TimerModule.getSettings();
+        } else if (targetTab === 'nodes' && typeof NodesModule !== 'undefined' && NodesModule.getSettings) {
+            return NodesModule.getSettings();
         } else if (typeof CounterModule !== 'undefined') {
             return CounterModule.getSettings('counter');
         }
@@ -774,6 +804,18 @@
             fps: 30
         };
 
+        App.state.nodes = {
+            sequence: (typeof NodeSequence !== 'undefined') ? NodeSequence.getDefaultSequence() : [],
+            easing: 'smoothOut',
+            easeStrength: 75,
+            format: 'normal',
+            monospace: false,
+            commas: true,
+            decimals: false,
+            prefix: '',
+            suffix: ''
+        };
+
         // 2. Unlink layer
         linkedLayer = null;
         linkedLayerInfo = null;
@@ -829,6 +871,10 @@
         }
         if (typeof TimerModule !== 'undefined') {
             TimerModule.updateDisplay();
+        }
+        if (typeof NodesModule !== 'undefined') {
+            NodesModule.render();
+            NodesModule.resetPreview();
         }
 
         // 6. Update Status & Notification

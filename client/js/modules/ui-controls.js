@@ -48,7 +48,7 @@ var UIControlsModule = (function () {
     function switchTab(tabId) {
         if (window.NOMRO_App) {
             window.NOMRO_App.currentTab = tabId;
-            if (tabId === 'counter' || tabId === 'timer') {
+            if (tabId === 'counter' || tabId === 'timer' || tabId === 'nodes') {
                 window.NOMRO_App.lastActiveSettingsTab = tabId;
             }
         }

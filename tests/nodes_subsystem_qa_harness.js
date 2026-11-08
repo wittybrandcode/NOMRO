@@ -1,0 +1,289 @@
+/**
+ * NOMRO PRO — Multi-Node Sequence Subsystem QA Harness
+ * Comprehensive verification of NodeSequence model, marker serialization,
+ * NodesExpressionGenerator, NodesModule calculation, and DOM wiring.
+ */
+
+var fs = require('fs');
+var path = require('path');
+var assert = require('assert');
+
+var BASE_DIR = path.resolve(__dirname, '..');
+
+var totalTests = 0;
+var passedTests = 0;
+var failedTests = 0;
+
+function runTest(desc, fn) {
+    totalTests++;
+    try {
+        fn();
+        passedTests++;
+        console.log('  ✔ PASS: ' + desc);
+    } catch (e) {
+        failedTests++;
+        console.error('  ✘ FAIL: ' + desc);
+        console.error('    Error: ' + e.message);
+    }
+}
+
+console.log('\n===============================================================');
+console.log('    NOMRO PRO — MULTI-NODE SUBSYSTEM QA HARNESS (v4.2.0)       ');
+console.log('===============================================================\n');
+
+// -------------------------------------------------------------
+// [SUITE 1] NodeSequence Data Model & Marker Serialization
+// -------------------------------------------------------------
+console.log('[SUITE 1] Testing NodeSequence Model & Serialization...');
+
+var NodeSequence = require(path.join(BASE_DIR, 'client/js/models/NodeSequence.js'));
+
+runTest('NodeSequence exports required constants and methods', function () {
+    assert.strictEqual(typeof NodeSequence.createNode, 'function');
+    assert.strictEqual(typeof NodeSequence.getDefaultSequence, 'function');
+    assert.strictEqual(typeof NodeSequence.sortNodes, 'function');
+    assert.strictEqual(typeof NodeSequence.sanitizeSequence, 'function');
+    assert.strictEqual(typeof NodeSequence.toMarkerComment, 'function');
+    assert.strictEqual(typeof NodeSequence.fromMarkerComment, 'function');
+    assert.strictEqual(NodeSequence.NODE_TYPES.NUMBER, 'number');
+    assert.strictEqual(NodeSequence.NODE_TYPES.TIME, 'time');
+    assert.strictEqual(NodeSequence.NODE_TYPES.TEXT, 'text');
+    assert.strictEqual(NodeSequence.NODE_TYPES.DELTA, 'delta');
+});
+
+runTest('getDefaultSequence returns 3 ordered nodes', function () {
+    var def = NodeSequence.getDefaultSequence();
+    assert.strictEqual(def.length, 3);
+    assert.strictEqual(def[0].value, 0);
+    assert.strictEqual(def[1].value, 500);
+    assert.strictEqual(def[2].value, 1000);
+    assert.strictEqual(def[0].time, 0);
+    assert.strictEqual(def[1].time, 2);
+    assert.strictEqual(def[2].time, 4);
+});
+
+runTest('toMarkerComment formats Number, Time, Text, and Delta correctly', function () {
+    var nNum = NodeSequence.createNode({ type: 'number', value: 1500, hold: 1.0, easing: 'snappyOut' });
+    assert.strictEqual(NodeSequence.toMarkerComment(nNum), 'NUM:1500|H:1|E:snappyOut');
+
+    var nTime = NodeSequence.createNode({ type: 'time', value: '00:03:00', hold: 0 });
+    assert.strictEqual(NodeSequence.toMarkerComment(nTime), 'TIME:00:03:00');
+
+    var nTxt = NodeSequence.createNode({ type: 'text', value: 'HALFTIME', hold: 2.5 });
+    assert.strictEqual(NodeSequence.toMarkerComment(nTxt), 'TXT:HALFTIME|H:2.5');
+
+    var nDelta = NodeSequence.createNode({ type: 'delta', value: '+25%' });
+    assert.strictEqual(NodeSequence.toMarkerComment(nDelta), 'DELTA:+25%');
+});
+
+runTest('fromMarkerComment parses payloads with options accurately', function () {
+    var parsed1 = NodeSequence.fromMarkerComment('NUM:2500|H:1.5|E:bounceOut', 3.0);
+    assert.strictEqual(parsed1.type, 'number');
+    assert.strictEqual(parsed1.value, 2500);
+    assert.strictEqual(parsed1.hold, 1.5);
+    assert.strictEqual(parsed1.easing, 'bounceOut');
+    assert.strictEqual(parsed1.time, 3.0);
+
+    var parsed2 = NodeSequence.fromMarkerComment('TIME:01:20:00', 5.0);
+    assert.strictEqual(parsed2.type, 'time');
+    assert.strictEqual(parsed2.value, '01:20:00');
+    assert.strictEqual(parsed2.hold, 0);
+    assert.strictEqual(parsed2.time, 5.0);
+
+    var parsed3 = NodeSequence.fromMarkerComment('TXT:GOAL!', 10.0);
+    assert.strictEqual(parsed3.type, 'text');
+    assert.strictEqual(parsed3.value, 'GOAL!');
+});
+
+runTest('sortNodes orders by time chronologically', function () {
+    var unsorted = [
+        NodeSequence.createNode({ time: 5 }),
+        NodeSequence.createNode({ time: 1 }),
+        NodeSequence.createNode({ time: 3 })
+    ];
+    var sorted = NodeSequence.sortNodes(unsorted);
+    assert.strictEqual(sorted[0].time, 1);
+    assert.strictEqual(sorted[1].time, 3);
+    assert.strictEqual(sorted[2].time, 5);
+});
+
+// -------------------------------------------------------------
+// [SUITE 2] NodesExpressionGenerator
+// -------------------------------------------------------------
+console.log('\n[SUITE 2] Testing NodesExpressionGenerator...');
+
+var exprGenPath = path.join(BASE_DIR, 'host/expressions/NodesExpressionGenerator.jsx');
+var exprGenContent = fs.readFileSync(exprGenPath, 'utf8');
+
+runTest('NodesExpressionGenerator file exists and exports generateNodesExpression', function () {
+    assert.ok(exprGenContent.length > 500);
+    assert.ok(exprGenContent.indexOf('NOMRO.expressions.generateNodesExpression') !== -1);
+});
+
+runTest('Generated expression contains piecewise interpolation & easing evaluation', function () {
+    // Mock environment for Node.js
+    var NOMRO = { expressions: {} };
+    eval(exprGenContent);
+
+    var settings = {
+        counterType: 'nodes',
+        nodes: NodeSequence.getDefaultSequence(),
+        commas: true,
+        monospace: false
+    };
+
+    var expr = NOMRO.expressions.generateNodesExpression(settings);
+    assert.ok(expr.indexOf('NOMRO_CONFIG') !== -1);
+    assert.ok(expr.indexOf('function applyEase') !== -1);
+    assert.ok(expr.indexOf('function timeStrToSec') !== -1);
+    assert.ok(expr.indexOf('function secToTimeStr') !== -1);
+    assert.ok(expr.indexOf('function formatNumber') !== -1);
+    assert.ok(expr.indexOf('markers.numKeys') !== -1);
+});
+
+// -------------------------------------------------------------
+// [SUITE 3] NodesModule Calculation & Logic
+// -------------------------------------------------------------
+console.log('\n[SUITE 3] Testing NodesModule Preview Calculation...');
+
+var NodesModule = require(path.join(BASE_DIR, 'client/js/modules/nodes.js'));
+
+runTest('NodesModule initializes and calculates output at waypoints', function () {
+    var state = {
+        nodes: {
+            sequence: [
+                NodeSequence.createNode({ id: 'n1', type: 'number', value: 0, time: 0, hold: 0 }),
+                NodeSequence.createNode({ id: 'n2', type: 'number', value: 1000, time: 2, hold: 0 })
+            ],
+            easing: 'linear',
+            easeStrength: 75,
+            format: 'normal',
+            commas: true
+        }
+    };
+
+    NodesModule.init({}, state, {});
+
+    var out0 = NodesModule.calculateOutputAtTime(0);
+    assert.strictEqual(out0.display, '0');
+    assert.strictEqual(out0.activeIndex, 0);
+
+    var out2 = NodesModule.calculateOutputAtTime(2);
+    assert.strictEqual(out2.display, '1,000');
+    assert.strictEqual(out2.activeIndex, 1);
+});
+
+runTest('NodesModule handles hold duration correctly', function () {
+    var state = {
+        nodes: {
+            sequence: [
+                NodeSequence.createNode({ id: 'n1', type: 'number', value: 100, time: 0, hold: 1.0 }),
+                NodeSequence.createNode({ id: 'n2', type: 'number', value: 500, time: 3, hold: 0 })
+            ],
+            easing: 'linear',
+            commas: false
+        }
+    };
+    NodesModule.init({}, state, {});
+
+    // At t = 0.5s (inside hold), value must remain 100
+    var outHold = NodesModule.calculateOutputAtTime(0.5);
+    assert.strictEqual(outHold.display, '100');
+    assert.strictEqual(outHold.activeIndex, 0);
+});
+
+runTest('NodesModule multi-type transition (time to number)', function () {
+    var state = {
+        nodes: {
+            sequence: [
+                NodeSequence.createNode({ id: 'n1', type: 'time', value: '00:01:00', time: 0, hold: 0 }),
+                NodeSequence.createNode({ id: 'n2', type: 'number', value: 120, time: 2, hold: 0 })
+            ],
+            easing: 'linear',
+            commas: false
+        }
+    };
+    NodesModule.init({}, state, {});
+
+    // At t=0, starts as 60s
+    var out0 = NodesModule.calculateOutputAtTime(0);
+    assert.strictEqual(out0.display, '00:01:00');
+
+    // At t=2, ends as 120
+    var out2 = NodesModule.calculateOutputAtTime(2);
+    assert.strictEqual(out2.display, '120');
+});
+
+runTest('NodesModule getSettings returns clean nodes payload', function () {
+    var state = {
+        nodes: {
+            sequence: NodeSequence.getDefaultSequence(),
+            easing: 'smoothOut',
+            easeStrength: 75,
+            format: 'normal'
+        }
+    };
+    NodesModule.init({}, state, {});
+    var settings = NodesModule.getSettings();
+    assert.strictEqual(settings.counterType, 'nodes');
+    assert.ok(Array.isArray(settings.nodes));
+    assert.strictEqual(settings.easing, 'smoothOut');
+});
+
+// -------------------------------------------------------------
+// [SUITE 4] HTML, CSS & Architecture Wiring
+// -------------------------------------------------------------
+console.log('\n[SUITE 4] Testing UI & Script Wiring in index.html and CSS...');
+
+var htmlContent = fs.readFileSync(path.join(BASE_DIR, 'client/index.html'), 'utf8');
+var cssContent = fs.readFileSync(path.join(BASE_DIR, 'client/css/compact.css'), 'utf8');
+
+runTest('index.html contains Nodes tab button with data-tab="nodes"', function () {
+    assert.ok(htmlContent.indexOf('data-tab="nodes"') !== -1);
+});
+
+runTest('index.html contains #panel-nodes with all required components', function () {
+    assert.ok(htmlContent.indexOf('id="panel-nodes"') !== -1);
+    assert.ok(htmlContent.indexOf('id="preview-nodes-val"') !== -1);
+    assert.ok(htmlContent.indexOf('id="nodes-list-container"') !== -1);
+    assert.ok(htmlContent.indexOf('id="btn-add-node"') !== -1);
+    assert.ok(htmlContent.indexOf('id="btn-create-nodes"') !== -1);
+});
+
+runTest('index.html includes NodeSequence.js, NodesView.js, and nodes.js', function () {
+    assert.ok(htmlContent.indexOf('js/models/NodeSequence.js') !== -1);
+    assert.ok(htmlContent.indexOf('js/views/NodesView.js') !== -1);
+    assert.ok(htmlContent.indexOf('js/modules/nodes.js') !== -1);
+});
+
+runTest('compact.css contains multi-node styling tokens and classes', function () {
+    assert.ok(cssContent.indexOf('.node-card') !== -1);
+    assert.ok(cssContent.indexOf('.nodes-preview-stage') !== -1);
+    assert.ok(cssContent.indexOf('.node-connector') !== -1);
+    assert.ok(cssContent.indexOf('.btn-add-node-block') !== -1);
+});
+
+runTest('LayerResolver recognizes nodes family and detectLayerType', function () {
+    var resolverPath = path.join(BASE_DIR, 'host/services/LayerResolver.jsx');
+    var resolverContent = fs.readFileSync(resolverPath, 'utf8');
+    assert.ok(resolverContent.indexOf('NOMRO_CONSTANTS.LAYER_TYPES.NODES') !== -1);
+    assert.ok(resolverContent.indexOf('Sequence') !== -1);
+    assert.ok(resolverContent.indexOf('Nodes') !== -1);
+});
+
+// -------------------------------------------------------------
+// Summary
+// -------------------------------------------------------------
+console.log('\n===============================================================');
+console.log('TOTAL TESTS RUN : ' + totalTests);
+console.log('TESTS PASSED    : ' + passedTests);
+console.log('TESTS FAILED    : ' + failedTests);
+console.log('SUCCESS RATE    : ' + ((passedTests / totalTests) * 100).toFixed(2) + '%');
+console.log('===============================================================\n');
+
+if (failedTests > 0) {
+    process.exit(1);
+} else {
+    console.log('🚀 MULTI-NODE SUBSYSTEM HARNESS: 100% PASSED!\n');
+    process.exit(0);
+}

@@ -14,6 +14,7 @@ var NOMRO_CONSTANTS = {
     LAYER_TYPES: {
         COUNTER: 'counter',
         TIMER: 'timer',
+        NODES: 'nodes',
         FREE: 'free'
     },
 
@@ -141,8 +142,10 @@ NOMRO.helpers.withUndoGroup = function (groupName, callback) {
 #include "easing/EasingRegistry.jsx"
 #include "easing/EasingExpressionAdapter.jsx"
 #include "expressions/ExpressionGenerator.jsx"
+#include "expressions/NodesExpressionGenerator.jsx"
 #include "core/CounterBuilder.jsx"
 #include "core/CountdownBuilder.jsx"
+#include "core/NodesBuilder.jsx"
 
 // ============================================
 // PUBLIC API DISPATCHERS (CALLED VIA CEP BRIDGE)
@@ -165,6 +168,8 @@ function createCounter(settings) {
 
         if (counterType === NOMRO_CONSTANTS.LAYER_TYPES.TIMER) {
             layer = NOMRO.core.buildCountdown(comp, settings);
+        } else if (counterType === NOMRO_CONSTANTS.LAYER_TYPES.NODES) {
+            layer = NOMRO.core.buildNodesSequence(comp, settings);
         } else if (counterType === NOMRO_CONSTANTS.LAYER_TYPES.FREE) {
             settings.useMarkers = true;
             settings.useFreeExpression = true;
@@ -283,11 +288,29 @@ function updateLayer(data) {
             // 3. Update Markers & Expression
             var expr = "";
             var isTimer = existingLayerType === NOMRO_CONSTANTS.LAYER_TYPES.TIMER;
+            var isNodes = existingLayerType === NOMRO_CONSTANTS.LAYER_TYPES.NODES ||
+                settings.counterType === NOMRO_CONSTANTS.LAYER_TYPES.NODES;
             var isFreeMode = existingLayerType === NOMRO_CONSTANTS.LAYER_TYPES.FREE ||
                 settings.counterType === NOMRO_CONSTANTS.LAYER_TYPES.FREE ||
                 settings.useFreeExpression === true;
 
-            if (isTimer) {
+            if (isNodes) {
+                if (settings.nodes && settings.nodes.length) {
+                    NOMRO.helpers.clearMarkers(layer);
+                    var markers = layer.property('Marker');
+                    var startTime = layer.inPoint;
+                    for (var ni = 0; ni < settings.nodes.length; ni++) {
+                        var nd = settings.nodes[ni];
+                        var mTime = startTime + (parseFloat(nd.time) || 0);
+                        var payload = (typeof _buildMarkerPayload === 'function') ? _buildMarkerPayload(nd) : ('NUM:' + (nd.value !== undefined ? nd.value : 0));
+                        var markerVal = new MarkerValue(payload);
+                        markerVal.comment = payload;
+                        markers.setValueAtTime(mTime, markerVal);
+                    }
+                }
+                expr = NOMRO.expressions.generateNodesExpression(settings);
+
+            } else if (isTimer) {
                 if (settings.startAt !== undefined && settings.startAt !== null) {
                     var startAt = parseFloat(settings.startAt);
                     if (!isNaN(startAt)) {

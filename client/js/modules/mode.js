@@ -106,12 +106,14 @@ var ModeModule = (function () {
         };
 
         var isTimerLayer = (normalized.counterType === 'timer');
+        var isNodesLayer = (normalized.counterType === 'nodes');
+        var isCounterLayer = (!isTimerLayer && !isNodesLayer);
 
         var btnCounter = document.getElementById('btn-create-counter');
         if (btnCounter) {
             var spanC = btnCounter.querySelector('span');
-            if (spanC) spanC.textContent = isTimerLayer ? 'Create Counter' : 'Update Counter';
-            btnCounter.classList.toggle('update-mode', !isTimerLayer);
+            if (spanC) spanC.textContent = isCounterLayer ? 'Update Counter' : 'Create Counter';
+            btnCounter.classList.toggle('update-mode', isCounterLayer);
         }
 
         var btnTimer = document.getElementById('btn-create-timer');
@@ -119,6 +121,13 @@ var ModeModule = (function () {
             var spanT = btnTimer.querySelector('span');
             if (spanT) spanT.textContent = isTimerLayer ? 'Update Timer' : 'Create Timer';
             btnTimer.classList.toggle('update-mode', isTimerLayer);
+        }
+
+        var btnNodes = document.getElementById('btn-create-nodes');
+        if (btnNodes) {
+            var spanN = btnNodes.querySelector('span');
+            if (spanN) spanN.textContent = isNodesLayer ? 'Update Sequence' : 'Create Sequence';
+            btnNodes.classList.toggle('update-mode', isNodesLayer);
         }
 
         var btnUnlink = document.getElementById('btn-unlink');
@@ -152,6 +161,14 @@ var ModeModule = (function () {
             var spanT = btnTimer.querySelector('span');
             if (spanT) spanT.textContent = 'Create Timer';
             btnTimer.classList.remove('update-mode');
+        }
+
+        // Reset Nodes button
+        var btnNodes = document.getElementById('btn-create-nodes');
+        if (btnNodes) {
+            var spanN = btnNodes.querySelector('span');
+            if (spanN) spanN.textContent = 'Create Sequence';
+            btnNodes.classList.remove('update-mode');
         }
 
         var btnUnlink = document.getElementById('btn-unlink');

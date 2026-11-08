@@ -174,11 +174,14 @@ NOMRO.validators.findLayerByReference = function (comp, ref) {
 };
 
 /**
- * Normalize counter type into update family (counter | timer)
+ * Normalize counter type into update family (counter | timer | nodes)
  */
 NOMRO.helpers.normalizeTypeFamily = function (counterType) {
     if (counterType === NOMRO_CONSTANTS.LAYER_TYPES.TIMER) {
         return NOMRO_CONSTANTS.LAYER_TYPES.TIMER;
+    }
+    if (counterType === NOMRO_CONSTANTS.LAYER_TYPES.NODES) {
+        return NOMRO_CONSTANTS.LAYER_TYPES.NODES;
     }
     return NOMRO_CONSTANTS.LAYER_TYPES.COUNTER;
 };
@@ -193,6 +196,10 @@ NOMRO.helpers.detectLayerType = function (layer) {
 
     if (declaredType) {
         return declaredType;
+    }
+
+    if (layer.name.indexOf('Sequence') !== -1 || layer.name.indexOf('Nodes') !== -1) {
+        return NOMRO_CONSTANTS.LAYER_TYPES.NODES;
     }
 
     return layer.name.indexOf('Countdown') !== -1

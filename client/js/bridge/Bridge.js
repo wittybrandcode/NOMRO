@@ -104,6 +104,23 @@ var Bridge = (function () {
     }
 
     /**
+     * Get playhead time in seconds from active composition
+     * @param {Function} callback - Callback(err, timeInSeconds)
+     */
+    function getCompPlayheadTime(callback) {
+        callback = callback || function () { };
+        var script = 'NOMRO.utils.getCompPlayheadTime()';
+
+        evalScript(script, function (err, result) {
+            if (err) {
+                callback(err, 0);
+            } else {
+                callback(null, parseFloat(result) || 0);
+            }
+        });
+    }
+
+    /**
      * Update an existing NOMRO layer
      * @param {string|Object} layerRef - Layer name or layer reference
      * @param {Object} settings - New settings
@@ -196,6 +213,7 @@ var Bridge = (function () {
         createCounter: createCounter,
         updateLayer: updateLayer,
         hasActiveComp: hasActiveComp,
+        getCompPlayheadTime: getCompPlayheadTime,
         getHostInfo: getHostInfo,
         getThemeColors: getThemeColors
     };

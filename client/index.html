@@ -97,6 +97,16 @@
                 </svg>
                 <span>Presets</span>
             </button>
+            <button class="tab-btn" data-tab="nodes" title="Nodes Mode: Multi-Waypoint Sequence (نظام العقد المتعددة)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="5" cy="6" r="3"></circle>
+                    <circle cx="19" cy="6" r="3"></circle>
+                    <circle cx="12" cy="18" r="3"></circle>
+                    <line x1="7.5" y1="7.5" x2="10.5" y2="15.5"></line>
+                    <line x1="16.5" y1="7.5" x2="13.5" y2="15.5"></line>
+                </svg>
+                <span>Nodes</span>
+            </button>
             <div class="tab-slider"></div>
         </nav>
 
@@ -822,6 +832,85 @@
                 </div>
             </section>
 
+            <!-- Nodes Tab Panel -->
+            <section class="panel" id="panel-nodes">
+
+                <!-- 1. Live Preview Card -->
+                <div class="card nodes-preview-card">
+                    <div class="nodes-preview-stage" title="Multi-Waypoint Live Preview (معاينة حية للمسار)">
+                        <span class="preview-nodes-number" id="preview-nodes-val">0</span>
+                        <div class="preview-nodes-progress-rail">
+                            <div class="preview-nodes-progress-fill" id="preview-nodes-progress-fill"></div>
+                        </div>
+                        <span class="preview-nodes-stage-indicator" id="preview-nodes-stage-indicator">Node 1 of 3 (0.0s)</span>
+                    </div>
+
+                    <div class="preview-controls-row">
+                        <button class="btn-preview" id="nodes-reset-preview" title="Reset Preview (إعادة ضبط المعاينة)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="1 4 1 10 7 10"></polyline>
+                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                            </svg>
+                        </button>
+                        <button class="btn-preview btn-preview-play" id="nodes-play-preview" title="Play Preview (تشغيل المعاينة الحية)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                        </button>
+                        <button class="btn-preview btn-preview-stop" id="nodes-stop-preview" title="Stop Preview (إيقاف المعاينة)" style="display: none;">
+                            <svg height="14" width="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="6" y="4" width="4" height="16"></rect>
+                                <rect x="14" y="4" width="4" height="16"></rect>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. Nodes Action Toolbar -->
+                <div class="nodes-toolbar">
+                    <div class="nodes-toolbar-left">
+                        <button type="button" class="btn-node-toolbar" id="btn-capture-playhead-global" title="Add Node at Current AE Playhead Time (إضافة عقدة عند مؤشر التايملاين)">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span>Capture Playhead</span>
+                        </button>
+                    </div>
+                    <div class="nodes-toolbar-right">
+                        <button type="button" class="btn-node-toolbar" id="nodes-toggle-monospace-btn" title="Toggle Monospaced Font (خط أحادي العرض)">
+                            <span>[M]</span>
+                        </button>
+                        <button type="button" class="btn-node-toolbar active" id="nodes-toggle-commas-btn" title="Toggle Thousand Commas (فواصل الآلاف)">
+                            <span>1,000</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. Scrollable Node Sequence List Container -->
+                <div class="nodes-list-container" id="nodes-list-container">
+                    <!-- Populated dynamically by NodesView -->
+                </div>
+
+                <!-- 4. Add Node Block Button -->
+                <button type="button" class="btn-add-node-block" id="btn-add-node" title="Add New Waypoint Node (إضافة عقدة ومحطة جديدة)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Add Waypoint Node</span>
+                </button>
+
+                <!-- 5. Create / Update Action Button -->
+                <button class="btn-create" id="btn-create-nodes" title="Create Multi-Node Sequence Layer in AE (إنشاء طبقة العقد في الأفتر إفكتس)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Create Sequence</span>
+                </button>
+            </section>
+
         </div>
 
         <!-- Global Status Bar (Matching OpenBox Status Bar) -->
@@ -863,6 +952,7 @@
     <script src="js/services/Logger.js"></script>
     <!-- State model removed: all state is managed by App.state in app.js -->
     <script src="js/models/Preset.js"></script>
+    <script src="js/models/NodeSequence.js"></script>
     <script src="js/presets/PresetDefaults.js"></script>
     <script src="js/services/Validator.js"></script>
     <script src="js/services/Storage.js"></script>
@@ -873,11 +963,13 @@
     <script src="js/easing/EasingValidator.js"></script>
     <script src="js/easing/EasingRuntime.js"></script>
     <script src="js/views/PresetView.js"></script>
+    <script src="js/views/NodesView.js"></script>
     <script src="js/services/ErrorHandler.js"></script>
     <script src="js/modules/timer-defaults.js"></script>
     <script src="js/modules/counter.js"></script>
     <script src="js/modules/timer.js"></script>
     <script src="js/modules/presets.js"></script>
+    <script src="js/modules/nodes.js"></script>
     <script src="js/modules/ui-controls.js"></script>
     <script src="js/modules/keyboard-shortcuts.js"></script>
     <script src="js/modules/sync.js"></script>
