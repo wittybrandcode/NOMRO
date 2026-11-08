@@ -198,7 +198,7 @@ NOMRO.helpers.detectLayerType = function (layer) {
         return declaredType;
     }
 
-    if (layer.name.indexOf('Sequence') !== -1 || layer.name.indexOf('Nodes') !== -1) {
+    if (layer.name.indexOf('Sequence') !== -1 || layer.name.indexOf('Nodes') !== -1 || layer.name.indexOf('Marker') !== -1) {
         return NOMRO_CONSTANTS.LAYER_TYPES.NODES;
     }
 

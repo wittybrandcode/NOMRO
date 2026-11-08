@@ -1,7 +1,13 @@
 ﻿/**
- * NOMRO - JSON Polyfill for ExtendScript (ES3)
+ * NOMRO - JSON & String Polyfills for ExtendScript (ES3)
  * @module utils/JSONPolyfill
  */
+
+if (typeof String.prototype.trim !== 'function') {
+    String.prototype.trim = function () {
+        return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    };
+}
 
 if (typeof JSON === 'undefined') {
     JSON = {};

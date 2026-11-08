@@ -36,7 +36,7 @@ NOMRO.expressions.generateNodesExpression = function (settings) {
 
     // Helper functions for format
     expr += 'function parseNode(str) {\n';
-    expr += '    str = (str || "").trim();\n';
+    expr += '    str = (str || "").replace(/^\\s+|\\s+$/g, "");\n';
     expr += '    var hold = 0;\n';
     expr += '    if (str.indexOf("|") !== -1) {\n';
     expr += '        var parts = str.split("|");\n';

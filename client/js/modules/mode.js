@@ -126,7 +126,7 @@ var ModeModule = (function () {
         var btnNodes = document.getElementById('btn-create-nodes');
         if (btnNodes) {
             var spanN = btnNodes.querySelector('span');
-            if (spanN) spanN.textContent = isNodesLayer ? 'Update Sequence' : 'Create Sequence';
+            if (spanN) spanN.textContent = isNodesLayer ? 'Update Counter Markers' : 'Create Counter Markers';
             btnNodes.classList.toggle('update-mode', isNodesLayer);
         }
 
@@ -167,7 +167,7 @@ var ModeModule = (function () {
         var btnNodes = document.getElementById('btn-create-nodes');
         if (btnNodes) {
             var spanN = btnNodes.querySelector('span');
-            if (spanN) spanN.textContent = 'Create Sequence';
+            if (spanN) spanN.textContent = 'Create Counter Markers';
             btnNodes.classList.remove('update-mode');
         }
 

@@ -106,7 +106,7 @@ var NodeSequence = (function () {
     function toMarkerComment(node) {
         if (!node) return 'NUM:0';
         var type = node.type || NODE_TYPES.NUMBER;
-        var val = String(node.value !== undefined ? node.value : 0).trim();
+        var val = String(node.value !== undefined ? node.value : 0).replace(/^\s+|\s+$/g, '');
         var hold = (node.hold && node.hold > 0) ? '|H:' + parseFloat(node.hold.toFixed(2)) : '';
         var ease = (node.easing && node.easing !== 'smoothOut') ? '|E:' + node.easing : '';
 
@@ -128,7 +128,7 @@ var NodeSequence = (function () {
      * @returns {Object} Node object
      */
     function fromMarkerComment(comment, time) {
-        comment = (comment || '').trim();
+        comment = (comment || '').replace(/^\s+|\s+$/g, '');
         var hold = 0;
         var easing = 'smoothOut';
 
@@ -137,7 +137,7 @@ var NodeSequence = (function () {
             var parts = comment.split('|');
             comment = parts[0];
             for (var p = 1; p < parts.length; p++) {
-                var opt = parts[p].trim();
+                var opt = parts[p].replace(/^\s+|\s+$/g, '');
                 if (opt.indexOf('H:') === 0) {
                     hold = parseFloat(opt.substring(2)) || 0;
                 } else if (opt.indexOf('E:') === 0) {

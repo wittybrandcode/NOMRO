@@ -13,7 +13,7 @@ NOMRO.core = NOMRO.core || {};
 function _buildMarkerPayload(node) {
     if (!node) return 'NUM:0';
     var type = node.type || 'number';
-    var val = String(node.value !== undefined ? node.value : 0).trim();
+    var val = String(node.value !== undefined ? node.value : 0).replace(/^\s+|\s+$/g, '');
     var hold = (node.hold && node.hold > 0) ? '|H:' + parseFloat(node.hold) : '';
     var ease = (node.easing && node.easing !== 'smoothOut') ? '|E:' + node.easing : '';
 
@@ -47,7 +47,7 @@ NOMRO.core.buildNodesSequence = function (comp, settings) {
 
         // 1. Create Text Layer
         var textLayer = comp.layers.addText('0');
-        textLayer.name = 'NOMRO_Sequence';
+        textLayer.name = 'NOMRO_Marker_Counter';
         textLayer.label = 13; // Lavender/Purple distinct layer color
 
         // 2. Add Controls

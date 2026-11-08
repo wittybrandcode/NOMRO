@@ -28,7 +28,7 @@ NOMRO.markers.getMarkerLabelForType = function (type) {
 NOMRO.markers.buildMarkerPayload = function (node) {
     if (!node) return 'NUM:0';
     var type = node.type || 'number';
-    var val = String(node.value !== undefined ? node.value : 0).trim();
+    var val = String(node.value !== undefined ? node.value : 0).replace(/^\s+|\s+$/g, '');
     var hold = (node.hold && parseFloat(node.hold) > 0) ? '|H:' + parseFloat(node.hold) : '';
     var ease = (node.easing && node.easing !== 'smoothOut') ? '|E:' + node.easing : '';
 
@@ -53,9 +53,10 @@ NOMRO.markers.writeNodeMarkers = function (layer, nodes) {
     nodes = nodes || [];
 
     var markers = layer.property('Marker');
-    // Clear existing markers
-    while (markers.numKeys > 0) {
-        markers.removeKey(1);
+    // Clear existing markers safely from last to first
+    var numKeys = markers.numKeys;
+    for (var k = numKeys; k >= 1; k--) {
+        markers.removeKey(k);
     }
 
     var startTime = layer.inPoint;
@@ -66,10 +67,14 @@ NOMRO.markers.writeNodeMarkers = function (layer, nodes) {
         var payload = NOMRO.markers.buildMarkerPayload(node);
         var markerVal = new MarkerValue(payload);
         markerVal.comment = payload;
-        if (node.hold && parseFloat(node.hold) > 0) {
-            markerVal.duration = parseFloat(node.hold);
-        }
-        markerVal.label = NOMRO.markers.getMarkerLabelForType(node.type);
+        try {
+            if (node.hold && parseFloat(node.hold) > 0) {
+                markerVal.duration = parseFloat(node.hold);
+            }
+        } catch (eDur) { }
+        try {
+            markerVal.label = NOMRO.markers.getMarkerLabelForType(node.type);
+        } catch (eLab) { }
         markers.setValueAtTime(mTime, markerVal);
     }
 };
@@ -99,10 +104,14 @@ NOMRO.markers.addNodeMarker = function (comp, layer, nodeData, targetTime) {
     var payload = NOMRO.markers.buildMarkerPayload(nodeData);
     var markerVal = new MarkerValue(payload);
     markerVal.comment = payload;
-    if (nodeData.hold && parseFloat(nodeData.hold) > 0) {
-        markerVal.duration = parseFloat(nodeData.hold);
-    }
-    markerVal.label = NOMRO.markers.getMarkerLabelForType(nodeData.type);
+    try {
+        if (nodeData.hold && parseFloat(nodeData.hold) > 0) {
+            markerVal.duration = parseFloat(nodeData.hold);
+        }
+    } catch (eDur) { }
+    try {
+        markerVal.label = NOMRO.markers.getMarkerLabelForType(nodeData.type);
+    } catch (eLab) { }
 
     markers.setValueAtTime(absTime, markerVal);
 
@@ -137,3 +146,4 @@ NOMRO.markers.readNodeMarkers = function (layer) {
     }
     return markersList;
 };
+
