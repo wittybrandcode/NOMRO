@@ -84,32 +84,6 @@ var CreationModule = (function () {
     }
 
     /**
-     * Guard against cross-type updates (Counter tab -> Timer layer or reverse)
-     * @param {string} requestedType - counter|timer
-     * @param {Object|null} linkedLayerInfo - { layerName, counterType }
-     * @returns {boolean} True if mismatch is detected and handled
-     */
-    function _handleTypeMismatch(requestedType, linkedLayerInfo) {
-        if (!linkedLayerInfo || !linkedLayerInfo.counterType) return false;
-
-        var linkedType = _normalizeType(linkedLayerInfo.counterType);
-        if (linkedType === requestedType) return false;
-
-        if (_callbacks.switchTab) {
-            _callbacks.switchTab(linkedType);
-        }
-
-        var expectedLabel = linkedType === 'timer' ? 'Timer' : 'Counter';
-        var layerName = linkedLayerInfo.layerName || 'NOMRO layer';
-        _reportError(
-            { message: 'Cross-type update blocked. Layer "' + layerName + '" must be updated from ' + expectedLabel + ' tab.' },
-            'creation.typeMismatch'
-        );
-        return true;
-    }
-
-
-    /**
      * Show loading state
      */
     function _showLoading() {

@@ -373,6 +373,18 @@ var PresetsModule = (function () {
                 if (comBtn) comBtn.classList.toggle('active', settings.commas);
             }
 
+            // Restore useMarkers to state and DOM
+            var useMarkersVal = (settings.useMarkers !== undefined) ? !!settings.useMarkers : false;
+            _state.counter.useMarkers = useMarkersVal;
+            var toggleMarkersBtn = document.getElementById('toggle-markers-btn');
+            if (toggleMarkersBtn) {
+                toggleMarkersBtn.classList.toggle('active', useMarkersVal);
+            }
+            if (_elements.durationValue) {
+                _elements.durationValue.parentElement.style.opacity = useMarkersVal ? '0.5' : '1';
+                _elements.durationValue.disabled = useMarkersVal;
+            }
+
             if (_callbacks.onUpdatePreview) _callbacks.onUpdatePreview();
 
         } else if (settings.counterType === 'timer') {

@@ -752,23 +752,23 @@
             symbolPosition: 'left',
             monospace: false,
             decimals: false,
-            commas: false,
+            commas: true,
             useMarkers: false
         };
 
         App.state.timer = {
             hours: 0,
-            mins: 5,
+            mins: 0,
             secs: 0,
             frames: 0,
             endHours: 0,
-            endMins: 0,
+            endMins: 5,
             endSecs: 0,
             endFrames: 0,
             duration: 10,
             startAt: 0,
             durationMode: 'manual',
-            format: 'hms',
+            format: 'hmsf',
             monospace: false,
             easing: 'linear',
             fps: 30
@@ -790,7 +790,7 @@
         if (elements.suffixSymbol) elements.suffixSymbol.value = '';
 
         if (elements.toggleDecimalsBtn) elements.toggleDecimalsBtn.classList.remove('active');
-        if (elements.toggleCommasBtn) elements.toggleCommasBtn.classList.remove('active');
+        if (elements.toggleCommasBtn) elements.toggleCommasBtn.classList.add('active');
         if (elements.toggleMonospaceBtn) elements.toggleMonospaceBtn.classList.remove('active');
         if (elements.toggleMarkersBtn) elements.toggleMarkersBtn.classList.remove('active');
 
@@ -807,16 +807,16 @@
 
         // 4. Reset Timer UI Elements
         if (elements.inputHours) elements.inputHours.value = '0';
-        if (elements.inputMins) elements.inputMins.value = '5';
+        if (elements.inputMins) elements.inputMins.value = '0';
         if (elements.inputSecs) elements.inputSecs.value = '0';
         if (elements.inputFrames) elements.inputFrames.value = '0';
         if (elements.inputEndH) elements.inputEndH.value = '0';
-        if (elements.inputEndM) elements.inputEndM.value = '0';
+        if (elements.inputEndM) elements.inputEndM.value = '5';
         if (elements.inputEndS) elements.inputEndS.value = '0';
         if (elements.inputEndF) elements.inputEndF.value = '0';
         if (elements.inputDuration) elements.inputDuration.value = '10';
         if (elements.inputStartAt) elements.inputStartAt.value = '0';
-        if (elements.selectCountdownFormat) elements.selectCountdownFormat.value = 'hms';
+        if (elements.selectCountdownFormat) elements.selectCountdownFormat.value = 'hmsf';
         if (elements.timerToggleMonospaceBtn) elements.timerToggleMonospaceBtn.classList.remove('active');
 
         if (typeof TimerDefaults !== 'undefined' && TimerDefaults.applyDurationModeUI) {
@@ -920,10 +920,10 @@
             '<div class="settings-section">' +
                 '<div class="settings-section-title">Presets & Data (' + presetsCount + ' Saved)</div>' +
                 '<div class="settings-btn-group">' +
-                    '<button id="btn-export-presets" class="settings-btn">Export Presets</button>' +
-                    '<button id="btn-import-presets" class="settings-btn">Import Presets</button>' +
+                    '<button id="modal-btn-export-presets" class="settings-btn">Export Presets</button>' +
+                    '<button id="modal-btn-import-presets" class="settings-btn">Import Presets</button>' +
                 '</div>' +
-                '<button id="btn-clear-presets" class="settings-btn settings-btn-danger" style="width: 100%; margin-top: 5px;">Clear All Presets</button>' +
+                '<button id="modal-btn-clear-presets" class="settings-btn settings-btn-danger" style="width: 100%; margin-top: 5px;">Clear All Presets</button>' +
             '</div>' +
 
             '<button id="btn-close-settings" class="shortcuts-close-btn" style="margin-top: 8px;">Close Settings</button>';
@@ -964,7 +964,7 @@
             });
         }
 
-        var btnExportPresets = dialog.querySelector('#btn-export-presets');
+        var btnExportPresets = dialog.querySelector('#modal-btn-export-presets');
         if (btnExportPresets) {
             btnExportPresets.addEventListener('click', function() {
                 if (typeof PresetService !== 'undefined' && PresetService.exportJSON) {
@@ -984,7 +984,7 @@
             });
         }
 
-        var btnImportPresets = dialog.querySelector('#btn-import-presets');
+        var btnImportPresets = dialog.querySelector('#modal-btn-import-presets');
         if (btnImportPresets) {
             btnImportPresets.addEventListener('click', function() {
                 var json = prompt('Paste Presets JSON here:');
@@ -1007,7 +1007,7 @@
             });
         }
 
-        var btnClearPresets = dialog.querySelector('#btn-clear-presets');
+        var btnClearPresets = dialog.querySelector('#modal-btn-clear-presets');
         if (btnClearPresets) {
             btnClearPresets.addEventListener('click', function() {
                 if (confirm('Are you sure you want to delete all saved presets? This cannot be undone.')) {

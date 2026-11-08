@@ -676,6 +676,43 @@ assert(creationSrc.includes('forceCreate') &&
        creationSrc.includes('linkedType === type'),
     'DEF-36: CreationModule allows creating a timer when a counter is selected and supports forceCreate');
 
+// DEF-37: Reset State Invariant & Default Parity (CORR-01)
+const appSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'app.js'), 'utf8');
+assert(appSrc.includes('resetAllToDefaults') &&
+       appSrc.includes('commas: true') &&
+       appSrc.includes('elements.toggleCommasBtn.classList.add(\'active\')') &&
+       appSrc.includes('endMins: 5') &&
+       appSrc.includes('elements.selectCountdownFormat.value = \'hmsf\''),
+    'DEF-37: app.js resetAllToDefaults maintains 100% parity with initial state (commas: true, endMins: 5, hmsf)');
+
+// DEF-38: Presets Module useMarkers Persistence (CORR-02)
+const presetsModuleSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'modules', 'presets.js'), 'utf8');
+assert(presetsModuleSrc.includes('_state.counter.useMarkers = useMarkersVal') &&
+       presetsModuleSrc.includes('toggleMarkersBtn.classList.toggle(\'active\', useMarkersVal)'),
+    'DEF-38: presets.js applySettings restores useMarkers state and toggles button correctly');
+
+// DEF-39: Fractional Frame Rate Math for NTSC 29.97fps (CORR-03)
+const timerModuleSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'modules', 'timer.js'), 'utf8');
+assert(timerModuleSrc.includes('var maxFrames = Math.max(1, Math.round(fps) - 1);'),
+    'DEF-39: timer.js uses Math.round(fps)-1 for maxFrames, preventing fractional frame truncation in NTSC');
+
+// DEF-40: Settings Modal Unique DOM IDs (CORR-04)
+assert(appSrc.includes('id="modal-btn-export-presets"') &&
+       appSrc.includes('id="modal-btn-import-presets"') &&
+       appSrc.includes('id="modal-btn-clear-presets"'),
+    'DEF-40: app.js showSettingsModal uses unique IDs avoiding DOM collision with index.html');
+
+// DEF-41: Purge of Dead Code _handleTypeMismatch (CORR-05)
+assert(!creationSrc.includes('function _handleTypeMismatch'),
+    'DEF-41: creation.js has cleanly purged orphaned _handleTypeMismatch dead code');
+
+// DEF-42: HTML Label Accessibility Attributes (CORR-06)
+const indexHtmlSrc = fs.readFileSync(path.join(baseDir, 'client', 'index.html'), 'utf8');
+assert(indexHtmlSrc.includes('for="input-duration"') &&
+       indexHtmlSrc.includes('for="input-startat"') &&
+       indexHtmlSrc.includes('for="select-countdown-format"'),
+    'DEF-42: index.html includes for attributes on config labels for accessibility and click-focus');
+
 // -------------------------------------------------------------------
 // MASTER SUMMARY REPORT
 // -------------------------------------------------------------------

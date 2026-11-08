@@ -455,7 +455,7 @@ var TimerModule = (function () {
         if (!_elements || !_state || !_state.timer) return;
 
         var fps = _state.timer.fps || 30;
-        var maxFrames = fps - 1;
+        var maxFrames = Math.max(1, Math.round(fps) - 1);
 
         var startHours = _elements.inputHours
             ? _sanitizeIntInput(_elements.inputHours, 0, 99, _state.timer.hours || 0)
