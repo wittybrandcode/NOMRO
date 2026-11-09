@@ -23,7 +23,14 @@ var Preset = (function () {
             }
         }
 
-        var category = (settings && settings.counterType === 'timer') ? 'timer' : 'counter';
+        var category = 'counter';
+        if (settings) {
+            if (settings.counterType === 'timer') {
+                category = 'timer';
+            } else if (settings.counterType === 'nodes' || settings.nodes || settings.nodeSequence) {
+                category = 'nodes';
+            }
+        }
 
         return {
             id: 'preset_' + Date.now() + '_' + Math.floor(Math.random() * 1000000),
@@ -85,5 +92,9 @@ var Preset = (function () {
         fromJSON: fromJSON
     };
 })();
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = Preset;
+}
 
 

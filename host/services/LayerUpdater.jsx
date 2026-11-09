@@ -152,9 +152,13 @@ NOMRO.helpers.createDefaultMarkers = function (layer, duration) {
     var dur = duration || NOMRO_CONSTANTS.MARKERS.DEFAULT_DURATION;
 
     var inMarker = new MarkerValue(NOMRO_CONSTANTS.MARKERS.IN);
+    inMarker.comment = NOMRO_CONSTANTS.MARKERS.IN;
+    try { inMarker.label = 8; } catch (eIn) { }
     layer.property('Marker').setValueAtTime(inPoint, inMarker);
 
     var outMarker = new MarkerValue(NOMRO_CONSTANTS.MARKERS.OUT);
+    outMarker.comment = NOMRO_CONSTANTS.MARKERS.OUT;
+    try { outMarker.label = 8; } catch (eOut) { }
     layer.property('Marker').setValueAtTime(inPoint + dur, outMarker);
 };
 
@@ -166,9 +170,13 @@ NOMRO.helpers.createDefaultFreeMarkers = function (layer, duration) {
     var dur = duration || NOMRO_CONSTANTS.MARKERS.DEFAULT_DURATION;
 
     var startMarker = new MarkerValue('START');
+    startMarker.comment = 'START';
+    try { startMarker.label = 8; } catch (eStart) { }
     layer.property('Marker').setValueAtTime(inPoint, startMarker);
 
     var stopMarker = new MarkerValue('STOP');
+    stopMarker.comment = 'STOP';
+    try { stopMarker.label = 8; } catch (eStop) { }
     layer.property('Marker').setValueAtTime(inPoint + dur, stopMarker);
 };
 

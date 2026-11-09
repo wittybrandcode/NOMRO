@@ -80,7 +80,13 @@ var PresetsModule = (function () {
         applySettings(preset.settings);
 
         // 2. Trigger direct creation via CreationModule (force fresh layer creation)
-        var type = (preset.settings && preset.settings.counterType === 'timer') ? 'timer' : 'counter';
+        var type = 'counter';
+        if (preset.settings && preset.settings.counterType === 'timer') {
+            type = 'timer';
+        } else if (preset.settings && (preset.settings.counterType === 'nodes' || (preset.settings.nodes && preset.settings.nodes.length)) || preset.category === 'nodes') {
+            type = 'nodes';
+        }
+
         if (typeof CreationModule !== 'undefined' && CreationModule.create) {
             CreationModule.create(type, true, preset.settings);
             if (_callbacks.onShowToast) {
@@ -230,6 +236,10 @@ var PresetsModule = (function () {
             if (typeof TimerModule !== 'undefined' && TimerModule.getSettings) {
                 return TimerModule.getSettings();
             }
+        } else if (currentTab === 'nodes') {
+            if (typeof NodesModule !== 'undefined' && NodesModule.getSettings) {
+                return NodesModule.getSettings();
+            }
         }
 
         return settings;
@@ -270,8 +280,18 @@ var PresetsModule = (function () {
         if (typeof EasingValidator !== 'undefined') {
             settings = EasingValidator.sanitizeSettings(settings);
         }
-        var type = settings.counterType || 'basic';
-        if (type !== 'timer') {
+        var isNodes = (settings.counterType === 'nodes') || !!(settings.nodes && settings.nodes.length);
+        var isTimer = !isNodes && (settings.counterType === 'timer');
+
+        if (isNodes) {
+            if (_callbacks.onSwitchTab) _callbacks.onSwitchTab('nodes');
+            if (typeof NodesModule !== 'undefined' && NodesModule.applySettings) {
+                NodesModule.applySettings(settings);
+            }
+            return;
+        }
+
+        if (!isTimer) {
             if (_callbacks.onSwitchTab) _callbacks.onSwitchTab('counter');
 
             if (settings.start !== undefined && _elements.startValue) {

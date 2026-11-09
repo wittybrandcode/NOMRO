@@ -588,17 +588,20 @@ const evalCustom = hostContext.EasingRuntime.evaluateById('smoothOut', 0.5, 37.5
 assert(Math.abs(evalCustom - 0.75) < 1e-6,
     'DEF-30: EasingRuntime evaluates exact parametric power at custom strength 37.5% (t=0.5 -> 0.75)');
 
-// DEF-31: 12 Golden Presets (6 Counters, 6 Timers) in PresetDefaults
+// DEF-31: 18 Golden Presets (6 Counters, 6 Timers, 6 Markers) in PresetDefaults
 const presetDefaultsSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'presets', 'PresetDefaults.js'), 'utf8');
 vm.runInContext(presetDefaultsSrc, hostContext);
-assert(hostContext.PresetDefaults && hostContext.PresetDefaults.FACTORY_PRESETS && hostContext.PresetDefaults.FACTORY_PRESETS.length === 12,
-    'DEF-31: PresetDefaults defines exactly the 12 Golden Factory Presets');
+assert(hostContext.PresetDefaults && hostContext.PresetDefaults.FACTORY_PRESETS && hostContext.PresetDefaults.FACTORY_PRESETS.length === 18,
+    'DEF-31: PresetDefaults defines exactly the 18 Golden Factory Presets');
 const counterPresets = hostContext.PresetDefaults.FACTORY_PRESETS.filter(p => p.category === 'counter');
 const timerPresets = hostContext.PresetDefaults.FACTORY_PRESETS.filter(p => p.category === 'timer');
-assert(counterPresets.length === 6 && timerPresets.length === 6,
-    'DEF-31: 12 Golden Presets are balanced (6 Counters and 6 Timers)');
+const nodesPresets = hostContext.PresetDefaults.FACTORY_PRESETS.filter(p => p.category === 'nodes');
+assert(counterPresets.length === 6 && timerPresets.length === 6 && nodesPresets.length === 6,
+    'DEF-31: 18 Golden Presets are balanced (6 Counters, 6 Timers, and 6 Markers/Nodes)');
 assert(counterPresets.every(p => p.isFactory === true && p.settings && p.settings.easeStrength !== undefined),
     'DEF-31: All factory counter presets include isFactory flag and easeStrength');
+assert(nodesPresets.every(p => p.isFactory === true && p.settings && p.settings.nodes && p.settings.nodes.length >= 3),
+    'DEF-31: All factory nodes presets include waypoint sequence with at least 3 nodes');
 
 // DEF-32: Live Preset Inspector & Filter DOM & CSS Contract
 assert(indexHtmlContent.includes('id="preset-inspector-card"') &&
@@ -606,8 +609,9 @@ assert(indexHtmlContent.includes('id="preset-inspector-card"') &&
        indexHtmlContent.includes('id="preset-preview-number"') &&
        indexHtmlContent.includes('id="btn-preset-play"') &&
        indexHtmlContent.includes('id="btn-preset-apply"') &&
-       indexHtmlContent.includes('id="btn-preset-create"'),
-    'DEF-32: index.html contains Live Preset Inspector stage and action buttons');
+       indexHtmlContent.includes('id="btn-preset-create"') &&
+       indexHtmlContent.includes('data-preset-cat="nodes"'),
+    'DEF-32: index.html contains Live Preset Inspector stage, action buttons, and Markers filter');
 assert(compactCssCode.includes('.preset-inspector-card') &&
        compactCssCode.includes('.preset-preview-stage') &&
        compactCssCode.includes('.preset-preview-number') &&
@@ -631,14 +635,20 @@ vm.runInContext(presetModelSrc, hostContext);
 vm.runInContext(presetServiceSrc, hostContext);
 
 const allPresets = hostContext.PresetService.getAll();
-assert(allPresets.length === 12,
-    'DEF-33: PresetService auto-seeds with the 12 Golden Presets on initial startup');
+assert(allPresets.length === 18,
+    'DEF-33: PresetService auto-seeds with the 18 Golden Presets on initial startup');
 const searchSnappy = hostContext.PresetService.search('Snappy', 'counter');
 assert(searchSnappy.length >= 1 && searchSnappy[0].name.includes('Social Metric'),
     'DEF-33: PresetService.search successfully finds presets by name keyword');
 const timerFiltered = hostContext.PresetService.getByCategory('timer');
 assert(timerFiltered.length === 6 && timerFiltered[0].category === 'timer',
     'DEF-33: PresetService.getByCategory correctly filters only timer presets');
+const nodesFiltered = hostContext.PresetService.getByCategory('nodes');
+assert(nodesFiltered.length === 6 && nodesFiltered[0].category === 'nodes',
+    'DEF-33: PresetService.getByCategory correctly filters only nodes/markers presets');
+const searchMilestone = hostContext.PresetService.search('Milestone', 'nodes');
+assert(searchMilestone.length >= 1 && searchMilestone[0].name.includes('Milestone 3-Tier'),
+    'DEF-33: PresetService.search finds multi-node presets by keyword');
 
 // DEF-34: Preset Duplication, EaseStrength Preservation & Factory Protection
 const duped = hostContext.PresetService.duplicate(counterPresets[0].id);

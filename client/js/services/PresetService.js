@@ -104,8 +104,18 @@ var PresetService = (function () {
         return cloned;
     }
 
+    function _resolveCategory(p) {
+        if (!p) return 'counter';
+        if (p.category) return p.category;
+        if (p.settings) {
+            if (p.settings.counterType === 'timer') return 'timer';
+            if (p.settings.counterType === 'nodes' || p.settings.nodes || p.settings.nodeSequence) return 'nodes';
+        }
+        return 'counter';
+    }
+
     /**
-     * Filter presets by category ('all', 'counter', 'timer', 'custom')
+     * Filter presets by category ('all', 'counter', 'timer', 'nodes', 'custom')
      * @param {string} category
      * @returns {Array} Filtered presets
      */
@@ -120,8 +130,7 @@ var PresetService = (function () {
         }
 
         return presets.filter(function (p) {
-            var cat = p.category || (p.settings && p.settings.counterType === 'timer' ? 'timer' : 'counter');
-            return cat === category;
+            return _resolveCategory(p) === category;
         });
     }
 
@@ -140,7 +149,7 @@ var PresetService = (function () {
         return pool.filter(function (p) {
             var name = (p.name || '').toLowerCase();
             var desc = (p.description || '').toLowerCase();
-            var type = (p.category || (p.settings && p.settings.counterType === 'timer' ? 'timer' : 'counter')).toLowerCase();
+            var type = _resolveCategory(p).toLowerCase();
             var sym = (p.settings && (p.settings.symbol || p.settings.suffix) ? (p.settings.symbol + ' ' + p.settings.suffix) : '').toLowerCase();
             return name.indexOf(q) !== -1 || desc.indexOf(q) !== -1 || type.indexOf(q) !== -1 || sym.indexOf(q) !== -1;
         });

@@ -375,6 +375,54 @@ runTest('NodesModule exports marker system methods', function () {
 });
 
 // -------------------------------------------------------------
+// [SUITE 6] Testing Multi-Node Presets & Layer Markers Integration
+// -------------------------------------------------------------
+console.log('\n[SUITE 6] Testing Multi-Node Presets & Layer Markers Integration...');
+
+var PresetDefaults = require(path.join(BASE_DIR, 'client/js/presets/PresetDefaults.js'));
+var Preset = require(path.join(BASE_DIR, 'client/js/models/Preset.js'));
+
+runTest('PresetDefaults contains 6 Golden Nodes presets', function () {
+    var factory = PresetDefaults.getFactoryPresets();
+    var nodePresets = factory.filter(function (p) { return p.category === 'nodes'; });
+    assert.strictEqual(nodePresets.length, 6);
+    assert.ok(nodePresets.every(function (p) {
+        return p.isFactory === true &&
+            p.settings &&
+            p.settings.counterType === 'nodes' &&
+            Array.isArray(p.settings.nodes) &&
+            p.settings.nodes.length >= 3;
+    }));
+});
+
+runTest('Preset model correctly resolves nodes category', function () {
+    var pNode = Preset.create('Test Node Preset', {
+        counterType: 'nodes',
+        nodes: [{ type: 'number', value: 0, time: 0 }, { type: 'number', value: 100, time: 2 }]
+    });
+    assert.strictEqual(pNode.category, 'nodes');
+    assert.strictEqual(pNode.isFactory, false);
+    assert.strictEqual(pNode.settings.counterType, 'nodes');
+});
+
+runTest('Nodes preset JSON serialization roundtrips flawlessly', function () {
+    var original = Preset.create('Roundtrip Sequence', {
+        counterType: 'nodes',
+        nodes: [
+            { id: 'n1', type: 'number', value: 0, time: 0, hold: 0.5 },
+            { id: 'n2', type: 'time', value: '00:01:00', time: 3, hold: 1.0 },
+            { id: 'n3', type: 'text', value: 'DONE', time: 5, hold: 0 }
+        ]
+    });
+    var jsonStr = Preset.toJSON(original);
+    var deserialized = Preset.fromJSON(jsonStr);
+    assert.strictEqual(deserialized.name, 'Roundtrip Sequence');
+    assert.strictEqual(deserialized.category, 'nodes');
+    assert.strictEqual(deserialized.settings.nodes.length, 3);
+    assert.strictEqual(deserialized.settings.nodes[2].value, 'DONE');
+});
+
+// -------------------------------------------------------------
 // Summary
 // -------------------------------------------------------------
 console.log('\n===============================================================');

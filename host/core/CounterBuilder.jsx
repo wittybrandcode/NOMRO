@@ -84,15 +84,23 @@ NOMRO.core.buildCounter = function (comp, settings) {
 
             if (settings.useFreeExpression) {
                 var startMarker = new MarkerValue('START');
+                startMarker.comment = 'START';
+                try { startMarker.label = 8; } catch (eStart) { }
                 markers.setValueAtTime(inTime, startMarker);
 
                 var stopMarker = new MarkerValue('STOP');
+                stopMarker.comment = 'STOP';
+                try { stopMarker.label = 8; } catch (eStop) { }
                 markers.setValueAtTime(outTime, stopMarker);
             } else {
                 var inMarker = new MarkerValue('IN');
+                inMarker.comment = 'IN';
+                try { inMarker.label = 8; } catch (eIn) { }
                 markers.setValueAtTime(inTime, inMarker);
 
                 var outMarker = new MarkerValue('OUT');
+                outMarker.comment = 'OUT';
+                try { outMarker.label = 8; } catch (eOut) { }
                 markers.setValueAtTime(outTime, outMarker);
             }
         }

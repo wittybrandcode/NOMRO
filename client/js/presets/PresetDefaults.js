@@ -1,6 +1,6 @@
 /**
  * NOMRO - Preset Defaults
- * 12 Curated Golden Factory Presets (6 Counters, 6 Timers)
+ * 18 Curated Golden Factory Presets (6 Counters, 6 Timers, 6 Markers)
  * Standardized for Motion Designers and Video Editors
  * @module presets/PresetDefaults
  */
@@ -361,6 +361,170 @@ var PresetDefaults = (function () {
                 },
                 curveLibrary: [],
                 fps: 30
+            }
+        },
+
+        // ==========================================
+        // MARKERS / NODES (6 GOLDEN PRESETS)
+        // ==========================================
+        {
+            id: 'factory_nodes_milestone_progression',
+            name: 'Milestone 3-Tier Steps',
+            category: 'nodes',
+            description: 'Multi-stage milestone progression (100 -> 500 -> 1,000) with holding periods and waypoint markers',
+            isFactory: true,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            settings: {
+                counterType: 'nodes',
+                numberFormat: 'normal',
+                symbol: '',
+                suffix: ' pts',
+                separator: ',',
+                formatPos: 'left',
+                monospace: true,
+                decimals: false,
+                commas: true,
+                easing: 'smoothOut',
+                easeStrength: 75,
+                nodes: [
+                    { id: 'node_m1', type: 'number', value: 100, time: 0.0, hold: 0.5, easing: 'smoothOut', easeStrength: 75 },
+                    { id: 'node_m2', type: 'number', value: 500, time: 2.0, hold: 1.0, easing: 'smoothOut', easeStrength: 75 },
+                    { id: 'node_m3', type: 'number', value: 1000, time: 4.5, hold: 0.0, easing: 'snappyOut', easeStrength: 85 }
+                ]
+            }
+        },
+        {
+            id: 'factory_nodes_launch_countdown',
+            name: 'Rocket Launch Sequence',
+            category: 'nodes',
+            description: 'Precision countdown passing zero into blast-off status text with colored sequence markers',
+            isFactory: true,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            settings: {
+                counterType: 'nodes',
+                numberFormat: 'normal',
+                symbol: '',
+                suffix: '',
+                separator: ':',
+                formatPos: 'left',
+                monospace: true,
+                decimals: false,
+                commas: false,
+                easing: 'linear',
+                easeStrength: 75,
+                nodes: [
+                    { id: 'node_l1', type: 'time', value: '00:00:10', time: 0.0, hold: 0.0, easing: 'linear', easeStrength: 75, timeFormat: 'ms' },
+                    { id: 'node_l2', type: 'time', value: '00:00:00', time: 5.0, hold: 0.5, easing: 'linear', easeStrength: 75, timeFormat: 'ms' },
+                    { id: 'node_l3', type: 'text', value: 'LIFT OFF!', time: 6.0, hold: 1.0, easing: 'snappyOut', easeStrength: 90 }
+                ]
+            }
+        },
+        {
+            id: 'factory_nodes_crypto_surge',
+            name: 'Market Surge & Profit Pulse',
+            category: 'nodes',
+            description: 'Dynamic market valuation rally ($45 -> $120 -> +166% -> $350 ATH)',
+            isFactory: true,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            settings: {
+                counterType: 'nodes',
+                numberFormat: 'normal',
+                symbol: '$',
+                suffix: '',
+                separator: ',',
+                formatPos: 'left',
+                monospace: true,
+                decimals: true,
+                commas: true,
+                easing: 'smoothOut',
+                easeStrength: 75,
+                nodes: [
+                    { id: 'node_c1', type: 'number', value: 45.0, time: 0.0, hold: 0.0, easing: 'smoothOut', easeStrength: 75 },
+                    { id: 'node_c2', type: 'number', value: 120.0, time: 2.0, hold: 0.5, easing: 'smoothOut', easeStrength: 75 },
+                    { id: 'node_c3', type: 'delta', value: 166.7, time: 3.5, hold: 0.8, easing: 'snappyOut', easeStrength: 85, deltaSymbol: '+', deltaSuffix: '%' },
+                    { id: 'node_c4', type: 'number', value: 350.0, time: 5.5, hold: 0.0, easing: 'overshoot', easeStrength: 80 }
+                ]
+            }
+        },
+        {
+            id: 'factory_nodes_gaming_multiplier',
+            name: 'Gaming Multiplier Combo',
+            category: 'nodes',
+            description: 'Rapid combo acceleration from 1.0x to 10.0x ending in MAX COMBO! badge',
+            isFactory: true,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            settings: {
+                counterType: 'nodes',
+                numberFormat: 'normal',
+                symbol: '',
+                suffix: 'x',
+                separator: '',
+                formatPos: 'left',
+                monospace: true,
+                decimals: true,
+                commas: false,
+                easing: 'snappyOut',
+                easeStrength: 80,
+                nodes: [
+                    { id: 'node_g1', type: 'number', value: 1.0, time: 0.0, hold: 0.0, easing: 'smoothOut', easeStrength: 70 },
+                    { id: 'node_g2', type: 'number', value: 3.5, time: 1.5, hold: 0.3, easing: 'snappyOut', easeStrength: 80 },
+                    { id: 'node_g3', type: 'number', value: 10.0, time: 3.0, hold: 0.5, easing: 'overshoot', easeStrength: 85 },
+                    { id: 'node_g4', type: 'text', value: 'MAX COMBO!', time: 4.2, hold: 0.0, easing: 'snappyOut', easeStrength: 90 }
+                ]
+            }
+        },
+        {
+            id: 'factory_nodes_workout_circuit',
+            name: 'HIIT Interval Circuit',
+            category: 'nodes',
+            description: 'Workout circuit with time blocks and rest states (WORK: 30s -> 00:30 -> 00:00 -> REST!)',
+            isFactory: true,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            settings: {
+                counterType: 'nodes',
+                numberFormat: 'normal',
+                symbol: '',
+                suffix: '',
+                separator: ':',
+                formatPos: 'left',
+                monospace: true,
+                decimals: false,
+                commas: false,
+                easing: 'linear',
+                easeStrength: 75,
+                nodes: [
+                    { id: 'node_w1', type: 'text', value: 'WORK: 30s', time: 0.0, hold: 0.5, easing: 'snappyOut', easeStrength: 75 },
+                    { id: 'node_w2', type: 'time', value: '00:00:30', time: 0.6, hold: 0.0, easing: 'linear', easeStrength: 75, timeFormat: 'ms' },
+                    { id: 'node_w3', type: 'time', value: '00:00:00', time: 4.0, hold: 0.5, easing: 'linear', easeStrength: 75, timeFormat: 'ms' },
+                    { id: 'node_w4', type: 'text', value: 'REST!', time: 4.6, hold: 1.0, easing: 'smoothOut', easeStrength: 80 }
+                ]
+            }
+        },
+        {
+            id: 'factory_nodes_split_chrono',
+            name: 'Precision Checkpoint Chrono',
+            category: 'nodes',
+            description: 'Multi-checkpoint racing sequence across 3 split times (0 -> 250 -> 750 -> 1,000)',
+            isFactory: true,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            settings: {
+                counterType: 'nodes',
+                numberFormat: 'normal',
+                symbol: '',
+                suffix: '',
+                separator: ',',
+                formatPos: 'left',
+                monospace: true,
+                decimals: false,
+                commas: true,
+                easing: 'smoothOut',
+                easeStrength: 75,
+                nodes: [
+                    { id: 'node_p1', type: 'number', value: 0, time: 0.0, hold: 0.2, easing: 'smoothOut', easeStrength: 75 },
+                    { id: 'node_p2', type: 'number', value: 250, time: 1.5, hold: 0.4, easing: 'smoothOut', easeStrength: 75 },
+                    { id: 'node_p3', type: 'number', value: 750, time: 3.0, hold: 0.4, easing: 'smoothOut', easeStrength: 75 },
+                    { id: 'node_p4', type: 'number', value: 1000, time: 4.5, hold: 0.0, easing: 'smoothOut', easeStrength: 75 }
+                ]
             }
         }
     ];

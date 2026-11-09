@@ -57,11 +57,13 @@ NOMRO.core.buildCountdown = function (comp, settings) {
             // IN marker at startAt
             var inMarker = new MarkerValue('IN');
             inMarker.comment = 'IN';
+            try { inMarker.label = 9; } catch (eIn) { }
             markers.setValueAtTime(startAt, inMarker);
 
             // OUT marker at startAt + duration
             var outMarker = new MarkerValue('OUT');
             outMarker.comment = 'OUT';
+            try { outMarker.label = 9; } catch (eOut) { }
             markers.setValueAtTime(startAt + duration, outMarker);
         }
 

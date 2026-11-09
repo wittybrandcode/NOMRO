@@ -113,6 +113,81 @@ var PresetView = (function () {
         return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
     }
 
+    function _isNodesPreset(preset) {
+        if (!preset) return false;
+        if (preset.category === 'nodes') return true;
+        if (preset.settings) {
+            return preset.settings.counterType === 'nodes' || !!(preset.settings.nodes && preset.settings.nodes.length);
+        }
+        return false;
+    }
+
+    /**
+     * Format a waypoint node value for preview
+     * @private
+     */
+    function _formatNodeValue(settings, node) {
+        if (!node) return '0';
+        var type = node.type || 'number';
+        if (type === 'time') {
+            return String(node.value || '00:00:00');
+        } else if (type === 'text') {
+            return String(node.value !== undefined ? node.value : '');
+        } else if (type === 'delta') {
+            var sym = node.deltaSymbol || '+';
+            var suf = node.deltaSuffix || '%';
+            return sym + (node.value !== undefined ? node.value : 0) + suf;
+        } else {
+            return _formatCounterValue(settings, node.value !== undefined ? node.value : 0);
+        }
+    }
+
+    /**
+     * Standalone piecewise evaluator for multi-node sequence preview
+     * @private
+     */
+    function _evaluateNodesPreview(nodeList, simT, settings) {
+        if (!nodeList || nodeList.length === 0) return '0';
+        var first = nodeList[0];
+        if (simT <= (parseFloat(first.time) || 0)) {
+            return _formatNodeValue(settings, first);
+        }
+
+        for (var idx = 0; idx < nodeList.length - 1; idx++) {
+            var nA = nodeList[idx];
+            var nB = nodeList[idx + 1];
+            var tA = parseFloat(nA.time) || 0;
+            var hA = parseFloat(nA.hold) || 0;
+            var tB = parseFloat(nB.time) || 0;
+            var tDepart = tA + hA;
+
+            if (simT >= tA && simT < tDepart) {
+                return _formatNodeValue(settings, nA);
+            }
+
+            if (simT >= tDepart && simT <= tB) {
+                var segDur = tB - tDepart;
+                var factor = segDur > 0 ? (simT - tDepart) / segDur : 1;
+                var curve = nA.easing || (settings && settings.easing) || 'smoothOut';
+                var strength = nA.easeStrength !== undefined ? nA.easeStrength : ((settings && settings.easeStrength !== undefined) ? settings.easeStrength : 75);
+                var k = (typeof EasingRuntime !== 'undefined' && EasingRuntime.evaluateById)
+                    ? EasingRuntime.evaluateById(curve, factor, strength)
+                    : factor;
+
+                if (nA.type === 'number' && nB.type === 'number') {
+                    var vA = parseFloat(nA.value) || 0;
+                    var vB = parseFloat(nB.value) || 0;
+                    var inter = vA + (vB - vA) * k;
+                    return _formatCounterValue(settings, inter);
+                } else {
+                    return (k < 1) ? _formatNodeValue(settings, nA) : _formatNodeValue(settings, nB);
+                }
+            }
+        }
+
+        return _formatNodeValue(settings, nodeList[nodeList.length - 1]);
+    }
+
     /**
      * Render the target display value of a preset
      * @private
@@ -120,8 +195,15 @@ var PresetView = (function () {
     function _getPresetDisplayValue(preset, isFinal) {
         if (!preset || !preset.settings) return '---';
         var s = preset.settings;
-        var isTimer = s.counterType === 'timer';
 
+        if (_isNodesPreset(preset)) {
+            var nodes = s.nodes || [];
+            if (!nodes.length) return '---';
+            var target = isFinal ? nodes[nodes.length - 1] : nodes[0];
+            return _formatNodeValue(s, target);
+        }
+
+        var isTimer = s.counterType === 'timer';
         if (isTimer) {
             var val = isFinal ? s.end : s.start;
             return _formatTimerValue(s, val !== undefined ? val : 0);
@@ -142,22 +224,38 @@ var PresetView = (function () {
         stopPreview();
 
         var s = preset.settings;
+        var isNodes = _isNodesPreset(preset);
         var isTimer = s.counterType === 'timer';
 
         if (_elements.inspectorType) {
-            _elements.inspectorType.textContent = isTimer ? 'TIMER' : 'COUNTER';
+            _elements.inspectorType.textContent = isNodes ? 'MARKERS' : (isTimer ? 'TIMER' : 'COUNTER');
         }
         if (_elements.inspectorName) {
             _elements.inspectorName.textContent = preset.name || 'Untitled Preset';
             _elements.inspectorName.title = preset.description || preset.name || '';
         }
         if (_elements.inspectorEasing) {
-            var curve = s.easing || (s.easingConfig ? s.easingConfig.singleCurveId : 'smoothOut');
-            var str = s.easeStrength !== undefined ? s.easeStrength : (s.easingConfig ? s.easingConfig.easeStrength : 75);
-            _elements.inspectorEasing.textContent = curve === 'linear' ? 'Linear' : (curve + ' (' + str + '%)');
+            if (isNodes) {
+                var count = (s.nodes && s.nodes.length) ? s.nodes.length : 0;
+                _elements.inspectorEasing.textContent = count + ' Waypoints';
+            } else {
+                var curve = s.easing || (s.easingConfig ? s.easingConfig.singleCurveId : 'smoothOut');
+                var str = s.easeStrength !== undefined ? s.easeStrength : (s.easingConfig ? s.easingConfig.easeStrength : 75);
+                _elements.inspectorEasing.textContent = curve === 'linear' ? 'Linear' : (curve + ' (' + str + '%)');
+            }
         }
         if (_elements.inspectorDur) {
-            _elements.inspectorDur.textContent = (s.duration || 2) + 's';
+            if (isNodes) {
+                var nodes = s.nodes || [];
+                var totalDur = 2.0;
+                if (nodes.length > 0) {
+                    var last = nodes[nodes.length - 1];
+                    totalDur = (parseFloat(last.time) || 0) + (parseFloat(last.hold) || 0);
+                }
+                _elements.inspectorDur.textContent = totalDur.toFixed(1) + 's';
+            } else {
+                _elements.inspectorDur.textContent = (s.duration || 2) + 's';
+            }
         }
         if (_elements.previewNumber) {
             _elements.previewNumber.textContent = _getPresetDisplayValue(preset, true);
@@ -208,7 +306,42 @@ var PresetView = (function () {
         }
 
         var s = preset.settings;
-        var isTimer = s.counterType === 'timer';
+        var isNodes = _isNodesPreset(preset);
+        var isTimer = !isNodes && s.counterType === 'timer';
+
+        if (isNodes) {
+            var nodes = s.nodes || [];
+            if (!nodes.length) {
+                stopPreview();
+                return;
+            }
+            var lastNode = nodes[nodes.length - 1];
+            var totalSeqDuration = (parseFloat(lastNode.time) || 0) + (parseFloat(lastNode.hold) || 0);
+            if (totalSeqDuration <= 0) totalSeqDuration = 4.0;
+            var animDuration = Math.max(1200, Math.min(3500, totalSeqDuration * 1000));
+            var startTime = performance.now();
+
+            function stepNodes(now) {
+                if (!_isAnimating) return;
+                var elapsed = now - startTime;
+                var progress = Math.min(elapsed / animDuration, 1);
+                var simTime = progress * totalSeqDuration;
+
+                if (_elements.previewNumber) {
+                    _elements.previewNumber.textContent = _evaluateNodesPreview(nodes, simTime, s);
+                }
+
+                if (progress < 1) {
+                    _animFrameId = requestAnimationFrame(stepNodes);
+                } else {
+                    stopPreview();
+                }
+            }
+
+            _animFrameId = requestAnimationFrame(stepNodes);
+            return;
+        }
+
         var startVal = s.start !== undefined ? parseFloat(s.start) : 0;
         var endVal = s.end !== undefined ? parseFloat(s.end) : 100;
         var rawDur = parseFloat(s.duration) || 2;
@@ -286,16 +419,22 @@ var PresetView = (function () {
         for (var i = 0; i < presets.length; i++) {
             var preset = presets[i];
             var isSelected = (preset.id === activePreset.id);
-            var isTimer = preset.settings && preset.settings.counterType === 'timer';
+            var isNodes = _isNodesPreset(preset);
+            var isTimer = !isNodes && preset.settings && preset.settings.counterType === 'timer';
 
             var item = document.createElement('div');
             item.className = 'preset-item-compact' + (isSelected ? ' is-selected' : '');
             item.setAttribute('data-id', preset.id);
 
-            // Icon SVG (Timer vs Counter)
-            var iconSvg = isTimer
-                ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>'
-                : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><text x="7" y="16" font-size="10" font-weight="bold" fill="currentColor">#</text></svg>';
+            // Icon SVG (Nodes/Markers vs Timer vs Counter)
+            var iconSvg = '';
+            if (isNodes) {
+                iconSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 0-4 4c0 3 4 8 4 8s4-5 4-8a4 4 0 0 0-4-4z"></path><circle cx="12" cy="6" r="1.5"></circle></svg>';
+            } else if (isTimer) {
+                iconSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
+            } else {
+                iconSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><text x="7" y="16" font-size="10" font-weight="bold" fill="currentColor">#</text></svg>';
+            }
 
             var badgeHtml = preset.isFactory
                 ? '<span class="preset-item-badge preset-item-badge--factory">DEFAULT</span>'
