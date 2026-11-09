@@ -276,7 +276,27 @@ var NodesView = (function () {
         var track = document.createElement('div');
         track.className = 'nodes-ruler-track';
 
-        // Playhead indicator needle
+        // Background Timecode Hash Ticks
+        var ticksEl = document.createElement('div');
+        ticksEl.className = 'nodes-ruler-ticks';
+        var tickStep = maxTime <= 4 ? 0.5 : (maxTime <= 10 ? 1 : 2);
+        for (var tk = 0; tk <= maxTime + 0.001; tk += tickStep) {
+            var tkPct = Math.min(100, (tk / maxTime) * 100);
+            var tick = document.createElement('div');
+            var isMajor = Math.abs(tk % (tickStep * 2)) < 0.01 || tk === 0 || Math.abs(tk - maxTime) < 0.01;
+            tick.className = 'nodes-tick' + (isMajor ? ' nodes-tick-major' : '');
+            tick.style.left = tkPct.toFixed(2) + '%';
+            if (isMajor) {
+                var tickLabel = document.createElement('span');
+                tickLabel.className = 'nodes-tick-label';
+                tickLabel.textContent = tk.toFixed(1) + 's';
+                tick.appendChild(tickLabel);
+            }
+            ticksEl.appendChild(tick);
+        }
+        track.appendChild(ticksEl);
+
+        // Playhead indicator needle (glides across ruler)
         var playhead = document.createElement('div');
         playhead.className = 'ruler-playhead';
         playhead.style.left = '0%';
@@ -291,7 +311,15 @@ var NodesView = (function () {
             pin.setAttribute('data-node-index', index);
             pin.setAttribute('title', '#' + (index + 1) + ' [' + (node.type || 'NUM').toUpperCase() + ': ' + node.value + '] at ' + (node.time || 0) + 's');
 
-            var pinHtml = '<span class="ruler-pin-head">#' + (index + 1) + '</span><span class="ruler-pin-stem"></span>';
+            var typeBadges = { number: 'NUM', time: 'TIME', text: 'TXT', delta: '±' };
+            var badgeText = typeBadges[node.type] || 'NUM';
+
+            var pinHtml = '<div class="ruler-pin-head ruler-pin-flag">' +
+                '<span class="ruler-pin-index">#' + (index + 1) + '</span>' +
+                '<span class="ruler-pin-type">' + badgeText + '</span>' +
+                '</div>' +
+                '<span class="ruler-pin-stem"></span>' +
+                '<span class="ruler-pin-anchor"></span>';
             pin.innerHTML = pinHtml;
 
             pin.addEventListener('click', function (e) {
@@ -301,14 +329,20 @@ var NodesView = (function () {
 
             track.appendChild(pin);
 
-            // Hold bar
+            // Elevated Hold Duration Ribbon
             if (node.hold && parseFloat(node.hold) > 0) {
                 var holdPct = Math.min(100 - pct, ((parseFloat(node.hold) || 0) / maxTime) * 100);
                 var holdBar = document.createElement('div');
-                holdBar.className = 'nodes-ruler-hold';
+                holdBar.className = 'nodes-ruler-hold type-' + (node.type || 'number');
                 holdBar.style.left = pct.toFixed(2) + '%';
                 holdBar.style.width = holdPct.toFixed(2) + '%';
                 holdBar.setAttribute('title', 'Hold pause: ' + node.hold + 's');
+                if (holdPct >= 7) {
+                    var innerHold = document.createElement('span');
+                    innerHold.className = 'hold-inner-label';
+                    innerHold.textContent = '+' + parseFloat(node.hold).toFixed(1) + 's';
+                    holdBar.appendChild(innerHold);
+                }
                 track.appendChild(holdBar);
             }
         });

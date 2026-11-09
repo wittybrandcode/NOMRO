@@ -66,6 +66,9 @@ var NodesModule = (function () {
         _elements.previewNodesVal = document.getElementById('preview-nodes-val');
         _elements.previewNodesProgress = document.getElementById('preview-nodes-progress-fill');
         _elements.previewNodesStage = document.getElementById('preview-nodes-stage-indicator');
+        _elements.hudCurrentTime = document.getElementById('nodes-hud-current-time');
+        _elements.hudTotalTime = document.getElementById('nodes-hud-total-time');
+        _elements.transportStatus = document.getElementById('nodes-transport-status');
         _elements.playPreviewBtn = document.getElementById('nodes-play-preview');
         _elements.stopPreviewBtn = document.getElementById('nodes-stop-preview');
         _elements.resetPreviewBtn = document.getElementById('nodes-reset-preview');
@@ -724,11 +727,20 @@ var NodesModule = (function () {
 
         // Smoothly position timeline ruler playhead needle
         var needle = _elements.markerRuler ? _elements.markerRuler.querySelector('.ruler-playhead') : null;
+        var seqList = _state.nodes.sequence;
+        var maxT = (seqList && seqList.length > 0) ? Math.max(0.001, seqList[seqList.length - 1].time || 0) : 1;
+
         if (needle) {
-            var seqList = _state.nodes.sequence;
-            var maxT = (seqList && seqList.length > 0) ? Math.max(0.001, seqList[seqList.length - 1].time || 0) : 1;
             var normPct = Math.min(100, Math.max(0, (t / maxT) * 100));
             needle.style.left = normPct.toFixed(2) + '%';
+        }
+
+        // Update HUD live timecode readouts
+        if (_elements.hudCurrentTime) {
+            _elements.hudCurrentTime.textContent = t.toFixed(2) + 's';
+        }
+        if (_elements.hudTotalTime) {
+            _elements.hudTotalTime.textContent = maxT.toFixed(2) + 's';
         }
     }
 
@@ -741,6 +753,10 @@ var NodesModule = (function () {
 
         if (_elements.playPreviewBtn) _elements.playPreviewBtn.style.display = 'none';
         if (_elements.stopPreviewBtn) _elements.stopPreviewBtn.style.display = 'inline-flex';
+        if (_elements.transportStatus) {
+            _elements.transportStatus.textContent = 'PLAYING';
+            _elements.transportStatus.classList.add('playing');
+        }
 
         var seq = _state.nodes.sequence;
         if (!seq || seq.length === 0) return;
@@ -780,6 +796,10 @@ var NodesModule = (function () {
 
         if (_elements.playPreviewBtn) _elements.playPreviewBtn.style.display = 'inline-flex';
         if (_elements.stopPreviewBtn) _elements.stopPreviewBtn.style.display = 'none';
+        if (_elements.transportStatus) {
+            _elements.transportStatus.textContent = 'PAUSED';
+            _elements.transportStatus.classList.remove('playing');
+        }
     }
 
     /**
@@ -787,6 +807,10 @@ var NodesModule = (function () {
      */
     function resetPreview() {
         stopPreview();
+        if (_elements.transportStatus) {
+            _elements.transportStatus.textContent = 'READY';
+            _elements.transportStatus.classList.remove('playing');
+        }
         var seq = _state.nodes.sequence;
         var startT = (seq && seq.length > 0) ? (seq[0].time || 0) : 0;
         updatePreviewAtTime(startT);
