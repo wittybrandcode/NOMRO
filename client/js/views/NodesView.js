@@ -64,7 +64,10 @@ var NodesView = (function () {
             var html = '';
             // Elevated High-Density Primary Row: Type, Value, Time, CTI & Delete
             html += '<div class="node-row-primary">';
-            html += '  <span class="node-badge ' + typeColorClass + '" title="Waypoint Marker #' + (index + 1) + '">📍 #' + (index + 1) + '</span>';
+            html += '  <span class="node-badge ' + typeColorClass + '" title="Waypoint Marker #' + (index + 1) + '">';
+            html += '    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="5"></circle><line x1="12" y1="13" x2="12" y2="22"></line></svg>';
+            html += '    <span>#' + (index + 1) + '</span>';
+            html += '  </span>';
             html += '  <select class="node-select-type select-compact" data-field="type" title="Marker Value Type (نوع القيمة)">';
             html += '    <option value="number"' + (node.type === 'number' ? ' selected' : '') + '>Number</option>';
             html += '    <option value="time"' + (node.type === 'time' ? ' selected' : '') + '>Time</option>';
@@ -77,10 +80,14 @@ var NodesView = (function () {
             html += '    <input type="text" class="node-input-val input-field-compact" data-field="value" value="' + _escapeHtml(node.value) + '" placeholder="' + valPlaceholder + '">';
             html += '  </div>';
 
-            html += '  <div class="node-time-wrapper input-unit-compact" title="Marker Time in Seconds (توقيت الماركر بالثواني)">';
-            html += '    <span class="node-time-icon">⏱️</span>';
-            html += '    <input type="number" class="node-input-time input-short" data-field="time" step="0.1" min="0" value="' + parseFloat((node.time || 0).toFixed(2)) + '">';
-            html += '    <span class="node-unit">s</span>';
+            html += '  <div class="input-wrapper-compact node-time-wrapper" title="Marker Time in Seconds (توقيت الماركر بالثواني)">';
+            html += '    <svg class="input-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
+            html += '    <input type="text" inputmode="decimal" class="input-field-compact node-input-time" data-field="time" step="0.1" min="0" value="' + parseFloat((node.time || 0).toFixed(2)) + '">';
+            html += '    <span class="unit-compact">s</span>';
+            html += '    <div class="input-arrows-compact">';
+            html += '      <button type="button" class="input-arrow-compact" data-action="up" title="Increase (+0.1s | Shift: +1s)"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"></polyline></svg></button>';
+            html += '      <button type="button" class="input-arrow-compact" data-action="down" title="Decrease (-0.1s | Shift: -1s)"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg></button>';
+            html += '    </div>';
             html += '  </div>';
 
             if (handlers.onCaptureTime) {
@@ -100,9 +107,13 @@ var NodesView = (function () {
             html += '<div class="node-row-secondary">';
             html += '  <div class="node-param-chip" title="Hold Pause Duration at this Waypoint (فترة الثبات بعد الوصول)">';
             html += '    <span class="node-param-label">Hold</span>';
-            html += '    <div class="input-unit-compact param-unit-compact">';
-            html += '      <input type="number" class="node-input-hold input-short" data-field="hold" step="0.1" min="0" value="' + (parseFloat(node.hold) || 0) + '" placeholder="0.0">';
-            html += '      <span class="node-unit">s</span>';
+            html += '    <div class="input-wrapper-compact node-hold-wrapper">';
+            html += '      <input type="text" inputmode="decimal" class="input-field-compact node-input-hold" data-field="hold" step="0.1" min="0" value="' + (parseFloat(node.hold) || 0) + '" placeholder="0.0">';
+            html += '      <span class="unit-compact">s</span>';
+            html += '      <div class="input-arrows-compact">';
+            html += '        <button type="button" class="input-arrow-compact" data-action="up" title="Increase (+0.1s | Shift: +1s)"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"></polyline></svg></button>';
+            html += '        <button type="button" class="input-arrow-compact" data-action="down" title="Decrease (-0.1s | Shift: -1s)"><svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg></button>';
+            html += '      </div>';
             html += '    </div>';
             html += '  </div>';
 
@@ -132,7 +143,12 @@ var NodesView = (function () {
                 var deltaT = Math.max(0, (nextNode.time || 0) - (node.time || 0)).toFixed(1);
                 var connector = document.createElement('div');
                 connector.className = 'node-connector';
-                connector.innerHTML = '<div class="node-connector-line"></div><span class="node-connector-delta">➔ Δ ' + deltaT + 's</span><div class="node-connector-line"></div>';
+                connector.innerHTML = '<div class="node-connector-line"></div>' +
+                    '<span class="node-connector-delta">' +
+                    '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>' +
+                    '<span>Δ ' + deltaT + 's</span>' +
+                    '</span>' +
+                    '<div class="node-connector-line"></div>';
                 container.appendChild(connector);
             }
         });
@@ -239,6 +255,56 @@ var NodesView = (function () {
                 }
             });
         }
+
+        // Precision Stepper Arrows
+        var arrows = card.querySelectorAll('.input-arrow-compact');
+        arrows.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                var action = btn.getAttribute('data-action');
+                var wrapper = btn.closest('.input-wrapper-compact');
+                var targetInput = wrapper ? wrapper.querySelector('input') : null;
+                if (targetInput) {
+                    _stepField(targetInput, action, e);
+                }
+            });
+        });
+
+        // Keyboard Arrow Stepping on inputs
+        [timeInput, holdInput].forEach(function (inp) {
+            if (!inp) return;
+            inp.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    _stepField(inp, 'up', e);
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    _stepField(inp, 'down', e);
+                }
+            });
+        });
+    }
+
+    /**
+     * Step input field value with Shift/Alt modifier support
+     * @private
+     */
+    function _stepField(input, action, e) {
+        if (!input) return;
+        if (typeof UIControls !== 'undefined' && UIControls.stepInput) {
+            UIControls.stepInput(input, action, e);
+            return;
+        }
+        var current = parseFloat(input.value) || 0;
+        var step = parseFloat(input.getAttribute('step')) || 0.1;
+        if (e && e.shiftKey) step *= 10;
+        else if (e && e.altKey) step = Math.max(step / 10, 0.01);
+        var min = input.getAttribute('min') !== null ? parseFloat(input.getAttribute('min')) : 0;
+        var next = action === 'up' ? current + step : current - step;
+        next = Math.max(min, next);
+        input.value = parseFloat(next.toFixed(2));
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
     }
 
     /**

@@ -2260,6 +2260,7 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 4px;
     height: 24px;
     padding: 0 6px;
     font-size: 9.5px;
@@ -2314,34 +2315,40 @@ body {
     height: 24px;
 }
 
-.node-time-box,
-.node-time-wrapper {
-    display: inline-flex;
-    align-items: center;
-    background: var(--bg-input);
-    border: 1px solid var(--border-subtle);
-    padding: 0 4px;
-    gap: 3px;
+.node-card .input-wrapper-compact,
+.marker-quick-row .input-wrapper-compact {
     height: 24px;
+}
+
+.node-time-wrapper {
+    width: 96px;
     flex-shrink: 0;
 }
 
-.node-time-icon {
-    font-size: 9.5px;
-    user-select: none;
+.node-hold-wrapper {
+    width: 82px;
+    flex-shrink: 0;
 }
 
-.node-input-time {
-    width: 38px;
-    height: 100%;
-    background: transparent;
-    border: none;
-    color: var(--text-bright);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 600;
-    text-align: right;
-    outline: none;
+.quick-time-box {
+    width: 96px;
+    flex-shrink: 0;
+}
+
+.quick-hold-box {
+    width: 82px;
+    flex-shrink: 0;
+}
+
+.node-card .input-arrows-compact,
+.marker-quick-row .input-arrows-compact {
+    width: 14px;
+}
+
+.node-card .input-arrows-compact .input-arrow-compact svg,
+.marker-quick-row .input-arrows-compact .input-arrow-compact svg {
+    width: 6.5px;
+    height: 6.5px;
 }
 
 .node-unit {
@@ -2508,6 +2515,9 @@ body {
 }
 
 .node-connector-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-size: 9px;
     font-family: var(--font-mono);
     color: var(--text-muted);

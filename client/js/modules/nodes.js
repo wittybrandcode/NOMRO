@@ -135,6 +135,51 @@ var NodesModule = (function () {
             });
         }
 
+        // Quick Marker Stepper Arrows
+        var quickArrows = document.querySelectorAll('.nodes-marker-creator .input-arrow-compact[data-action]');
+        quickArrows.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                var action = btn.getAttribute('data-action');
+                var targetId = btn.getAttribute('data-target');
+                var input = document.getElementById(targetId);
+                if (input) {
+                    if (typeof UIControls !== 'undefined' && UIControls.stepInput) {
+                        UIControls.stepInput(input, action, e);
+                    } else {
+                        var current = parseFloat(input.value) || 0;
+                        var step = parseFloat(input.getAttribute('step')) || 0.5;
+                        if (e && e.shiftKey) step *= 10;
+                        else if (e && e.altKey) step = Math.max(step / 10, 0.05);
+                        var min = input.getAttribute('min') !== null ? parseFloat(input.getAttribute('min')) : 0;
+                        var next = action === 'up' ? current + step : current - step;
+                        next = Math.max(min, next);
+                        input.value = parseFloat(next.toFixed(2));
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                }
+            });
+        });
+
+        // Quick Marker Keyboard Stepping
+        [_elements.quickMarkerTime, _elements.quickMarkerHold].forEach(function (inp) {
+            if (!inp) return;
+            inp.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (typeof UIControls !== 'undefined' && UIControls.stepInput) {
+                        UIControls.stepInput(inp, 'up', e);
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (typeof UIControls !== 'undefined' && UIControls.stepInput) {
+                        UIControls.stepInput(inp, 'down', e);
+                    }
+                }
+            });
+        });
+
         // Sync Markers from Layer
         if (_elements.btnSyncMarkersFromLayer) {
             _elements.btnSyncMarkersFromLayer.addEventListener('click', function () {
