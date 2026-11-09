@@ -13,6 +13,7 @@ var NodesModule = (function () {
     var _previewStartTime = null;
     var _isPlayingPreview = false;
     var _currentPreviewTime = 0;
+    var _isLooping = true;
 
     /**
      * Initialize Nodes module
@@ -75,6 +76,8 @@ var NodesModule = (function () {
         _elements.resetPreviewBtn = document.getElementById('nodes-reset-preview');
         _elements.btnPrevMarker = document.getElementById('nodes-prev-marker');
         _elements.btnNextMarker = document.getElementById('nodes-next-marker');
+        _elements.btnEndMarker = document.getElementById('nodes-end-preview');
+        _elements.btnToggleLoop = document.getElementById('nodes-toggle-loop-btn');
         _elements.toggleMonospaceBtn = document.getElementById('nodes-toggle-monospace-btn');
         _elements.toggleCommasBtn = document.getElementById('nodes-toggle-commas-btn');
     }
@@ -179,6 +182,17 @@ var NodesModule = (function () {
                 jumpToNextMarker();
             });
         }
+        if (_elements.btnEndMarker) {
+            _elements.btnEndMarker.addEventListener('click', function () {
+                jumpToEndMarker();
+            });
+        }
+        if (_elements.btnToggleLoop) {
+            _elements.btnToggleLoop.addEventListener('click', function () {
+                toggleLoop();
+            });
+        }
+        document.addEventListener('keydown', _handleNodesKeydown);
 
         // Quick Toggles
         if (_elements.toggleMonospaceBtn) {
@@ -793,12 +807,19 @@ var NodesModule = (function () {
             if (!_isPlayingPreview) return;
             var elapsedSec = (now - _previewStartTime) / 1000;
 
-            // Loop smoothly with a small pause at the end
-            var loopDuration = totalDuration + 1.0;
-            var modTime = elapsedSec % loopDuration;
-            var currentT = startTime + Math.min(modTime, totalDuration);
-
-            updatePreviewAtTime(currentT);
+            if (_isLooping) {
+                var loopDuration = totalDuration + 0.8;
+                var modTime = elapsedSec % loopDuration;
+                var currentT = startTime + Math.min(modTime, totalDuration);
+                updatePreviewAtTime(currentT);
+            } else {
+                if (elapsedSec >= totalDuration) {
+                    updatePreviewAtTime(endTime);
+                    stopPreview();
+                    return;
+                }
+                updatePreviewAtTime(startTime + elapsedSec);
+            }
 
             _previewAnimId = requestAnimationFrame(_tick);
         }
@@ -901,6 +922,64 @@ var NodesModule = (function () {
         var targetCard = _elements.nodesContainer ? _elements.nodesContainer.querySelector('[data-node-id="' + nextNode.id + '"]') : null;
         if (targetCard && targetCard.scrollIntoView) {
             targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    /**
+     * Jump playhead to last timeline marker (AE 'End' behavior)
+     */
+    function jumpToEndMarker() {
+        var seq = _state.nodes.sequence;
+        if (!seq || seq.length === 0) return;
+        stopPreview();
+
+        var lastIdx = seq.length - 1;
+        var lastNode = seq[lastIdx];
+        updatePreviewAtTime(lastNode.time || 0);
+        if (typeof NodesView !== 'undefined' && _elements.nodesContainer) {
+            NodesView.highlightActiveNode(_elements.nodesContainer, lastIdx);
+        }
+        var targetCard = _elements.nodesContainer ? _elements.nodesContainer.querySelector('[data-node-id="' + lastNode.id + '"]') : null;
+        if (targetCard && targetCard.scrollIntoView) {
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    /**
+     * Toggle preview loop mode
+     */
+    function toggleLoop() {
+        _isLooping = !_isLooping;
+        if (_elements.btnToggleLoop) {
+            _elements.btnToggleLoop.classList.toggle('active', _isLooping);
+        }
+        if (typeof MessagesModule !== 'undefined') {
+            MessagesModule.showToast(_isLooping ? 'Preview Loop: ON' : 'Preview Loop: OFF', 'info');
+        }
+    }
+
+    /**
+     * Scoped keyboard shortcuts for Markers tab (J, K, Home, End)
+     * @private
+     */
+    function _handleNodesKeydown(e) {
+        var tag = e.target.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        var panel = document.getElementById('panel-nodes');
+        if (!panel || !panel.classList.contains('active')) return;
+
+        if (e.key === 'j' || e.key === 'J') {
+            e.preventDefault();
+            jumpToPrevMarker();
+        } else if (e.key === 'k' || e.key === 'K') {
+            e.preventDefault();
+            jumpToNextMarker();
+        } else if (e.key === 'Home') {
+            e.preventDefault();
+            resetPreview();
+        } else if (e.key === 'End') {
+            e.preventDefault();
+            jumpToEndMarker();
         }
     }
 

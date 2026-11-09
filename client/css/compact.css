@@ -2150,6 +2150,17 @@ body {
     border-color: rgba(255, 255, 255, 0.25);
 }
 
+.nodes-preview-card .btn-preview-loop.active {
+    background: #14221b !important;
+    border-color: #10b981 !important;
+    color: #34d399 !important;
+}
+
+.nodes-preview-card .btn-preview-loop.active svg {
+    color: #34d399 !important;
+    stroke: #34d399 !important;
+}
+
 .nodes-toolbar {
     display: flex;
     align-items: center;
@@ -2588,13 +2599,39 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.10);
     padding: 0 14px;
     box-sizing: border-box;
-    cursor: pointer;
+    cursor: ew-resize;
     user-select: none;
     overflow: hidden;
 }
 
-.nodes-marker-ruler-rail:hover {
-    border-color: rgba(91, 141, 239, 0.4);
+.nodes-marker-ruler-rail:hover,
+.nodes-marker-ruler-rail.is-scrubbing {
+    border-color: rgba(91, 141, 239, 0.5);
+}
+
+/* Micro Ticks on Ruler Track */
+.nodes-ruler-ticks {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.nodes-ruler-tick {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(-50%);
+}
+
+.nodes-ruler-tick.tick-major {
+    height: 5px;
+    background: rgba(255, 255, 255, 0.35);
 }
 
 .nodes-ruler-wire {
@@ -2615,10 +2652,10 @@ body {
     overflow: visible;
 }
 
-/* Clean AE-Style Marker Pins */
+/* Authentic AE Pentagon Marker Pins */
 .nodes-ruler-pin {
     position: absolute;
-    top: 4px;
+    top: 3px;
     transform: translateX(-50%);
     cursor: pointer;
     z-index: 6;
@@ -2626,32 +2663,52 @@ body {
     flex-direction: column;
     align-items: center;
     user-select: none;
+    transition: transform 0.1s ease;
 }
 
 .nodes-ruler-pin:hover {
-    z-index: 10;
+    transform: translateX(-50%) scale(1.18);
+    z-index: 15;
 }
 
 .ruler-pin-flag {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 16px;
-    height: 16px;
-    padding: 0 3px;
+    width: 17px;
+    height: 17px;
+    padding: 0 0 2px 0;
     font-size: 8.5px;
     font-family: var(--font-mono);
-    font-weight: 700;
+    font-weight: 800;
     border: 1px solid;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
     line-height: 1;
     box-sizing: border-box;
 }
 
 .ruler-pin-stem {
-    width: 1px;
-    height: 16px;
+    width: 1.5px;
+    height: 13px;
     background: currentColor;
     opacity: 0.85;
+    margin-top: -1px;
+}
+
+/* Active Pin Highlight */
+.nodes-ruler-pin.active {
+    z-index: 10;
+}
+
+.nodes-ruler-pin.active .ruler-pin-flag {
+    border-color: #ffffff !important;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
+}
+
+.nodes-ruler-pin.active .ruler-pin-stem {
+    background: #ffffff !important;
+    opacity: 1;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.6));
 }
 
 .nodes-ruler-pin.type-number {
@@ -2690,14 +2747,15 @@ body {
     background: #21180b;
 }
 
-/* Hold Duration Bar */
+/* Hold Duration Bar with AE Bracket */
 .nodes-ruler-hold {
     position: absolute;
     top: 17px;
     height: 10px;
-    background: rgba(91, 141, 239, 0.15);
+    background: rgba(91, 141, 239, 0.14);
     border: 1px solid rgba(91, 141, 239, 0.45);
     border-left: none;
+    border-right: 2px solid #5b8def;
     z-index: 3;
     pointer-events: none;
     box-sizing: border-box;

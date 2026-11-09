@@ -19,6 +19,7 @@ var KeyboardShortcuts = (function () {
         '1': { action: 'switchTab', param: 'counter', desc: 'فتح تبويب Counter' },
         '2': { action: 'switchTab', param: 'timer', desc: 'فتح تبويب Timer' },
         '3': { action: 'switchTab', param: 'presets', desc: 'فتح تبويب Presets' },
+        '4': { action: 'switchTab', param: 'nodes', desc: 'فتح تبويب Markers' },
 
         // Preview controls
         ' ': { action: 'playPreview', desc: 'تشغيل المعاينة' },

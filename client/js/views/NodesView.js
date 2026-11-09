@@ -256,10 +256,23 @@ var NodesView = (function () {
                 cards[i].classList.remove('node-card-active');
             }
         }
+
+        // Also synchronize active pin on timeline ruler rail
+        var rail = document.getElementById('nodes-marker-ruler-rail');
+        if (rail) {
+            var pins = rail.querySelectorAll('.nodes-ruler-pin');
+            for (var p = 0; p < pins.length; p++) {
+                if (p === activeIndex) {
+                    pins[p].classList.add('active');
+                } else {
+                    pins[p].classList.remove('active');
+                }
+            }
+        }
     }
 
     /**
-     * Render visual marker timeline ruler
+     * Render visual marker timeline ruler with magnetic snapping & AE marker pins
      * @param {HTMLElement} container
      * @param {Array} sequence
      * @param {Function} onMarkerClick
@@ -271,23 +284,36 @@ var NodesView = (function () {
 
         if (!sequence || sequence.length === 0) return;
 
-        var maxTime = Math.max(1, sequence[sequence.length - 1].time || 0);
+        var maxTime = Math.max(0.5, sequence[sequence.length - 1].time || 0);
 
         var track = document.createElement('div');
         track.className = 'nodes-ruler-track';
 
-        // Clean baseline rail wire
+        // 1. Subtle Micro-Ticks on Track (clean non-colliding visual scale)
+        var ticksContainer = document.createElement('div');
+        ticksContainer.className = 'nodes-ruler-ticks';
+        var tickCount = (maxTime <= 5) ? Math.max(2, Math.round(maxTime * 2)) : 5;
+        for (var tIdx = 0; tIdx <= tickCount; tIdx++) {
+            var tick = document.createElement('span');
+            var isMajor = (tIdx === 0 || tIdx === tickCount || tIdx % 2 === 0);
+            tick.className = 'nodes-ruler-tick' + (isMajor ? ' tick-major' : '');
+            tick.style.left = ((tIdx / tickCount) * 100).toFixed(2) + '%';
+            ticksContainer.appendChild(tick);
+        }
+        track.appendChild(ticksContainer);
+
+        // 2. Clean baseline rail wire (horizontal alignment guide)
         var wire = document.createElement('div');
         wire.className = 'nodes-ruler-wire';
         track.appendChild(wire);
 
-        // Playhead indicator needle (glides across ruler)
+        // 3. Playhead indicator needle (glides across ruler)
         var playhead = document.createElement('div');
         playhead.className = 'ruler-playhead';
         playhead.style.left = '0%';
         track.appendChild(playhead);
 
-        // Render hold duration bars behind pins
+        // 4. Render hold duration bars behind pins
         sequence.forEach(function (node, index) {
             var pct = Math.min(100, Math.max(0, ((node.time || 0) / maxTime) * 100));
             if (node.hold && parseFloat(node.hold) > 0) {
@@ -296,22 +322,22 @@ var NodesView = (function () {
                 holdBar.className = 'nodes-ruler-hold type-' + (node.type || 'number');
                 holdBar.style.left = pct.toFixed(2) + '%';
                 holdBar.style.width = holdPct.toFixed(2) + '%';
-                holdBar.setAttribute('title', 'Hold: ' + node.hold + 's');
+                holdBar.setAttribute('title', 'Hold: ' + node.hold + 's (ثبات)');
                 track.appendChild(holdBar);
             }
         });
 
-        // Render clean, distinct marker pins
+        // 5. Render clean, distinct AE marker pins
         sequence.forEach(function (node, index) {
             var pct = Math.min(100, Math.max(0, ((node.time || 0) / maxTime) * 100));
             var pin = document.createElement('div');
-            pin.className = 'nodes-ruler-pin type-' + (node.type || 'number');
+            pin.className = 'nodes-ruler-pin type-' + (node.type || 'number') + (index === 0 ? ' active' : '');
             pin.style.left = pct.toFixed(2) + '%';
             pin.setAttribute('data-node-id', node.id);
             pin.setAttribute('data-node-index', index);
-            pin.setAttribute('title', 'Marker #' + (index + 1) + ' (' + (node.type || 'num') + '): ' + node.value + ' at ' + (node.time || 0) + 's');
+            pin.setAttribute('title', 'Marker #' + (index + 1) + ' (' + (node.type || 'number') + '): ' + node.value + ' @ ' + (node.time || 0) + 's');
 
-            var pinHtml = '<div class="ruler-pin-head ruler-pin-flag">' + (index + 1) + '</div>' +
+            var pinHtml = '<div class="ruler-pin-flag">' + (index + 1) + '</div>' +
                 '<span class="ruler-pin-stem"></span>';
             pin.innerHTML = pinHtml;
 
@@ -323,7 +349,7 @@ var NodesView = (function () {
             track.appendChild(pin);
         });
 
-        // Interactive Click & Drag to Scrub
+        // 6. Interactive Click & Drag to Scrub with Magnetic Snapping
         if (typeof onScrub === 'function') {
             var isDragging = false;
 
@@ -331,13 +357,24 @@ var NodesView = (function () {
                 var rect = container.getBoundingClientRect();
                 var clickX = e.clientX - rect.left - 14;
                 var availWidth = Math.max(1, rect.width - 28);
-                var pct = Math.max(0, Math.min(1, clickX / availWidth));
-                return pct * maxTime;
+                var rawPct = Math.max(0, Math.min(1, clickX / availWidth));
+                var rawTime = rawPct * maxTime;
+
+                // Magnetic Snapping to Markers within ~2.5% threshold
+                var snapThreshold = Math.max(0.06, maxTime * 0.025);
+                for (var s = 0; s < sequence.length; s++) {
+                    var mTime = sequence[s].time || 0;
+                    if (Math.abs(rawTime - mTime) <= snapThreshold) {
+                        return mTime;
+                    }
+                }
+                return rawTime;
             }
 
             container.onmousedown = function (e) {
                 if (e.target.closest('.nodes-ruler-pin')) return;
                 isDragging = true;
+                container.classList.add('is-scrubbing');
                 onScrub(getScrubTime(e));
 
                 function onMouseMove(moveEvent) {
@@ -348,6 +385,7 @@ var NodesView = (function () {
 
                 function onMouseUp() {
                     isDragging = false;
+                    container.classList.remove('is-scrubbing');
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
                 }

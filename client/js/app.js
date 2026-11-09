@@ -405,8 +405,29 @@
         if (typeof KeyboardShortcuts !== 'undefined') {
             KeyboardShortcuts.init({
                 onSwitchTab: switchTab,
-                onPlayPreview: function () { if (elements.playPreview) elements.playPreview.click(); },
-                onStopPreview: function () { if (elements.stopPreview) elements.stopPreview.click(); },
+                onPlayPreview: function () {
+                    if (App.currentTab === 'nodes') {
+                        var playBtn = document.getElementById('nodes-play-preview');
+                        var stopBtn = document.getElementById('nodes-stop-preview');
+                        if (playBtn && playBtn.style.display !== 'none') {
+                            playBtn.click();
+                        } else if (stopBtn && stopBtn.style.display !== 'none') {
+                            stopBtn.click();
+                        }
+                    } else if (elements.playPreview) {
+                        elements.playPreview.click();
+                    }
+                },
+                onStopPreview: function () {
+                    if (App.currentTab === 'nodes') {
+                        var stopBtn = document.getElementById('nodes-stop-preview');
+                        if (stopBtn && stopBtn.style.display !== 'none') {
+                            stopBtn.click();
+                        }
+                    } else if (elements.stopPreview) {
+                        elements.stopPreview.click();
+                    }
+                },
                 onCreate: function () {
                     if (App.currentTab === 'timer' && elements.btnCreateTimer) {
                         elements.btnCreateTimer.click();

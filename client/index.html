@@ -859,33 +859,45 @@
                     <!-- Transport & Quick Formatting Controls -->
                     <div class="preview-controls-row">
                         <div class="preview-controls-left">
-                            <button class="btn-preview btn-preview-reset" id="nodes-reset-preview" title="Reset to Start (إعادة ضبط للبداية)">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                                    <polyline points="1 4 1 10 7 10"></polyline>
-                                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-                                </svg>
-                            </button>
-                            <button class="btn-preview btn-preview-step" id="nodes-prev-marker" title="Jump to Previous Marker (الانتقال للماركر السابق)">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                                    <polygon points="19 20 9 12 19 4 19 20"></polygon>
+                            <button class="btn-preview btn-preview-step" id="nodes-reset-preview" title="Start (Home) - الانتقال للبداية">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                                     <line x1="5" y1="19" x2="5" y2="5"></line>
+                                    <polygon points="19 20 9 12 19 4 19 20"></polygon>
                                 </svg>
                             </button>
-                            <button class="btn-preview btn-preview-play" id="nodes-play-preview" title="Play Preview Motion (تشغيل المعاينة الحية)">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            <button class="btn-preview btn-preview-step" id="nodes-prev-marker" title="Previous Marker (J) - الماركر السابق">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="17 19 7 12 17 5 17 19"></polygon>
                                 </svg>
                             </button>
-                            <button class="btn-preview btn-preview-stop" id="nodes-stop-preview" title="Stop Preview (إيقاف المعاينة)" style="display: none;">
-                                <svg height="12" width="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <button class="btn-preview btn-preview-play" id="nodes-play-preview" title="Play Preview (Space) - تشغيل المعاينة">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="6 4 18 12 6 20 6 4"></polygon>
+                                </svg>
+                            </button>
+                            <button class="btn-preview btn-preview-stop" id="nodes-stop-preview" title="Pause Preview (Space) - إيقاف المعاينة" style="display: none;">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
                                     <rect x="6" y="4" width="4" height="16"></rect>
                                     <rect x="14" y="4" width="4" height="16"></rect>
                                 </svg>
                             </button>
-                            <button class="btn-preview btn-preview-step" id="nodes-next-marker" title="Jump to Next Marker (الانتقال للماركر التالي)">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <button class="btn-preview btn-preview-step" id="nodes-next-marker" title="Next Marker (K) - الماركر التالي">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                                    <polygon points="7 5 17 12 7 19 7 5"></polygon>
+                                </svg>
+                            </button>
+                            <button class="btn-preview btn-preview-step" id="nodes-end-preview" title="End (End) - الانتقال للنهاية">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                                     <polygon points="5 4 15 12 5 20 5 4"></polygon>
                                     <line x1="19" y1="5" x2="19" y2="19"></line>
+                                </svg>
+                            </button>
+                            <button class="btn-preview btn-preview-step btn-preview-loop active" id="nodes-toggle-loop-btn" title="Loop Preview (تكرار المعاينة)">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <polyline points="17 1 21 5 17 9"></polyline>
+                                    <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+                                    <polyline points="7 23 3 19 7 15"></polyline>
+                                    <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
                                 </svg>
                             </button>
                         </div>
