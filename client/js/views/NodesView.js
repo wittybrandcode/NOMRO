@@ -276,25 +276,10 @@ var NodesView = (function () {
         var track = document.createElement('div');
         track.className = 'nodes-ruler-track';
 
-        // Background Timecode Hash Ticks
-        var ticksEl = document.createElement('div');
-        ticksEl.className = 'nodes-ruler-ticks';
-        var tickStep = maxTime <= 4 ? 0.5 : (maxTime <= 10 ? 1 : 2);
-        for (var tk = 0; tk <= maxTime + 0.001; tk += tickStep) {
-            var tkPct = Math.min(100, (tk / maxTime) * 100);
-            var tick = document.createElement('div');
-            var isMajor = Math.abs(tk % (tickStep * 2)) < 0.01 || tk === 0 || Math.abs(tk - maxTime) < 0.01;
-            tick.className = 'nodes-tick' + (isMajor ? ' nodes-tick-major' : '');
-            tick.style.left = tkPct.toFixed(2) + '%';
-            if (isMajor) {
-                var tickLabel = document.createElement('span');
-                tickLabel.className = 'nodes-tick-label';
-                tickLabel.textContent = tk.toFixed(1) + 's';
-                tick.appendChild(tickLabel);
-            }
-            ticksEl.appendChild(tick);
-        }
-        track.appendChild(ticksEl);
+        // Clean baseline rail wire
+        var wire = document.createElement('div');
+        wire.className = 'nodes-ruler-wire';
+        track.appendChild(wire);
 
         // Playhead indicator needle (glides across ruler)
         var playhead = document.createElement('div');
@@ -302,6 +287,21 @@ var NodesView = (function () {
         playhead.style.left = '0%';
         track.appendChild(playhead);
 
+        // Render hold duration bars behind pins
+        sequence.forEach(function (node, index) {
+            var pct = Math.min(100, Math.max(0, ((node.time || 0) / maxTime) * 100));
+            if (node.hold && parseFloat(node.hold) > 0) {
+                var holdPct = Math.min(100 - pct, ((parseFloat(node.hold) || 0) / maxTime) * 100);
+                var holdBar = document.createElement('div');
+                holdBar.className = 'nodes-ruler-hold type-' + (node.type || 'number');
+                holdBar.style.left = pct.toFixed(2) + '%';
+                holdBar.style.width = holdPct.toFixed(2) + '%';
+                holdBar.setAttribute('title', 'Hold: ' + node.hold + 's');
+                track.appendChild(holdBar);
+            }
+        });
+
+        // Render clean, distinct marker pins
         sequence.forEach(function (node, index) {
             var pct = Math.min(100, Math.max(0, ((node.time || 0) / maxTime) * 100));
             var pin = document.createElement('div');
@@ -309,17 +309,10 @@ var NodesView = (function () {
             pin.style.left = pct.toFixed(2) + '%';
             pin.setAttribute('data-node-id', node.id);
             pin.setAttribute('data-node-index', index);
-            pin.setAttribute('title', '#' + (index + 1) + ' [' + (node.type || 'NUM').toUpperCase() + ': ' + node.value + '] at ' + (node.time || 0) + 's');
+            pin.setAttribute('title', 'Marker #' + (index + 1) + ' (' + (node.type || 'num') + '): ' + node.value + ' at ' + (node.time || 0) + 's');
 
-            var typeBadges = { number: 'NUM', time: 'TIME', text: 'TXT', delta: '±' };
-            var badgeText = typeBadges[node.type] || 'NUM';
-
-            var pinHtml = '<div class="ruler-pin-head ruler-pin-flag">' +
-                '<span class="ruler-pin-index">#' + (index + 1) + '</span>' +
-                '<span class="ruler-pin-type">' + badgeText + '</span>' +
-                '</div>' +
-                '<span class="ruler-pin-stem"></span>' +
-                '<span class="ruler-pin-anchor"></span>';
+            var pinHtml = '<div class="ruler-pin-head ruler-pin-flag">' + (index + 1) + '</div>' +
+                '<span class="ruler-pin-stem"></span>';
             pin.innerHTML = pinHtml;
 
             pin.addEventListener('click', function (e) {
@@ -328,33 +321,39 @@ var NodesView = (function () {
             });
 
             track.appendChild(pin);
-
-            // Elevated Hold Duration Ribbon
-            if (node.hold && parseFloat(node.hold) > 0) {
-                var holdPct = Math.min(100 - pct, ((parseFloat(node.hold) || 0) / maxTime) * 100);
-                var holdBar = document.createElement('div');
-                holdBar.className = 'nodes-ruler-hold type-' + (node.type || 'number');
-                holdBar.style.left = pct.toFixed(2) + '%';
-                holdBar.style.width = holdPct.toFixed(2) + '%';
-                holdBar.setAttribute('title', 'Hold pause: ' + node.hold + 's');
-                if (holdPct >= 7) {
-                    var innerHold = document.createElement('span');
-                    innerHold.className = 'hold-inner-label';
-                    innerHold.textContent = '+' + parseFloat(node.hold).toFixed(1) + 's';
-                    holdBar.appendChild(innerHold);
-                }
-                track.appendChild(holdBar);
-            }
         });
 
+        // Interactive Click & Drag to Scrub
         if (typeof onScrub === 'function') {
-            container.onclick = function (e) {
-                if (e.target.closest('.nodes-ruler-pin')) return;
+            var isDragging = false;
+
+            function getScrubTime(e) {
                 var rect = container.getBoundingClientRect();
                 var clickX = e.clientX - rect.left - 14;
                 var availWidth = Math.max(1, rect.width - 28);
                 var pct = Math.max(0, Math.min(1, clickX / availWidth));
-                onScrub(pct * maxTime);
+                return pct * maxTime;
+            }
+
+            container.onmousedown = function (e) {
+                if (e.target.closest('.nodes-ruler-pin')) return;
+                isDragging = true;
+                onScrub(getScrubTime(e));
+
+                function onMouseMove(moveEvent) {
+                    if (isDragging) {
+                        onScrub(getScrubTime(moveEvent));
+                    }
+                }
+
+                function onMouseUp() {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                }
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
             };
         }
 

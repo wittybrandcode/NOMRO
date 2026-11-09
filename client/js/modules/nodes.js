@@ -12,6 +12,7 @@ var NodesModule = (function () {
     var _previewAnimId = null;
     var _previewStartTime = null;
     var _isPlayingPreview = false;
+    var _currentPreviewTime = 0;
 
     /**
      * Initialize Nodes module
@@ -72,6 +73,8 @@ var NodesModule = (function () {
         _elements.playPreviewBtn = document.getElementById('nodes-play-preview');
         _elements.stopPreviewBtn = document.getElementById('nodes-stop-preview');
         _elements.resetPreviewBtn = document.getElementById('nodes-reset-preview');
+        _elements.btnPrevMarker = document.getElementById('nodes-prev-marker');
+        _elements.btnNextMarker = document.getElementById('nodes-next-marker');
         _elements.toggleMonospaceBtn = document.getElementById('nodes-toggle-monospace-btn');
         _elements.toggleCommasBtn = document.getElementById('nodes-toggle-commas-btn');
     }
@@ -166,6 +169,16 @@ var NodesModule = (function () {
                 resetPreview();
             });
         }
+        if (_elements.btnPrevMarker) {
+            _elements.btnPrevMarker.addEventListener('click', function () {
+                jumpToPrevMarker();
+            });
+        }
+        if (_elements.btnNextMarker) {
+            _elements.btnNextMarker.addEventListener('click', function () {
+                jumpToNextMarker();
+            });
+        }
 
         // Quick Toggles
         if (_elements.toggleMonospaceBtn) {
@@ -204,6 +217,11 @@ var NodesModule = (function () {
 
         if (_elements.markerRuler && NodesView.renderMarkerRuler) {
             NodesView.renderMarkerRuler(_elements.markerRuler, _state.nodes.sequence, function (nodeId, index) {
+                var node = _state.nodes.sequence[index];
+                if (node) {
+                    stopPreview();
+                    updatePreviewAtTime(node.time || 0);
+                }
                 if (typeof NodesView.highlightActiveNode === 'function') {
                     NodesView.highlightActiveNode(_elements.nodesContainer, index);
                 }
@@ -220,6 +238,9 @@ var NodesModule = (function () {
             var seq = _state.nodes.sequence;
             var maxT = seq.length > 0 ? (seq[seq.length - 1].time || 0) : 0;
             _elements.rulerSub.textContent = seq.length + ' Markers • ' + maxT.toFixed(1) + 's Total';
+            if (_elements.hudTotalTime) {
+                _elements.hudTotalTime.textContent = maxT.toFixed(1) + 's';
+            }
         }
     }
 
@@ -704,6 +725,7 @@ var NodesModule = (function () {
      * @param {number} t - Time in seconds
      */
     function updatePreviewAtTime(t) {
+        _currentPreviewTime = t;
         var res = calculateOutputAtTime(t);
 
         if (_elements.previewNodesVal) {
@@ -737,10 +759,10 @@ var NodesModule = (function () {
 
         // Update HUD live timecode readouts
         if (_elements.hudCurrentTime) {
-            _elements.hudCurrentTime.textContent = t.toFixed(2) + 's';
+            _elements.hudCurrentTime.textContent = t.toFixed(1) + 's';
         }
         if (_elements.hudTotalTime) {
-            _elements.hudTotalTime.textContent = maxT.toFixed(2) + 's';
+            _elements.hudTotalTime.textContent = maxT.toFixed(1) + 's';
         }
     }
 
@@ -814,6 +836,72 @@ var NodesModule = (function () {
         var seq = _state.nodes.sequence;
         var startT = (seq && seq.length > 0) ? (seq[0].time || 0) : 0;
         updatePreviewAtTime(startT);
+    }
+
+    /**
+     * Jump playhead to previous timeline marker (AE 'J' shortcut behavior)
+     */
+    function jumpToPrevMarker() {
+        var seq = _state.nodes.sequence;
+        if (!seq || seq.length === 0) return;
+        stopPreview();
+
+        var prevNode = null;
+        var prevIdx = 0;
+        for (var i = seq.length - 1; i >= 0; i--) {
+            var t = seq[i].time || 0;
+            if (t < _currentPreviewTime - 0.05) {
+                prevNode = seq[i];
+                prevIdx = i;
+                break;
+            }
+        }
+        if (!prevNode) {
+            prevNode = seq[0];
+            prevIdx = 0;
+        }
+
+        updatePreviewAtTime(prevNode.time || 0);
+        if (typeof NodesView !== 'undefined' && _elements.nodesContainer) {
+            NodesView.highlightActiveNode(_elements.nodesContainer, prevIdx);
+        }
+        var targetCard = _elements.nodesContainer ? _elements.nodesContainer.querySelector('[data-node-id="' + prevNode.id + '"]') : null;
+        if (targetCard && targetCard.scrollIntoView) {
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    /**
+     * Jump playhead to next timeline marker (AE 'K' shortcut behavior)
+     */
+    function jumpToNextMarker() {
+        var seq = _state.nodes.sequence;
+        if (!seq || seq.length === 0) return;
+        stopPreview();
+
+        var nextNode = null;
+        var nextIdx = seq.length - 1;
+        for (var i = 0; i < seq.length; i++) {
+            var t = seq[i].time || 0;
+            if (t > _currentPreviewTime + 0.05) {
+                nextNode = seq[i];
+                nextIdx = i;
+                break;
+            }
+        }
+        if (!nextNode) {
+            nextNode = seq[seq.length - 1];
+            nextIdx = seq.length - 1;
+        }
+
+        updatePreviewAtTime(nextNode.time || 0);
+        if (typeof NodesView !== 'undefined' && _elements.nodesContainer) {
+            NodesView.highlightActiveNode(_elements.nodesContainer, nextIdx);
+        }
+        var targetCard = _elements.nodesContainer ? _elements.nodesContainer.querySelector('[data-node-id="' + nextNode.id + '"]') : null;
+        if (targetCard && targetCard.scrollIntoView) {
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
     }
 
     /**

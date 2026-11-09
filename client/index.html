@@ -835,22 +835,9 @@
             <!-- Nodes Tab Panel -->
             <section class="panel" id="panel-nodes">
 
-                <!-- 1. Live Studio Preview & Interactive Ruler Card -->
+                <!-- 1. Live Preview & Interactive Marker Ruler Card -->
                 <div class="card nodes-preview-card">
-                    <!-- Stage Header / HUD Top Bar -->
-                    <div class="nodes-stage-hud-header">
-                        <div class="nodes-hud-status">
-                            <span class="nodes-live-dot"></span>
-                            <span class="nodes-live-label">LIVE WAYPOINT MONITOR</span>
-                        </div>
-                        <div class="nodes-hud-timecode" title="Current Playhead / Total Duration">
-                            <span class="hud-time-now" id="nodes-hud-current-time">0.00s</span>
-                            <span class="hud-time-sep">/</span>
-                            <span class="hud-time-total" id="nodes-hud-total-time">4.00s</span>
-                        </div>
-                    </div>
-
-                    <div class="nodes-preview-stage" title="Multi-Waypoint Live Preview (معاينة حية لمسار الحركة)">
+                    <div class="nodes-preview-stage" title="Multi-Waypoint Live Preview (معاينة حية للمسار)">
                         <span class="preview-nodes-number" id="preview-nodes-val">0</span>
                         <div class="preview-nodes-progress-rail">
                             <div class="preview-nodes-progress-fill" id="preview-nodes-progress-fill"></div>
@@ -861,49 +848,53 @@
                     <!-- Visual Marker Timeline Ruler (مسطرة مسار الماركرات البصرية) -->
                     <div class="nodes-marker-ruler-box" id="nodes-marker-ruler-box" title="Visual Marker Track (مسار الماركرات الزمني)">
                         <div class="nodes-ruler-label-row">
-                            <div class="nodes-ruler-title-group">
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="4" y1="21" x2="4" y2="14"></line>
-                                    <line x1="4" y1="10" x2="4" y2="3"></line>
-                                    <line x1="12" y1="21" x2="12" y2="12"></line>
-                                    <line x1="12" y1="8" x2="12" y2="3"></line>
-                                    <line x1="20" y1="21" x2="20" y2="16"></line>
-                                    <line x1="20" y1="12" x2="20" y2="3"></line>
-                                </svg>
-                                <span class="nodes-ruler-title">TIMELINE MARKERS</span>
-                            </div>
+                            <span class="nodes-ruler-title">TIMELINE MARKERS</span>
                             <span class="nodes-ruler-sub" id="nodes-ruler-sub">3 Markers • 4.0s Total</span>
                         </div>
-                        <div class="nodes-marker-ruler-rail" id="nodes-marker-ruler-rail" title="Click anywhere on ruler to scrub (انقر في أي مكان لتحريك المؤشر)">
-                            <!-- Rendered by NodesView.renderMarkerRuler with .ruler-playhead, ruler ticks & AE pins -->
+                        <div class="nodes-marker-ruler-rail" id="nodes-marker-ruler-rail" title="Drag or click to scrub playhead (اسحب أو انقر لتحريك المؤشر)">
+                            <!-- Rendered by NodesView.renderMarkerRuler with .ruler-playhead & AE pins -->
                         </div>
                     </div>
 
                     <!-- Transport & Quick Formatting Controls -->
                     <div class="preview-controls-row">
                         <div class="preview-controls-left">
-                            <button class="btn-preview btn-preview-reset" id="nodes-reset-preview" title="Reset Preview to Start (إعادة ضبط المعاينة للبداية)">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <button class="btn-preview btn-preview-reset" id="nodes-reset-preview" title="Reset to Start (إعادة ضبط للبداية)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                                     <polyline points="1 4 1 10 7 10"></polyline>
                                     <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
                                 </svg>
                             </button>
+                            <button class="btn-preview btn-preview-step" id="nodes-prev-marker" title="Jump to Previous Marker (الانتقال للماركر السابق)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <polygon points="19 20 9 12 19 4 19 20"></polygon>
+                                    <line x1="5" y1="19" x2="5" y2="5"></line>
+                                </svg>
+                            </button>
                             <button class="btn-preview btn-preview-play" id="nodes-play-preview" title="Play Preview Motion (تشغيل المعاينة الحية)">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                                 </svg>
                             </button>
                             <button class="btn-preview btn-preview-stop" id="nodes-stop-preview" title="Stop Preview (إيقاف المعاينة)" style="display: none;">
-                                <svg height="13" width="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <svg height="12" width="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                                     <rect x="6" y="4" width="4" height="16"></rect>
                                     <rect x="14" y="4" width="4" height="16"></rect>
                                 </svg>
                             </button>
+                            <button class="btn-preview btn-preview-step" id="nodes-next-marker" title="Jump to Next Marker (الانتقال للماركر التالي)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                    <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                                    <line x1="19" y1="5" x2="19" y2="19"></line>
+                                </svg>
+                            </button>
                         </div>
                         <div class="preview-controls-center">
-                            <div class="nodes-transport-pill">
-                                <span class="nodes-transport-playback-status" id="nodes-transport-status">READY</span>
-                            </div>
+                            <span class="nodes-hud-timecode" id="nodes-hud-timecode" title="Current Time / Total Duration">
+                                <span class="hud-time-now" id="nodes-hud-current-time">0.0s</span>
+                                <span class="hud-time-sep">/</span>
+                                <span class="hud-time-total" id="nodes-hud-total-time">4.0s</span>
+                            </span>
                         </div>
                         <div class="preview-controls-right">
                             <button type="button" class="btn-node-toolbar" id="nodes-toggle-monospace-btn" title="Toggle Monospaced Font (خط أحادي العرض لمنع الاهتزاز)">
