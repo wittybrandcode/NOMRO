@@ -85,7 +85,7 @@ NOMRO.expressions.generateEmbedded = function (settings) {
     formatCode += '  var decPart = parts.length > 1 ? "." + parts[1] : "";\n';
     formatCode += '  var match = fmt.match(/0+/);\n';
     formatCode += '  var zeros = match ? match[0].length : 1;\n';
-    formatCode += '  var str = Math.abs(parseInt(intPart)).toString();\n';
+    formatCode += '  var str = Math.abs(parseInt(intPart, 10) || 0).toString();\n';
     formatCode += '  while (str.length < zeros) str = "0" + str;\n';
     formatCode += '  if (sep !== "") {\n';
     formatCode += '      str = str.replace(/\\B(?=(\\d{3})+(?!\\d))/g, sep);\n';
@@ -269,7 +269,7 @@ NOMRO.expressions.generateFreeExpression = function (settings) {
     formatCode += '  var decPart = parts.length > 1 ? "." + parts[1] : "";\n';
     formatCode += '  var match = fmt.match(/0+/);\n';
     formatCode += '  var zeros = match ? match[0].length : 1;\n';
-    formatCode += '  var str = Math.abs(parseInt(intPart)).toString();\n';
+    formatCode += '  var str = Math.abs(parseInt(intPart, 10) || 0).toString();\n';
     formatCode += '  while (str.length < zeros) str = "0" + str;\n';
     formatCode += '  if (sep !== "") {\n';
     formatCode += '      str = str.replace(/\\B(?=(\\d{3})+(?!\\d))/g, sep);\n';

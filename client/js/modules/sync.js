@@ -83,19 +83,32 @@ var SyncModule = (function () {
             singleCurveId: settings.easing || 'linear'
         };
 
-        _state.counter.easingConfig = easingConfig;
-        _state.counter.curveLibrary = settings.curveLibrary || _state.counter.curveLibrary || [];
-
-        var selectedCurve = easingConfig.mode === 'single'
-            ? easingConfig.singleCurveId
-            : (settings.easing || _state.counter.easing || 'linear');
-
-        if (typeof UIControlsModule !== 'undefined' && UIControlsModule.applyEasingConfig) {
-            UIControlsModule.applyEasingConfig(easingConfig, selectedCurve, _state.counter.curveLibrary);
+        // 1. Easing Configuration Application based on counterType
+        if (settings.counterType === 'nodes') {
+            if (_state.nodes) {
+                if (settings.easing) _state.nodes.easing = settings.easing;
+                if (settings.easeStrength !== undefined) _state.nodes.easeStrength = settings.easeStrength;
+            }
+        } else if (settings.counterType === 'timer') {
+            if (_state.timer) {
+                _state.timer.easing = easingConfig.mode === 'single' ? easingConfig.singleCurveId : (settings.easing || 'linear');
+                _state.timer.easingConfig = easingConfig;
+            }
         } else {
-            _state.counter.easing = selectedCurve;
-            if (_elements.singleEasingCurve) {
-                _elements.singleEasingCurve.value = selectedCurve;
+            _state.counter.easingConfig = easingConfig;
+            _state.counter.curveLibrary = settings.curveLibrary || _state.counter.curveLibrary || [];
+
+            var selectedCurve = easingConfig.mode === 'single'
+                ? easingConfig.singleCurveId
+                : (settings.easing || _state.counter.easing || 'linear');
+
+            if (typeof UIControlsModule !== 'undefined' && UIControlsModule.applyEasingConfig) {
+                UIControlsModule.applyEasingConfig(easingConfig, selectedCurve, _state.counter.curveLibrary);
+            } else {
+                _state.counter.easing = selectedCurve;
+                if (_elements.singleEasingCurve) {
+                    _elements.singleEasingCurve.value = selectedCurve;
+                }
             }
         }
 

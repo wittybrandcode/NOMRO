@@ -78,7 +78,11 @@ NOMRO.core.buildCountdown = function (comp, settings) {
                 textDoc.font = "CourierNewPSMT";
             }
             textProp.setValue(textDoc);
-        } catch (e) { }
+        } catch (e) {
+            if (NOMRO.helpers && NOMRO.helpers.logError) {
+                NOMRO.helpers.logError('CountdownBuilder: Font/Justify styling', e);
+            }
+        }
 
         // ========================================
         // BUILD AND APPLY EXPRESSION
@@ -102,7 +106,11 @@ NOMRO.core.buildCountdown = function (comp, settings) {
         try {
             settings.layerName = textLayer.name;
             textLayer.comment = JSON.stringify(settings);
-        } catch (e) { }
+        } catch (e) {
+            if (NOMRO.helpers && NOMRO.helpers.logError) {
+                NOMRO.helpers.logError('CountdownBuilder: Save Comment Metadata', e);
+            }
+        }
 
         app.endUndoGroup();
         return textLayer;

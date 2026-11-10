@@ -585,20 +585,17 @@ var NodesModule = (function () {
      * @param {string|null} targetNodeId
      */
     function captureCompPlayhead(targetNodeId) {
-        if (typeof Bridge !== 'undefined' && Bridge.evalScript) {
-            Bridge.evalScript('NOMRO.utils.getCompPlayheadTime ? NOMRO.utils.getCompPlayheadTime() : (app.project.activeItem ? app.project.activeItem.time : 0)', function (err, result) {
-                var compTime = 0;
-                if (!err && result && !isNaN(parseFloat(result))) {
-                    compTime = Math.max(0, parseFloat(parseFloat(result).toFixed(2)));
-                }
+        if (typeof Bridge !== 'undefined' && Bridge.getCompPlayheadTime) {
+            Bridge.getCompPlayheadTime(function (err, compTime) {
+                var t = (!err && typeof compTime === 'number') ? Math.max(0, parseFloat(compTime.toFixed(2))) : 0;
 
                 if (targetNodeId) {
-                    updateNode(targetNodeId, { time: compTime });
+                    updateNode(targetNodeId, { time: t });
                     if (typeof MessagesModule !== 'undefined') {
-                        MessagesModule.showToast('Captured Playhead: ' + compTime + 's', 'success');
+                        MessagesModule.showToast('Captured Playhead: ' + t + 's', 'success');
                     }
                 } else {
-                    addNode({ time: compTime });
+                    addNode({ time: t });
                 }
             });
         } else {
@@ -676,6 +673,30 @@ var NodesModule = (function () {
     }
 
     /**
+     * Resolve numeric value for node at index, supporting chained or percentage deltas
+     * @private
+     */
+    function _resolveNodeNumericValue(seq, idx) {
+        if (!seq || idx < 0 || idx >= seq.length) return 0;
+        var node = seq[idx];
+        if (!node) return 0;
+        if (node.type === 'number') return parseFloat(node.value) || 0;
+        if (node.type === 'delta' && idx > 0) {
+            var prevVal = _resolveNodeNumericValue(seq, idx - 1);
+            var deltaStr = String(node.value).trim();
+            var deltaVal = 0;
+            if (deltaStr.indexOf('%') !== -1) {
+                var pct = parseFloat(deltaStr.replace('%', '')) || 0;
+                deltaVal = prevVal * (pct / 100);
+            } else {
+                deltaVal = parseFloat(deltaStr) || 0;
+            }
+            return prevVal + deltaVal;
+        }
+        return parseFloat(node.value) || 0;
+    }
+
+    /**
      * Calculate and format output value at arbitrary time t
      * @param {number} t - Time in seconds
      * @returns {Object} { display: string, activeIndex: number, progress: number }
@@ -691,13 +712,27 @@ var NodesModule = (function () {
 
         // Before first node
         if (t <= (first.time || 0)) {
-            var val0 = first.type === 'number' ? _formatNumber(first.value) : String(first.value);
+            var val0 = '';
+            if (first.type === 'number' || first.type === 'delta') {
+                val0 = _formatNumber(_resolveNodeNumericValue(seq, 0));
+            } else if (first.type === 'time') {
+                val0 = (typeof NodesView !== 'undefined' && NodesView.formatTime) ? NodesView.formatTime(_timeToSeconds(first.value)) : String(first.value);
+            } else {
+                val0 = String(first.value);
+            }
             return { display: val0, activeIndex: 0, progress: 0 };
         }
 
         // After last node
         if (t >= (last.time || 0)) {
-            var valEnd = last.type === 'number' ? _formatNumber(last.value) : String(last.value);
+            var valEnd = '';
+            if (last.type === 'number' || last.type === 'delta') {
+                valEnd = _formatNumber(_resolveNodeNumericValue(seq, seq.length - 1));
+            } else if (last.type === 'time') {
+                valEnd = (typeof NodesView !== 'undefined' && NodesView.formatTime) ? NodesView.formatTime(_timeToSeconds(last.value)) : String(last.value);
+            } else {
+                valEnd = String(last.value);
+            }
             return { display: valEnd, activeIndex: seq.length - 1, progress: 1 };
         }
 
@@ -715,8 +750,16 @@ var NodesModule = (function () {
 
                 // Inside hold period
                 if (elapsed < holdDur) {
-                    var hVal = n1.type === 'number' ? _formatNumber(n1.value) : String(n1.value);
-                    return { display: hVal, activeIndex: i, progress: t / Math.max(0.001, last.time) };
+                    var hVal = '';
+                    if (n1.type === 'number' || n1.type === 'delta') {
+                        hVal = _formatNumber(_resolveNodeNumericValue(seq, i));
+                    } else if (n1.type === 'time') {
+                        hVal = (typeof NodesView !== 'undefined' && NodesView.formatTime) ? NodesView.formatTime(_timeToSeconds(n1.value)) : String(n1.value);
+                    } else {
+                        hVal = String(n1.value);
+                    }
+                    var holdProg = (t - (first.time || 0)) / Math.max(0.001, (last.time || 0) - (first.time || 0));
+                    return { display: hVal, activeIndex: i, progress: Math.min(1, Math.max(0, holdProg)) };
                 }
 
                 // Active interpolation
@@ -728,9 +771,9 @@ var NodesModule = (function () {
                 var displayStr = '';
 
                 // Multi-Type Interpolation
-                if (n1.type === 'number' && n2.type === 'number') {
-                    var v1 = parseFloat(n1.value) || 0;
-                    var v2 = parseFloat(n2.value) || 0;
+                if ((n1.type === 'number' || n1.type === 'delta') && (n2.type === 'number' || n2.type === 'delta')) {
+                    var v1 = _resolveNodeNumericValue(seq, i);
+                    var v2 = _resolveNodeNumericValue(seq, i + 1);
                     displayStr = _formatNumber(v1 + (v2 - v1) * easedT);
 
                 } else if (n1.type === 'time' && n2.type === 'time') {
@@ -739,28 +782,15 @@ var NodesModule = (function () {
                     var curS = s1 + (s2 - s1) * easedT;
                     displayStr = NodesView.formatTime(curS);
 
-                } else if (n1.type === 'time' && n2.type === 'number') {
+                } else if (n1.type === 'time' && (n2.type === 'number' || n2.type === 'delta')) {
                     var ts1 = _timeToSeconds(n1.value);
-                    var nv2 = parseFloat(n2.value) || 0;
+                    var nv2 = _resolveNodeNumericValue(seq, i + 1);
                     displayStr = _formatNumber(ts1 + (nv2 - ts1) * easedT);
 
-                } else if (n1.type === 'number' && n2.type === 'time') {
-                    var nv1 = parseFloat(n1.value) || 0;
+                } else if ((n1.type === 'number' || n1.type === 'delta') && n2.type === 'time') {
+                    var nv1 = _resolveNodeNumericValue(seq, i);
                     var ts2 = _timeToSeconds(n2.value);
                     displayStr = NodesView.formatTime(nv1 + (ts2 - nv1) * easedT);
-
-                } else if (n2.type === 'delta') {
-                    var baseNum = (n1.type === 'number') ? (parseFloat(n1.value) || 0) : 0;
-                    var deltaStr = String(n2.value).trim();
-                    var deltaVal = 0;
-                    if (deltaStr.indexOf('%') !== -1) {
-                        var pct = parseFloat(deltaStr.replace('%', '')) || 0;
-                        deltaVal = baseNum * (pct / 100);
-                    } else {
-                        deltaVal = parseFloat(deltaStr) || 0;
-                    }
-                    var targetNum = baseNum + deltaVal;
-                    displayStr = _formatNumber(baseNum + (targetNum - baseNum) * easedT);
 
                 } else {
                     // Text step switch at midpoint

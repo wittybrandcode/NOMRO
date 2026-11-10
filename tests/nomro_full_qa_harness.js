@@ -723,6 +723,49 @@ assert(indexHtmlSrc.includes('for="input-duration"') &&
        indexHtmlSrc.includes('for="select-countdown-format"'),
     'DEF-42: index.html includes for attributes on config labels for accessibility and click-focus');
 
+// DEF-43: Bridge getCompPlayheadInfo Contract (BUG-01, BUG-10)
+const bridgeSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'bridge', 'Bridge.js'), 'utf8');
+assert(bridgeSrc.includes('getCompPlayheadInfo:') &&
+       bridgeSrc.includes('function getCompPlayheadInfo('),
+    'DEF-43: Bridge.js exports getCompPlayheadInfo returning structured { time, fps }');
+assert(bridgeSrc.includes('parsed.markers || (parsed.data && parsed.data.markers)'),
+    'DEF-43: Bridge.js syncNodeMarkers correctly unpacks flattened markers payload');
+
+// DEF-44: Live Slider Sync Focus Preservation & Sequence Comparison (BUG-02)
+assert(appSrc.includes('function _areNodesEqual(seqA, seqB)') &&
+       appSrc.includes('activeEl.closest(\'#panel-nodes\')'),
+    'DEF-44: app.js guards _syncLiveValues against DOM destruction and focus stealing');
+
+// DEF-45: ExpressionGenerator ES3 Radix 10 Hardening (BUG-05)
+const exprGenSrc = fs.readFileSync(path.join(baseDir, 'host', 'expressions', 'ExpressionGenerator.jsx'), 'utf8');
+assert(!exprGenSrc.includes('parseInt(intPart))') &&
+       exprGenSrc.includes('parseInt(intPart, 10)'),
+    'DEF-45: ExpressionGenerator strictly specifies radix 10 for parseInt, preventing ES3 octal evaluation');
+
+// DEF-46: Validator Nodes Sequence Support (BUG-06)
+assert(typeof Validator.validateNodes === 'function',
+    'DEF-46: Validator.js exports validateNodes method');
+const nodesValidSample = {
+    counterType: 'nodes',
+    nodes: [
+        { id: '1', type: 'number', value: 0, time: 0 },
+        { id: '2', type: 'number', value: 100, time: 2 }
+    ]
+};
+assert(Validator.isValid(nodesValidSample) === true,
+    'DEF-46: Validator.isValid returns true for valid nodes sequence');
+
+// DEF-47: CreationModule IPC Watchdog Timer (BUG-07)
+assert(creationSrc.includes('watchdogTimer') &&
+       creationSrc.includes('updateWatchdog'),
+    'DEF-47: CreationModule implements 10-second watchdog timers for create and update');
+
+// DEF-48: KeyboardShortcuts Non-Blocking Ctrl+Enter in Text Inputs (BUG-08)
+const shortcutsSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'modules', 'keyboard-shortcuts.js'), 'utf8');
+assert(shortcutsSrc.includes('isCtrlEnter') &&
+       shortcutsSrc.includes('if (isInput && !isCtrlEnter) return;'),
+    'DEF-48: KeyboardShortcuts allows Ctrl+Enter / Cmd+Enter inside input and textarea elements');
+
 // -------------------------------------------------------------------
 // MASTER SUMMARY REPORT
 // -------------------------------------------------------------------

@@ -490,6 +490,27 @@
     // LIVE SLIDER SYNC
     // ========================================
     /**
+     * Check if two node sequences are identical
+     * @private
+     */
+    function _areNodesEqual(seqA, seqB) {
+        if (!seqA || !seqB || seqA.length !== seqB.length) return false;
+        for (var i = 0; i < seqA.length; i++) {
+            var a = seqA[i];
+            var b = seqB[i];
+            if (!a || !b) return false;
+            if (parseFloat(a.time) !== parseFloat(b.time) ||
+                String(a.value) !== String(b.value) ||
+                parseFloat(a.hold || 0) !== parseFloat(b.hold || 0) ||
+                String(a.easing || '') !== String(b.easing || '') ||
+                String(a.type || '') !== String(b.type || '')) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Sync live slider values from AE when the same layer remains selected.
      * Updates UI fields only if values have actually changed.
      */
@@ -564,8 +585,24 @@
                 Logger.log('Sync', 'Live timer slider values synced');
             }
         } else if (settings.counterType === 'nodes') {
+            // Guard: If user is actively typing or interacting inside the nodes panel, do not disturb DOM
+            if (activeEl && activeEl.closest && activeEl.closest('#panel-nodes')) {
+                return;
+            }
             if (typeof NodesModule !== 'undefined' && NodesModule.applySettings) {
-                if (settings.nodes || settings.markers) {
+                var currentNodes = (typeof NodesModule.getSettings === 'function') ? NodesModule.getSettings().nodes : null;
+                var newNodes = settings.nodes || null;
+                if (!newNodes && settings.markers && typeof NodeSequence !== 'undefined') {
+                    var reconstructed = [];
+                    for (var m = 0; m < settings.markers.length; m++) {
+                        var mk = settings.markers[m];
+                        reconstructed.push(NodeSequence.fromMarkerComment(mk.comment, mk.time));
+                    }
+                    if (reconstructed.length >= 2) {
+                        newNodes = NodeSequence.sortNodes(reconstructed);
+                    }
+                }
+                if (newNodes && (!_areNodesEqual(currentNodes, newNodes))) {
                     NodesModule.applySettings(settings);
                     Logger.log('Sync', 'Live node sequence synced');
                 }

@@ -423,6 +423,85 @@ runTest('Nodes preset JSON serialization roundtrips flawlessly', function () {
 });
 
 // -------------------------------------------------------------
+// [SUITE 7] Testing Elevated Math Parity, Validation & Radix Hardening
+// -------------------------------------------------------------
+console.log('\n[SUITE 7] Testing Elevated Math Parity, Validation & Hardening...');
+
+var ValidatorSrc = fs.readFileSync(path.join(BASE_DIR, 'client/js/services/Validator.js'), 'utf8');
+var Validator = (function() {
+    var window = {};
+    eval(ValidatorSrc);
+    return Validator;
+})();
+
+runTest('Validator.validateNodes validates correct sequence and detects anomalies', function () {
+    assert.strictEqual(typeof Validator.validateNodes, 'function');
+
+    // Valid sequence
+    var validNodes = [
+        { id: '1', type: 'number', value: 0, time: 0, hold: 0 },
+        { id: '2', type: 'delta', value: '+25%', time: 2, hold: 0.5 },
+        { id: '3', type: 'number', value: 2000, time: 4, hold: 0 }
+    ];
+    var valErrors = Validator.validateNodes({ nodes: validNodes });
+    assert.strictEqual(valErrors.length, 0);
+
+    // Too few nodes
+    var shortErrors = Validator.validateNodes({ nodes: [{ id: '1', value: 100, time: 0 }] });
+    assert.ok(shortErrors.length > 0);
+    assert.ok(shortErrors[0].message.indexOf('At least 2') !== -1);
+
+    // Negative timestamp
+    var negErrors = Validator.validateNodes({ nodes: [
+        { id: '1', value: 0, time: -1 },
+        { id: '2', value: 100, time: 2 }
+    ]});
+    assert.ok(negErrors.length > 0);
+    assert.ok(negErrors[0].message.indexOf('non-negative') !== -1);
+
+    // Non-chronological order
+    var chronoErrors = Validator.validateNodes({ nodes: [
+        { id: '1', value: 0, time: 5 },
+        { id: '2', value: 100, time: 2 }
+    ]});
+    assert.ok(chronoErrors.length > 0);
+    assert.ok(chronoErrors[0].message.indexOf('chronologically') !== -1);
+});
+
+runTest('NodesExpressionGenerator contains recursive delta resolver and per-node easing', function () {
+    var NOMRO = { version: '4.2.0', expressions: {} };
+    eval(exprGenContent);
+    var code = NOMRO.expressions.generateNodesExpression({
+        nodes: [
+            { type: 'number', value: 1000, time: 0 },
+            { type: 'delta', value: '+25%', time: 2, ease: 'snappyOut' }
+        ],
+        decimals: false,
+        commas: true
+    });
+
+    assert.ok(code.indexOf('function resolveNodeNum(idx)') !== -1, 'Defines recursive resolveNodeNum');
+    assert.ok(code.indexOf('function applyEase(t, curve)') !== -1, 'Defines per-node applyEase with curve param');
+    assert.ok(code.indexOf('parseInt(intPart, 10)') !== -1, 'Uses radix 10 for intPart parseInt');
+    assert.ok(code.indexOf('ds.indexOf("%") !== -1') !== -1, 'Evaluates percentage delta in AE expression');
+});
+
+runTest('Bridge.getCompPlayheadInfo is exported and functional', function () {
+    var bridgeCode = fs.readFileSync(path.join(BASE_DIR, 'client/js/bridge/Bridge.js'), 'utf8');
+    assert.ok(bridgeCode.indexOf('getCompPlayheadInfo:') !== -1, 'Bridge exports getCompPlayheadInfo');
+    assert.ok(bridgeCode.indexOf('function getCompPlayheadInfo(callback)') !== -1, 'Defines getCompPlayheadInfo');
+    assert.ok(bridgeCode.indexOf('getCurrentCompTime()') !== -1, 'Calls getCurrentCompTime host script');
+});
+
+runTest('Quick Marker creator inputs have accessibility aria-labels', function () {
+    var indexHtml = fs.readFileSync(path.join(BASE_DIR, 'client/index.html'), 'utf8');
+    assert.ok(indexHtml.indexOf('id="input-quick-marker-type" title="Node Type (نوع العقدة)" aria-label="Node Type"') !== -1);
+    assert.ok(indexHtml.indexOf('id="input-quick-marker-val" placeholder="Value..." value="1000" title="Marker Value (قيمة الماركر)" aria-label="Marker Value"') !== -1);
+    assert.ok(indexHtml.indexOf('id="input-quick-marker-time"') !== -1 && indexHtml.indexOf('aria-label="Marker Time"') !== -1);
+    assert.ok(indexHtml.indexOf('id="input-quick-marker-hold"') !== -1 && indexHtml.indexOf('aria-label="Hold Duration"') !== -1);
+});
+
+// -------------------------------------------------------------
 // Summary
 // -------------------------------------------------------------
 console.log('\n===============================================================');

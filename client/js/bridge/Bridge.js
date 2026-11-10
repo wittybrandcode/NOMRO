@@ -121,6 +121,35 @@ var Bridge = (function () {
     }
 
     /**
+     * Get playhead time and fps from active composition
+     * @param {Function} callback - Callback(err, { time: number, fps: number })
+     */
+    function getCompPlayheadInfo(callback) {
+        callback = callback || function () { };
+        var script = 'getCurrentCompTime()';
+
+        evalScript(script, function (err, result) {
+            if (err) {
+                callback(err, { time: 0, fps: 30 });
+                return;
+            }
+            try {
+                var parsed = JSON.parse(result);
+                if (parsed && parsed.success) {
+                    var t = (parsed.data && typeof parsed.data.time === 'number') ? parsed.data.time : (typeof parsed.time === 'number' ? parsed.time : 0);
+                    var f = (parsed.data && parsed.data.fps) || parsed.fps || 30;
+                    callback(null, { time: t, fps: f });
+                } else {
+                    callback(new Error((parsed && parsed.error) ? parsed.error : 'No active comp'), { time: 0, fps: 30 });
+                }
+            } catch (e) {
+                var num = parseFloat(result) || 0;
+                callback(null, { time: num, fps: 30 });
+            }
+        });
+    }
+
+    /**
      * Update an existing NOMRO layer
      * @param {string|Object} layerRef - Layer name or layer reference
      * @param {Object} settings - New settings
@@ -186,7 +215,7 @@ var Bridge = (function () {
                 if (parsed && parsed.success === false) {
                     callback({ message: parsed.error || 'Add marker failed' }, null);
                 } else {
-                    callback(null, parsed ? parsed.data : result);
+                    callback(null, (parsed && (parsed.node || parsed.data || parsed)) || result);
                 }
             } catch (e) {
                 callback(null, result);
@@ -213,7 +242,8 @@ var Bridge = (function () {
                 if (parsed && parsed.success === false) {
                     callback({ message: parsed.error || 'Sync markers failed' }, null);
                 } else {
-                    callback(null, parsed && parsed.data ? parsed.data.markers : []);
+                    var markers = (parsed && (parsed.markers || (parsed.data && parsed.data.markers))) || [];
+                    callback(null, markers);
                 }
             } catch (e) {
                 callback(null, []);
@@ -274,6 +304,7 @@ var Bridge = (function () {
         updateLayer: updateLayer,
         hasActiveComp: hasActiveComp,
         getCompPlayheadTime: getCompPlayheadTime,
+        getCompPlayheadInfo: getCompPlayheadInfo,
         addNodeMarker: addNodeMarker,
         syncNodeMarkers: syncNodeMarkers,
         getHostInfo: getHostInfo,

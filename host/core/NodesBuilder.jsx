@@ -89,7 +89,11 @@ NOMRO.core.buildNodesSequence = function (comp, settings) {
                 textDoc.font = "CourierNewPSMT";
             }
             sourceText.setValue(textDoc);
-        } catch (e) { }
+        } catch (e) {
+            if (NOMRO.helpers && NOMRO.helpers.logError) {
+                NOMRO.helpers.logError('NodesBuilder: Font/Justify styling', e);
+            }
+        }
 
         var textRect = textLayer.sourceRectAtTime(0, false);
         var anchorX = textRect.left + textRect.width / 2;
@@ -101,7 +105,11 @@ NOMRO.core.buildNodesSequence = function (comp, settings) {
         try {
             settings.layerName = textLayer.name;
             textLayer.comment = JSON.stringify(settings);
-        } catch (e) { }
+        } catch (e) {
+            if (NOMRO.helpers && NOMRO.helpers.logError) {
+                NOMRO.helpers.logError('NodesBuilder: Save Comment Metadata', e);
+            }
+        }
 
         app.endUndoGroup();
         return textLayer;

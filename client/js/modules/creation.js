@@ -191,8 +191,20 @@ var CreationModule = (function () {
             _showLoading();
             if (_callbacks.onStatus) _callbacks.onStatus('busy', 'Creating ' + type + '...');
 
+            var watchdogTimer = setTimeout(function () {
+                if (_isCreating) {
+                    _isCreating = false;
+                    hideLoading();
+                    _reportError(
+                        { message: 'Operation timed out after 10 seconds. Please check After Effects.' },
+                        'creation.watchdog'
+                    );
+                }
+            }, 10000);
+
             if (typeof Bridge !== 'undefined' && Bridge.createCounter) {
                 Bridge.createCounter(settings, function (err, result) {
+                    clearTimeout(watchdogTimer);
                     hideLoading();
                     _isCreating = false;
                     if (err) {
@@ -206,6 +218,7 @@ var CreationModule = (function () {
             } else {
                 // Browser preview mode
                 setTimeout(function () {
+                    clearTimeout(watchdogTimer);
                     hideLoading();
                     _isCreating = false;
                     var typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
@@ -231,9 +244,21 @@ var CreationModule = (function () {
         _showLoading();
         if (_callbacks.onStatus) _callbacks.onStatus('busy', 'Updating layer...');
 
+        var updateWatchdog = setTimeout(function () {
+            if (_isCreating) {
+                _isCreating = false;
+                hideLoading();
+                _reportError(
+                    { message: 'Layer update timed out after 10 seconds. Please check After Effects.' },
+                    'creation.updateWatchdog'
+                );
+            }
+        }, 10000);
+
         try {
             if (typeof Bridge !== 'undefined' && Bridge.updateLayer) {
                 Bridge.updateLayer(layerRef, settings, function (err, result) {
+                    clearTimeout(updateWatchdog);
                     hideLoading();
                     _isCreating = false;
 
@@ -249,6 +274,7 @@ var CreationModule = (function () {
             } else {
                 // Browser preview mode
                 setTimeout(function () {
+                    clearTimeout(updateWatchdog);
                     hideLoading();
                     _isCreating = false;
                     if (_callbacks.showToast) _callbacks.showToast('Preview - Layer updated!', 'success');
@@ -256,6 +282,7 @@ var CreationModule = (function () {
                 }, 500);
             }
         } catch (e) {
+            clearTimeout(updateWatchdog);
             hideLoading();
             _isCreating = false;
             _reportError(e, 'creation.update', 'Unexpected error updating layer');

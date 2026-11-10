@@ -104,11 +104,65 @@ var Validator = (function () {
     }
 
     /**
+     * Validate nodes sequence settings
+     * @param {Object} settings - Nodes settings with sequence
+     * @returns {Array} Array of error objects [{field, message}]
+     */
+    function validateNodes(settings) {
+        var errors = [];
+        if (!settings) {
+            errors.push({ field: 'nodes', message: 'Settings payload is missing' });
+            return errors;
+        }
+
+        var seq = settings.nodes || [];
+        if (!Array.isArray(seq) || seq.length < 2) {
+            errors.push({ field: 'nodes', message: 'At least 2 waypoint nodes are required' });
+            return errors;
+        }
+
+        var lastTime = -1;
+        for (var i = 0; i < seq.length; i++) {
+            var n = seq[i];
+            if (!n) {
+                errors.push({ field: 'node_' + i, message: 'Invalid node object' });
+                continue;
+            }
+            var t = parseFloat(n.time);
+            if (isNaN(t) || t < 0) {
+                errors.push({ field: 'node_' + i + '_time', message: 'Node time must be a non-negative number' });
+            } else if (t < lastTime) {
+                errors.push({ field: 'node_' + i + '_time', message: 'Nodes must be ordered chronologically' });
+            }
+            lastTime = Math.max(lastTime, isNaN(t) ? 0 : t);
+
+            if (n.hold !== undefined && n.hold !== null && n.hold !== '') {
+                var h = parseFloat(n.hold);
+                if (isNaN(h) || h < 0) {
+                    errors.push({ field: 'node_' + i + '_hold', message: 'Hold duration must be non-negative' });
+                }
+            }
+
+            if (n.value === undefined || n.value === null || String(n.value).trim() === '') {
+                errors.push({ field: 'node_' + i + '_value', message: 'Node value cannot be empty' });
+            }
+        }
+
+        return errors;
+    }
+
+    /**
      * Validate all counter settings
      * @param {Object} settings - Counter settings
      * @returns {Array} Array of error objects [{field, message}]
      */
     function validate(settings) {
+        if (!settings) return [{ field: 'settings', message: 'Settings missing' }];
+
+        if (settings.counterType === 'nodes') {
+            return validateNodes(settings);
+        }
+
         var errors = [];
         var error;
 
@@ -445,6 +499,7 @@ var Validator = (function () {
 
     return {
         validate: validate,
+        validateNodes: validateNodes,
         isValid: isValid,
         getFirstError: getFirstError,
         validateNumber: validateNumber,

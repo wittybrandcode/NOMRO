@@ -104,25 +104,10 @@ var TimerModule = (function () {
                     btn.classList.remove('time-btn-capturing');
                 }, 400);
 
-                if (typeof Bridge !== 'undefined' && Bridge.evalScript) {
-                    Bridge.evalScript('getCurrentCompTime()', function(err, resStr) {
-                        if (err || !resStr) {
+                if (typeof Bridge !== 'undefined' && Bridge.getCompPlayheadInfo) {
+                    Bridge.getCompPlayheadInfo(function (err, info) {
+                        if (err || !info) {
                             console.error('Failed to get comp time', err);
-                            _focusTimeInputs(focusTarget);
-                            return;
-                        }
-                        
-                        var res;
-                        try {
-                            res = JSON.parse(resStr);
-                        } catch(e) {
-                            console.error('Failed to parse comp time', e);
-                            _focusTimeInputs(focusTarget);
-                            return;
-                        }
-
-                        if (!res || !res.success) {
-                            console.error('Failed to get comp time', res);
                             if (typeof MessagesModule !== 'undefined') {
                                 MessagesModule.showToast('Please open or select an active composition first', 'error');
                             }
@@ -130,9 +115,8 @@ var TimerModule = (function () {
                             return;
                         }
 
-                        var data = res.data || res;
-                        var timeInSeconds = (typeof data.time === 'number') ? data.time : (typeof res.time === 'number' ? res.time : 0);
-                        var fps = data.fps || res.fps || 30;
+                        var timeInSeconds = (typeof info.time === 'number') ? info.time : 0;
+                        var fps = info.fps || 30;
                         if (_state && _state.timer) {
                             _state.timer.fps = fps;
                         }

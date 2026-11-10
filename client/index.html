@@ -957,51 +957,51 @@
 
                     <!-- Row B: Fast Quick Marker Input Strip -->
                     <div class="marker-quick-row">
-                        <select class="select-compact" id="input-quick-marker-type" title="Node Type (نوع العقدة)">
+                        <select class="select-compact" id="input-quick-marker-type" title="Node Type (نوع العقدة)" aria-label="Node Type">
                             <option value="number">Number</option>
                             <option value="time">Time</option>
                             <option value="text">Text</option>
                             <option value="delta">Delta (±)</option>
                         </select>
                         <div class="quick-val-box">
-                            <input type="text" class="input-field-compact" id="input-quick-marker-val" placeholder="Value..." value="1000" title="Marker Value (قيمة الماركر)">
+                            <input type="text" class="input-field-compact" id="input-quick-marker-val" placeholder="Value..." value="1000" title="Marker Value (قيمة الماركر)" aria-label="Marker Value">
                         </div>
                         <div class="input-wrapper-compact quick-time-box" title="Marker Time in Seconds (وقت الماركر بالثواني)">
                             <svg class="input-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <polyline points="12 6 12 12 16 14"></polyline>
                             </svg>
-                            <input type="text" inputmode="decimal" class="input-field-compact" id="input-quick-marker-time" placeholder="0.0" step="0.5" min="0" value="4.0" title="Marker Time (توقيت الماركر)">
+                            <input type="text" inputmode="decimal" class="input-field-compact" id="input-quick-marker-time" placeholder="0.0" step="0.5" min="0" value="4.0" title="Marker Time (توقيت الماركر)" aria-label="Marker Time">
                             <span class="unit-compact">s</span>
                             <div class="input-arrows-compact">
-                                <button type="button" class="input-arrow-compact" data-action="up" data-target="input-quick-marker-time" title="Increase Time (+0.5s | Shift: +5s)">
+                                <button type="button" class="input-arrow-compact" data-action="up" data-target="input-quick-marker-time" title="Increase Time (+0.5s | Shift: +5s)" aria-label="Increase Time">
                                     <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                                         <polyline points="18 15 12 9 6 15"></polyline>
                                     </svg>
                                 </button>
-                                <button type="button" class="input-arrow-compact" data-action="down" data-target="input-quick-marker-time" title="Decrease Time (-0.5s | Shift: -5s)">
+                                <button type="button" class="input-arrow-compact" data-action="down" data-target="input-quick-marker-time" title="Decrease Time (-0.5s | Shift: -5s)" aria-label="Decrease Time">
                                     <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                                         <polyline points="6 9 12 15 18 9"></polyline>
                                     </svg>
                                 </button>
                             </div>
                         </div>
-                        <button type="button" class="btn-node-icon" id="btn-quick-capture-cti" title="Get CTI from AE (جلب وقت المؤشر)">
+                        <button type="button" class="btn-node-icon" id="btn-quick-capture-cti" title="Get CTI from AE (جلب وقت المؤشر)" aria-label="Capture AE Playhead Time">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <polyline points="12 6 12 12 16 14"></polyline>
                             </svg>
                         </button>
                         <div class="input-wrapper-compact quick-hold-box" title="Hold Duration in Seconds (مدة الثبات)">
-                            <input type="text" inputmode="decimal" class="input-field-compact" id="input-quick-marker-hold" placeholder="0.0" step="0.5" min="0" value="0" title="Hold Pause (مدة الثبات)">
+                            <input type="text" inputmode="decimal" class="input-field-compact" id="input-quick-marker-hold" placeholder="0.0" step="0.5" min="0" value="0" title="Hold Pause (مدة الثبات)" aria-label="Hold Duration">
                             <span class="unit-compact">s</span>
                             <div class="input-arrows-compact">
-                                <button type="button" class="input-arrow-compact" data-action="up" data-target="input-quick-marker-hold" title="Increase Hold (+0.5s | Shift: +5s)">
+                                <button type="button" class="input-arrow-compact" data-action="up" data-target="input-quick-marker-hold" title="Increase Hold (+0.5s | Shift: +5s)" aria-label="Increase Hold">
                                     <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                                         <polyline points="18 15 12 9 6 15"></polyline>
                                     </svg>
                                 </button>
-                                <button type="button" class="input-arrow-compact" data-action="down" data-target="input-quick-marker-hold" title="Decrease Hold (-0.5s | Shift: -5s)">
+                                <button type="button" class="input-arrow-compact" data-action="down" data-target="input-quick-marker-hold" title="Decrease Hold (-0.5s | Shift: -5s)" aria-label="Decrease Hold">
                                     <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                                         <polyline points="6 9 12 15 18 9"></polyline>
                                     </svg>

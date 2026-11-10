@@ -53,10 +53,13 @@ var KeyboardShortcuts = (function () {
      * @param {KeyboardEvent} e
      */
     function _handleKeydown(e) {
-        // Skip if disabled or in text input field
+        // Skip if disabled or in text input field (unless invoking Ctrl+Enter / Cmd+Enter to create)
         if (!_isEnabled) return;
         var tag = e.target.tagName;
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        var isInput = (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT');
+        var isCtrlEnter = isInput && e.key === 'Enter' && (e.ctrlKey || e.metaKey);
+
+        if (isInput && !isCtrlEnter) return;
 
         // If a button is focused, allow global shortcuts (1, 2, 3, Ctrl+Enter, ?) but allow native Space click
         if (tag === 'BUTTON' && e.key === ' ') return;
