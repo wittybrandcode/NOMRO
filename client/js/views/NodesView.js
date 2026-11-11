@@ -415,14 +415,16 @@ var NodesView = (function () {
             track.appendChild(pin);
         });
 
+        container.appendChild(track);
+
         // 6. Interactive Click & Drag to Scrub with Magnetic Snapping
         if (typeof onScrub === 'function') {
             var isDragging = false;
 
             function getScrubTime(e) {
-                var rect = container.getBoundingClientRect();
-                var clickX = e.clientX - rect.left - 14;
-                var availWidth = Math.max(1, rect.width - 28);
+                var rect = track.getBoundingClientRect();
+                var clickX = e.clientX - rect.left;
+                var availWidth = Math.max(1, rect.width);
                 var rawPct = Math.max(0, Math.min(1, clickX / availWidth));
                 var rawTime = rawPct * maxTime;
 
@@ -460,13 +462,93 @@ var NodesView = (function () {
                 document.addEventListener('mouseup', onMouseUp);
             };
         }
+    }
 
-        container.appendChild(track);
+    /**
+     * In-place DOM update for a specific node card without tearing down container
+     * @param {HTMLElement} container
+     * @param {string} nodeId
+     * @param {Object} changes
+     * @param {Array} [sequence]
+     * @returns {boolean}
+     */
+    function updateNodeCardValues(container, nodeId, changes, sequence) {
+        if (!container || !nodeId || !changes) return false;
+        var card = container.querySelector('.node-card[data-node-id="' + nodeId + '"]');
+        if (!card) return false;
+
+        // 1. Type change
+        if (changes.type !== undefined) {
+            var classList = card.className.split(' ');
+            var newClasses = classList.filter(function (cls) { return cls.indexOf('type-') !== 0; });
+            newClasses.push('type-' + changes.type);
+            card.className = newClasses.join(' ');
+
+            var typeSelect = card.querySelector('.node-select-type');
+            if (typeSelect && typeSelect.value !== changes.type) {
+                typeSelect.value = changes.type;
+            }
+
+            var valInput = card.querySelector('.node-input-val');
+            if (valInput) {
+                var valPlaceholder = changes.type === 'number' ? '0' :
+                    (changes.type === 'time' ? '00:01:00' :
+                        (changes.type === 'delta' ? '+100' : 'STAGE'));
+                valInput.setAttribute('placeholder', valPlaceholder);
+            }
+        }
+
+        // 2. Value change
+        if (changes.value !== undefined) {
+            var valInput = card.querySelector('.node-input-val');
+            if (valInput && document.activeElement !== valInput) {
+                valInput.value = changes.value;
+            }
+        }
+
+        // 3. Time change
+        if (changes.time !== undefined) {
+            var timeInput = card.querySelector('.node-input-time');
+            if (timeInput && document.activeElement !== timeInput) {
+                timeInput.value = parseFloat((changes.time || 0).toFixed(2));
+            }
+        }
+
+        // 4. Hold change
+        if (changes.hold !== undefined) {
+            var holdInput = card.querySelector('.node-input-hold');
+            if (holdInput && document.activeElement !== holdInput) {
+                holdInput.value = changes.hold;
+            }
+        }
+
+        // 5. Easing change
+        if (changes.easing !== undefined) {
+            var easeSelect = card.querySelector('.node-select-ease');
+            if (easeSelect && easeSelect.value !== changes.easing) {
+                easeSelect.value = changes.easing;
+            }
+        }
+
+        // 6. Update connector delta indicators if sequence provided
+        if (sequence && sequence.length > 1) {
+            var connectors = container.querySelectorAll('.node-connector');
+            for (var c = 0; c < connectors.length && c < sequence.length - 1; c++) {
+                var delta = Math.max(0, (sequence[c + 1].time || 0) - (sequence[c].time || 0)).toFixed(1);
+                var deltaSpan = connectors[c].querySelector('.node-connector-delta span');
+                if (deltaSpan) {
+                    deltaSpan.textContent = 'Δ ' + delta + 's';
+                }
+            }
+        }
+
+        return true;
     }
 
     return {
         renderNodeList: renderNodeList,
         renderMarkerRuler: renderMarkerRuler,
+        updateNodeCardValues: updateNodeCardValues,
         highlightActiveNode: highlightActiveNode,
         formatTime: _formatTime
     };

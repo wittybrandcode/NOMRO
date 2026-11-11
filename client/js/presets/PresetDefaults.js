@@ -70,7 +70,11 @@ var PresetDefaults = (function () {
                 monospace: false,
                 decimals: false,
                 commas: true,
-                useMarkers: false
+                useMarkers: false,
+                layerMarkers: true,
+                effects: [
+                    { matchName: 'ADBE Drop Shadow', opacity: 40, distance: 5, softness: 10 }
+                ]
             }
         },
         {
@@ -101,7 +105,11 @@ var PresetDefaults = (function () {
                 monospace: true,
                 decimals: false,
                 commas: false,
-                useMarkers: false
+                useMarkers: false,
+                layerMarkers: true,
+                effects: [
+                    { matchName: 'ADBE Drop Shadow', opacity: 50, distance: 4, softness: 8 }
+                ]
             }
         },
         {
@@ -225,7 +233,8 @@ var PresetDefaults = (function () {
                     easeStrength: 75
                 },
                 curveLibrary: [],
-                fps: 30
+                fps: 30,
+                layerMarkers: true
             }
         },
         {
@@ -252,7 +261,8 @@ var PresetDefaults = (function () {
                     easeStrength: 75
                 },
                 curveLibrary: [],
-                fps: 30
+                fps: 30,
+                layerMarkers: true
             }
         },
         {
@@ -333,7 +343,11 @@ var PresetDefaults = (function () {
                     easeStrength: 80
                 },
                 curveLibrary: [],
-                fps: 30
+                fps: 30,
+                layerMarkers: true,
+                effects: [
+                    { matchName: 'ADBE Glo2', threshold: 50, radius: 25, intensity: 1.5 }
+                ]
             }
         },
         {
@@ -443,6 +457,9 @@ var PresetDefaults = (function () {
                     { id: 'node_c2', type: 'number', value: 120.0, time: 2.0, hold: 0.5, easing: 'smoothOut', easeStrength: 75 },
                     { id: 'node_c3', type: 'delta', value: 166.7, time: 3.5, hold: 0.8, easing: 'snappyOut', easeStrength: 85, deltaSymbol: '+', deltaSuffix: '%' },
                     { id: 'node_c4', type: 'number', value: 350.0, time: 5.5, hold: 0.0, easing: 'overshoot', easeStrength: 80 }
+                ],
+                effects: [
+                    { matchName: 'ADBE Glo2', threshold: 60, radius: 20, intensity: 1.2 }
                 ]
             }
         },
@@ -470,6 +487,9 @@ var PresetDefaults = (function () {
                     { id: 'node_g2', type: 'number', value: 3.5, time: 1.5, hold: 0.3, easing: 'snappyOut', easeStrength: 80 },
                     { id: 'node_g3', type: 'number', value: 10.0, time: 3.0, hold: 0.5, easing: 'overshoot', easeStrength: 85 },
                     { id: 'node_g4', type: 'text', value: 'MAX COMBO!', time: 4.2, hold: 0.0, easing: 'snappyOut', easeStrength: 90 }
+                ],
+                effects: [
+                    { matchName: 'ADBE Drop Shadow', opacity: 60, distance: 6, softness: 12 }
                 ]
             }
         },

@@ -50,10 +50,7 @@ NOMRO.core.buildNodesSequence = function (comp, settings) {
         textLayer.name = 'NOMRO_Marker_Counter';
         textLayer.label = 13; // Lavender/Purple distinct layer color
 
-        // 2. Add Controls
-        NOMRO.core.addSlider(textLayer, 'NOMRO_Ease', settings.easeStrength !== undefined ? settings.easeStrength : 75);
-
-        // 3. Clear existing markers and add node markers with visual colors and hold durations
+        // 2. Clear existing markers and add node markers with visual colors and hold durations
         if (NOMRO.markers && NOMRO.markers.writeNodeMarkers) {
             NOMRO.markers.writeNodeMarkers(textLayer, nodes);
         } else {
@@ -100,6 +97,11 @@ NOMRO.core.buildNodesSequence = function (comp, settings) {
         var anchorY = textRect.top + textRect.height / 2;
         textLayer.property('Anchor Point').setValue([anchorX, anchorY]);
         textLayer.property('Position').setValue([comp.width / 2, comp.height / 2]);
+
+        // 5b. Preset Effects
+        if (settings.effects && NOMRO.effects && NOMRO.effects.applyPresetEffects) {
+            NOMRO.effects.applyPresetEffects(textLayer, settings.effects);
+        }
 
         // 6. Save Metadata Comment
         try {

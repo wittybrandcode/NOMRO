@@ -147,3 +147,67 @@ NOMRO.markers.readNodeMarkers = function (layer) {
     return markersList;
 };
 
+/**
+ * Apply milestone markers across any NOMRO layer type (Counter, Timer, etc.)
+ * Supports milestone percentages (0%, 50%, 100%) and cue markers
+ * @param {Layer} layer - Target layer
+ * @param {Object} settings - Layer configuration settings
+ */
+NOMRO.markers.applyMilestoneMarkers = function (layer, settings) {
+    if (!layer || !settings) return;
+    if (!settings.layerMarkers && !settings.milestones) return;
+
+    var markers = layer.property('Marker');
+    if (!markers) return;
+
+    var inTime = layer.inPoint;
+    var duration = parseFloat(settings.duration) || 2;
+    var outTime = inTime + duration;
+    var type = settings.counterType || 'counter';
+
+    try {
+        if (type === 'counter' || type === 'basic') {
+            // Milestone markers at 0%, 50%, 100%
+            var m0 = new MarkerValue('START: ' + (settings.start !== undefined ? settings.start : 0));
+            m0.comment = 'START: ' + (settings.start !== undefined ? settings.start : 0);
+            try { m0.label = 8; } catch (e0) { } // Blue
+            markers.setValueAtTime(inTime, m0);
+
+            var midTime = inTime + (duration * 0.5);
+            var midVal = Math.round(((parseFloat(settings.start) || 0) + (parseFloat(settings.end) || 100)) / 2);
+            var mMid = new MarkerValue('50%: ' + midVal);
+            mMid.comment = '50%: ' + midVal;
+            try { mMid.label = 11; } catch (eMid) { } // Orange
+            markers.setValueAtTime(midTime, mMid);
+
+            var mEnd = new MarkerValue('END: ' + (settings.end !== undefined ? settings.end : 100));
+            mEnd.comment = 'END: ' + (settings.end !== undefined ? settings.end : 100);
+            try { mEnd.label = 9; } catch (eEnd) { } // Green
+            markers.setValueAtTime(outTime, mEnd);
+        } else if (type === 'timer' || type === 'countdown') {
+            // Timer Split cues: START, HALF-WAY, COMPLETE
+            var tStart = new MarkerValue('START: ' + (settings.format || 'hms').toUpperCase());
+            tStart.comment = 'START: ' + (settings.format || 'hms').toUpperCase();
+            try { tStart.label = 8; } catch (et0) { }
+            markers.setValueAtTime(inTime, tStart);
+
+            if (duration >= 3) {
+                var tMidTime = inTime + (duration * 0.5);
+                var tMid = new MarkerValue('HALF-WAY');
+                tMid.comment = 'HALF-WAY';
+                try { tMid.label = 11; } catch (etMid) { }
+                markers.setValueAtTime(tMidTime, tMid);
+            }
+
+            var tEnd = new MarkerValue('COMPLETE');
+            tEnd.comment = 'COMPLETE';
+            try { tEnd.label = 9; } catch (etEnd) { }
+            markers.setValueAtTime(outTime, tEnd);
+        }
+    } catch (eMilestone) {
+        if (NOMRO.helpers && NOMRO.helpers.logError) {
+            NOMRO.helpers.logError('Apply Milestone Markers', eMilestone);
+        }
+    }
+};
+

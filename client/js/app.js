@@ -651,6 +651,13 @@
         if (selectionRequestInFlight || typeof Bridge === 'undefined' || !Bridge.evalScript) {
             return;
         }
+        if (typeof document !== 'undefined' && document.hidden) {
+            return;
+        }
+        if (typeof document !== 'undefined') {
+            var modalOpen = document.querySelector('.modal.is-active, .modal-open, .dialog-open, [data-modal-open="true"]');
+            if (modalOpen) return;
+        }
 
         selectionRequestInFlight = true;
 

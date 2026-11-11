@@ -502,6 +502,82 @@ runTest('Quick Marker creator inputs have accessibility aria-labels', function (
 });
 
 // -------------------------------------------------------------
+// [SUITE 8] In-Place DOM Mutation & Universal Presets (v4.2.0)
+// -------------------------------------------------------------
+console.log('\n[SUITE 8] Testing In-Place DOM Mutation & Universal Presets...');
+
+var NodesView = require(path.join(BASE_DIR, 'client/js/views/NodesView.js'));
+
+runTest('NodesView exports updateNodeCardValues for in-place mutation', function () {
+    assert.strictEqual(typeof NodesView.updateNodeCardValues, 'function');
+});
+
+runTest('NodesView.updateNodeCardValues updates card inputs without wiping DOM', function () {
+    var mockCard = {
+        className: 'node-card type-number',
+        querySelector: function (sel) {
+            if (sel === '.node-input-val') return this.valInp;
+            if (sel === '.node-input-time') return this.timeInp;
+            if (sel === '.node-input-hold') return this.holdInp;
+            if (sel === '.node-select-ease') return this.easeSelect;
+            if (sel === '.node-select-type') return this.typeSelect;
+            return null;
+        },
+        querySelectorAll: function () { return []; },
+        valInp: { value: '100', setAttribute: function () {} },
+        timeInp: { value: '0' },
+        holdInp: { value: '0' },
+        easeSelect: { value: 'smoothOut' },
+        typeSelect: { value: 'number' }
+    };
+    var mockContainer = {
+        querySelector: function (sel) {
+            if (sel.indexOf('node_test_1') !== -1) return mockCard;
+            return null;
+        },
+        querySelectorAll: function () { return []; }
+    };
+
+    var updated = NodesView.updateNodeCardValues(mockContainer, 'node_test_1', {
+        value: 500,
+        time: 1.5,
+        hold: 0.8,
+        easing: 'snappyOut'
+    });
+    assert.strictEqual(updated, true);
+    assert.strictEqual(mockCard.valInp.value, 500);
+    assert.strictEqual(mockCard.timeInp.value, 1.5);
+    assert.strictEqual(mockCard.holdInp.value, 0.8);
+    assert.strictEqual(mockCard.easeSelect.value, 'snappyOut');
+});
+
+runTest('Universal EffectPresetApplier exists and defines applyPresetEffects', function () {
+    var effectCode = fs.readFileSync(path.join(BASE_DIR, 'host/services/EffectPresetApplier.jsx'), 'utf8');
+    assert.ok(effectCode.indexOf('NOMRO.effects.applyPresetEffects') !== -1);
+    assert.ok(effectCode.indexOf('ADBE Drop Shadow') !== -1);
+    assert.ok(effectCode.indexOf('ADBE Glo2') !== -1);
+});
+
+runTest('NodeMarkerService defines applyMilestoneMarkers for universal layer markers', function () {
+    var markerCode = fs.readFileSync(path.join(BASE_DIR, 'host/services/NodeMarkerService.jsx'), 'utf8');
+    assert.ok(markerCode.indexOf('NOMRO.markers.applyMilestoneMarkers') !== -1);
+    assert.ok(markerCode.indexOf('50%:') !== -1);
+    assert.ok(markerCode.indexOf('HALF-WAY') !== -1);
+});
+
+runTest('PresetDefaults factory presets include native effects and layerMarkers', function () {
+    var factory = PresetDefaults.getFactoryPresets();
+    var withEffects = factory.filter(function (p) {
+        return p.settings && p.settings.effects && p.settings.effects.length > 0;
+    });
+    var withMarkers = factory.filter(function (p) {
+        return p.settings && p.settings.layerMarkers === true;
+    });
+    assert.ok(withEffects.length >= 3, 'At least 3 factory presets include native effects');
+    assert.ok(withMarkers.length >= 4, 'At least 4 factory presets include layerMarkers');
+});
+
+// -------------------------------------------------------------
 // Summary
 // -------------------------------------------------------------
 console.log('\n===============================================================');

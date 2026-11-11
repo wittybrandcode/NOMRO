@@ -187,24 +187,58 @@ NOMRO.helpers.normalizeTypeFamily = function (counterType) {
 };
 
 /**
- * Detect persisted layer type from config or fallback naming convention
+ * Detect persisted layer type from config, expression signatures, markers, or fallback naming convention
  */
 NOMRO.helpers.detectLayerType = function (layer) {
+    if (!layer) return NOMRO_CONSTANTS.LAYER_TYPES.COUNTER;
+
+    // 1. Persisted config in expression or comment
     var exprConfig = NOMRO.helpers.readExpressionConfig ? NOMRO.helpers.readExpressionConfig(layer) : {};
     var commentConfig = NOMRO.helpers.readCommentConfig ? NOMRO.helpers.readCommentConfig(layer) : {};
     var declaredType = exprConfig.counterType || commentConfig.counterType;
-
     if (declaredType) {
         return declaredType;
     }
 
-    if (layer.name.indexOf('Sequence') !== -1 || layer.name.indexOf('Nodes') !== -1 || layer.name.indexOf('Marker') !== -1) {
+    // 2. Expression architectural signature analysis
+    try {
+        var srcText = layer.property("Source Text");
+        if (srcText && srcText.expression) {
+            var exprStr = srcText.expression;
+            if (exprStr.indexOf('Multi-Node Sequence Engine') !== -1 || exprStr.indexOf('parseNode') !== -1) {
+                return NOMRO_CONSTANTS.LAYER_TYPES.NODES;
+            }
+            if (exprStr.indexOf('NOMRO Countdown') !== -1 || exprStr.indexOf('secToTimeStr') !== -1) {
+                return NOMRO_CONSTANTS.LAYER_TYPES.TIMER;
+            }
+            if (exprStr.indexOf('NOMRO Counter') !== -1) {
+                return NOMRO_CONSTANTS.LAYER_TYPES.COUNTER;
+            }
+        }
+    } catch (eExpr) { }
+
+    // 3. Node marker payload inspection
+    try {
+        var markers = layer.property("Marker");
+        if (markers && markers.numKeys > 0) {
+            var firstComment = markers.keyValue(1).comment || '';
+            if (/^(NUM:|TIME:|TXT:|DELTA:)/.test(firstComment)) {
+                return NOMRO_CONSTANTS.LAYER_TYPES.NODES;
+            }
+        }
+    } catch (eMark) { }
+
+    // 4. Stricter name convention fallback
+    var lName = layer.name || '';
+    if (lName.indexOf('Sequence') !== -1 || lName.indexOf('Nodes') !== -1 || lName.indexOf('NOMRO_Marker') !== -1) {
         return NOMRO_CONSTANTS.LAYER_TYPES.NODES;
     }
 
-    return layer.name.indexOf('Countdown') !== -1
-        ? NOMRO_CONSTANTS.LAYER_TYPES.TIMER
-        : NOMRO_CONSTANTS.LAYER_TYPES.COUNTER;
+    if (lName.indexOf('Countdown') !== -1 || lName.indexOf('Timer') !== -1) {
+        return NOMRO_CONSTANTS.LAYER_TYPES.TIMER;
+    }
+
+    return NOMRO_CONSTANTS.LAYER_TYPES.COUNTER;
 };
 
 /**

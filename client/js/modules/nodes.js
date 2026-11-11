@@ -260,21 +260,11 @@ var NodesModule = (function () {
     }
 
     /**
-     * Render nodes list view and timeline marker ruler
+     * Render marker timeline ruler and HUD counters without touching DOM cards
      */
-    function render() {
+    function renderRulerOnly() {
         if (typeof document === 'undefined') return;
-        if (!_elements.nodesContainer || typeof NodesView === 'undefined') return;
-
-        NodesView.renderNodeList(_elements.nodesContainer, _state.nodes.sequence, {
-            onUpdateNode: updateNode,
-            onDeleteNode: removeNode,
-            onCaptureTime: function (nodeId) {
-                captureCompPlayhead(nodeId);
-            }
-        });
-
-        if (_elements.markerRuler && NodesView.renderMarkerRuler) {
+        if (_elements.markerRuler && typeof NodesView !== 'undefined' && NodesView.renderMarkerRuler) {
             NodesView.renderMarkerRuler(_elements.markerRuler, _state.nodes.sequence, function (nodeId, index) {
                 var node = _state.nodes.sequence[index];
                 if (node) {
@@ -301,6 +291,24 @@ var NodesModule = (function () {
                 _elements.hudTotalTime.textContent = maxT.toFixed(1) + 's';
             }
         }
+    }
+
+    /**
+     * Render nodes list view and timeline marker ruler
+     */
+    function render() {
+        if (typeof document === 'undefined') return;
+        if (!_elements.nodesContainer || typeof NodesView === 'undefined') return;
+
+        NodesView.renderNodeList(_elements.nodesContainer, _state.nodes.sequence, {
+            onUpdateNode: updateNode,
+            onDeleteNode: removeNode,
+            onCaptureTime: function (nodeId) {
+                captureCompPlayhead(nodeId);
+            }
+        });
+
+        renderRulerOnly();
     }
 
     /**
@@ -562,22 +570,44 @@ var NodesModule = (function () {
      */
     function updateNode(nodeId, changes) {
         var seq = _state.nodes.sequence;
+        var targetNode = null;
         for (var i = 0; i < seq.length; i++) {
             if (seq[i].id === nodeId) {
+                targetNode = seq[i];
                 for (var key in changes) {
-                    seq[i][key] = changes[key];
+                    targetNode[key] = changes[key];
                 }
                 break;
             }
         }
+        if (!targetNode) return;
 
-        // If time changed, re-sort chronologically
+        // Check if chronological sorting changed
+        var orderChanged = false;
         if (changes.time !== undefined && typeof NodeSequence !== 'undefined') {
-            _state.nodes.sequence = NodeSequence.sortNodes(seq);
+            var sorted = NodeSequence.sortNodes(seq);
+            for (var s = 0; s < sorted.length; s++) {
+                if (sorted[s].id !== seq[s].id) {
+                    orderChanged = true;
+                    break;
+                }
+            }
+            _state.nodes.sequence = sorted;
         }
 
-        render();
-        updatePreviewAtTime(0);
+        if (orderChanged) {
+            // Re-render completely if node order changed
+            render();
+            updatePreviewAtTime(targetNode.time || 0);
+        } else {
+            // In-place mutation: update DOM card values and ruler without tearing down cards
+            if (typeof NodesView !== 'undefined' && NodesView.updateNodeCardValues) {
+                NodesView.updateNodeCardValues(_elements.nodesContainer, nodeId, changes, _state.nodes.sequence);
+            }
+            renderRulerOnly();
+            var targetTime = (changes.time !== undefined) ? targetNode.time : _currentPreviewTime;
+            updatePreviewAtTime(targetTime);
+        }
     }
 
     /**

@@ -101,6 +101,16 @@ NOMRO.core.buildCountdown = function (comp, settings) {
         textLayer.property('Position').setValue([comp.width / 2, comp.height / 2]);
 
         // ========================================
+        // PRESET EFFECTS & MILESTONE MARKERS
+        // ========================================
+        if (settings.effects && NOMRO.effects && NOMRO.effects.applyPresetEffects) {
+            NOMRO.effects.applyPresetEffects(textLayer, settings.effects);
+        }
+        if ((settings.layerMarkers || settings.milestones) && NOMRO.markers && NOMRO.markers.applyMilestoneMarkers) {
+            NOMRO.markers.applyMilestoneMarkers(textLayer, settings);
+        }
+
+        // ========================================
         // SAVE METADATA (For UI Sync)
         // ========================================
         try {

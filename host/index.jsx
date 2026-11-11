@@ -8,7 +8,7 @@
 // CONSTANTS
 // ============================================
 var NOMRO_CONSTANTS = {
-    VERSION: '4.1.0',
+    VERSION: '4.2.0',
     PREFIX: 'NOMRO_',
 
     LAYER_TYPES: {
@@ -139,6 +139,7 @@ NOMRO.helpers.withUndoGroup = function (groupName, callback) {
 #include "services/SettingsExtractor.jsx"
 #include "services/LayerUpdater.jsx"
 #include "services/NodeMarkerService.jsx"
+#include "services/EffectPresetApplier.jsx"
 #include "easing/EasingLib.jsx"
 #include "easing/EasingRegistry.jsx"
 #include "easing/EasingExpressionAdapter.jsx"
@@ -234,9 +235,16 @@ function readSelectedLayer() {
             settings.counterType = NOMRO.helpers.detectLayerType(layer);
         }
 
-        var markersList = NOMRO.helpers.readMarkers(layer);
-        if (markersList.length > 0) {
-            settings.markers = markersList;
+        if (settings.counterType === 'nodes' && NOMRO.markers && NOMRO.markers.readNodeMarkers) {
+            var nodeMarkers = NOMRO.markers.readNodeMarkers(layer);
+            if (nodeMarkers.length > 0) {
+                settings.markers = nodeMarkers;
+            }
+        } else {
+            var markersList = NOMRO.helpers.readMarkers(layer);
+            if (markersList.length > 0) {
+                settings.markers = markersList;
+            }
         }
 
         return JSON.stringify(settings);
@@ -275,12 +283,16 @@ function updateLayer(data) {
         settings.counterType = existingLayerType;
 
         NOMRO.helpers.withUndoGroup('NOMRO Update Layer', function () {
-            // 1. Update sliders
-            NOMRO.helpers.updateLargeSlider(layer, NOMRO_CONSTANTS.SLIDER_NAMES.START, settings.start);
-            NOMRO.helpers.updateLargeSlider(layer, NOMRO_CONSTANTS.SLIDER_NAMES.END, settings.end);
-            NOMRO.helpers.updateSlider(layer, NOMRO_CONSTANTS.SLIDER_NAMES.DURATION, settings.duration);
-            if (settings.easeStrength !== undefined) {
-                NOMRO.helpers.updateSlider(layer, NOMRO_CONSTANTS.SLIDER_NAMES.EASE, settings.easeStrength);
+            // 1. Update sliders ONLY for Counter family (nodes and timer do not use slider controls)
+            var isCounterFamily = (existingLayerType === NOMRO_CONSTANTS.LAYER_TYPES.COUNTER ||
+                                   existingLayerType === NOMRO_CONSTANTS.LAYER_TYPES.BASIC);
+            if (isCounterFamily) {
+                NOMRO.helpers.updateLargeSlider(layer, NOMRO_CONSTANTS.SLIDER_NAMES.START, settings.start);
+                NOMRO.helpers.updateLargeSlider(layer, NOMRO_CONSTANTS.SLIDER_NAMES.END, settings.end);
+                NOMRO.helpers.updateSlider(layer, NOMRO_CONSTANTS.SLIDER_NAMES.DURATION, settings.duration);
+                if (settings.easeStrength !== undefined) {
+                    NOMRO.helpers.updateSlider(layer, NOMRO_CONSTANTS.SLIDER_NAMES.EASE, settings.easeStrength);
+                }
             }
 
             // 2. Update metadata comment
@@ -343,6 +355,14 @@ function updateLayer(data) {
 
             layer.property('Source Text').expression = expr;
             NOMRO.helpers.updateFont(layer, settings.monospace, settings.originalFont || settings.fontFamily);
+
+            // 4. Apply preset effects & milestone markers if specified
+            if (settings.effects && NOMRO.effects && NOMRO.effects.applyPresetEffects) {
+                NOMRO.effects.applyPresetEffects(layer, settings.effects);
+            }
+            if ((settings.layerMarkers || settings.milestones) && NOMRO.markers && NOMRO.markers.applyMilestoneMarkers) {
+                NOMRO.markers.applyMilestoneMarkers(layer, settings);
+            }
         });
 
         var updatedLayerRef = NOMRO.helpers.getLayerRef(layer);
@@ -385,13 +405,19 @@ function addNodeMarker(data) {
         var comp = NOMRO.validators.getActiveComp();
         var layer = NOMRO.validators.findLayerByReference(comp, data.layerRef || data);
         var node = data.node || {};
-        var addedNode = NOMRO.markers.addNodeMarker(comp, layer, node, data.time);
 
-        // Re-evaluate Source Text expression
-        var settings = NOMRO.helpers.readExpressionConfig(layer);
-        var markers = NOMRO.markers.readNodeMarkers(layer);
-        var expr = NOMRO.expressions.generateNodesExpression(settings);
-        layer.property('Source Text').expression = expr;
+        var addedNode = null;
+        var markers = [];
+
+        NOMRO.helpers.withUndoGroup('NOMRO Add Node Marker', function () {
+            addedNode = NOMRO.markers.addNodeMarker(comp, layer, node, data.time);
+
+            // Re-evaluate Source Text expression
+            var settings = NOMRO.helpers.readExpressionConfig(layer);
+            markers = NOMRO.markers.readNodeMarkers(layer);
+            var expr = NOMRO.expressions.generateNodesExpression(settings);
+            layer.property('Source Text').expression = expr;
+        });
 
         return NOMRO.helpers.createResponse(true, {
             node: addedNode,

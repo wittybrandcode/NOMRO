@@ -117,11 +117,17 @@ NOMRO.helpers.readMarkers = function (layer) {
     var markersList = [];
     try {
         var markers = layer.property('Marker');
+        var inPoint = layer.inPoint;
         if (markers.numKeys > 0) {
             for (var m = 1; m <= markers.numKeys; m++) {
+                var kTime = markers.keyTime(m);
+                var kVal = markers.keyValue(m);
                 markersList.push({
-                    time: markers.keyTime(m),
-                    comment: markers.keyValue(m).comment
+                    time: parseFloat((kTime - inPoint).toFixed(3)),
+                    absTime: kTime,
+                    comment: kVal.comment || '',
+                    duration: kVal.duration || 0,
+                    label: kVal.label || 0
                 });
             }
         }

@@ -767,6 +767,136 @@ assert(shortcutsSrc.includes('isCtrlEnter') &&
     'DEF-48: KeyboardShortcuts allows Ctrl+Enter / Cmd+Enter inside input and textarea elements');
 
 // -------------------------------------------------------------------
+// [SUITE 5] SYSTEM ELEVATION & ARCHITECTURAL HARDENING (v4.2.0)
+// -------------------------------------------------------------------
+const hostIndexSrc = fs.readFileSync(path.join(baseDir, 'host', 'index.jsx'), 'utf8');
+
+// DEF-49: Relative Marker Timing in SettingsExtractor (VULN-01)
+const settingsExtractorSrc = fs.readFileSync(path.join(baseDir, 'host', 'services', 'SettingsExtractor.jsx'), 'utf8');
+assert(settingsExtractorSrc.includes('kTime - inPoint') &&
+       settingsExtractorSrc.includes('absTime: kTime'),
+    'DEF-49: SettingsExtractor normalizes marker time relative to layer inPoint and preserves absTime');
+
+// DEF-50: Slider Isolation on updateLayer (VULN-02)
+assert(hostIndexSrc.includes('isCounterFamily') &&
+       hostIndexSrc.includes('NOMRO_CONSTANTS.LAYER_TYPES.COUNTER') &&
+       hostIndexSrc.includes('if (isCounterFamily)'),
+    'DEF-50: host/index.jsx isolates slider updates strictly to counter layers, preventing slider pollution');
+
+// DEF-51: Clean NodesBuilder without NOMRO_Ease (VULN-03)
+const nodesBuilderSrc = fs.readFileSync(path.join(baseDir, 'host', 'core', 'NodesBuilder.jsx'), 'utf8');
+assert(!nodesBuilderSrc.includes("NOMRO.core.addSlider(textLayer, 'NOMRO_Ease'"),
+    'DEF-51: NodesBuilder is completely clean and does not create orphaned NOMRO_Ease slider');
+
+// DEF-52: Undo Group Wrapping for addNodeMarker (VULN-04)
+assert(hostIndexSrc.includes("NOMRO.helpers.withUndoGroup('NOMRO Add Node Marker'"),
+    'DEF-52: host/index.jsx wraps addNodeMarker inside withUndoGroup for safe AE undo history');
+
+// DEF-53: Manifest & Host Version 4.2.0 (VULN-07)
+const manifestSrc = fs.readFileSync(path.join(baseDir, 'CSXS', 'manifest.xml'), 'utf8');
+assert(manifestSrc.includes('ExtensionBundleVersion="4.2.0"') &&
+       manifestSrc.includes('Version="4.2.0"') &&
+       hostIndexSrc.includes("VERSION: '4.2.0'"),
+    'DEF-53: CSXS manifest.xml and host/index.jsx are synchronized to version 4.2.0');
+
+// DEF-54: Dynamic Ruler Scrub Bounds (VULN-05)
+const nodesViewSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'views', 'NodesView.js'), 'utf8');
+assert(nodesViewSrc.includes('track.getBoundingClientRect()') &&
+       nodesViewSrc.includes('clickX = e.clientX - rect.left') &&
+       nodesViewSrc.includes('availWidth = Math.max(1, rect.width)') &&
+       !nodesViewSrc.includes('rect.width - 28'),
+    'DEF-54: NodesView calculates ruler scrubbing dynamically from track bounds without magic numbers');
+
+// DEF-55: In-Place DOM Card Update & Preview Stability (VULN-06)
+const nodesSrc = fs.readFileSync(path.join(baseDir, 'client', 'js', 'modules', 'nodes.js'), 'utf8');
+assert(nodesViewSrc.includes('updateNodeCardValues:') &&
+       nodesSrc.includes('NodesView.updateNodeCardValues') &&
+       nodesSrc.includes('renderRulerOnly()'),
+    'DEF-55: Nodes subsystem implements in-place DOM card updates preserving focus and preview playhead');
+
+// DEF-56: Native Browser Spinbutton Suppression (SYS-13)
+assert(compactCssCode.includes('input[type="number"]::-webkit-outer-spin-button') &&
+       compactCssCode.includes('.input-field-compact::-webkit-outer-spin-button') &&
+       compactCssCode.includes('-webkit-appearance: none;'),
+    'DEF-56: compact.css comprehensively hides native browser number spin buttons across all inputs');
+
+// DEF-57: Universal Native Effects Service EffectPresetApplier (VULN-09 / SYS-07)
+const effectApplierPath = path.join(baseDir, 'host', 'services', 'EffectPresetApplier.jsx');
+assert(fs.existsSync(effectApplierPath), 'DEF-57: EffectPresetApplier.jsx exists in host/services');
+const effectApplierSrc = fs.readFileSync(effectApplierPath, 'utf8');
+assert(effectApplierSrc.includes('NOMRO.effects.applyPresetEffects') &&
+       effectApplierSrc.includes('ADBE Drop Shadow') &&
+       effectApplierSrc.includes('ADBE Glo2') &&
+       hostIndexSrc.includes('#include "services/EffectPresetApplier.jsx"'),
+    'DEF-57: EffectPresetApplier defines applyPresetEffects supporting ADBE Drop Shadow and Glo2');
+
+// DEF-58: Universal Milestone Layer Markers Service (SYS-08)
+const nodeMarkerServiceSrc = fs.readFileSync(path.join(baseDir, 'host', 'services', 'NodeMarkerService.jsx'), 'utf8');
+assert(nodeMarkerServiceSrc.includes('NOMRO.markers.applyMilestoneMarkers'),
+    'DEF-58: NodeMarkerService exports applyMilestoneMarkers for universal layer markers');
+
+// DEF-59: Builders Integration with Effects & Milestone Markers (SYS-07, SYS-08)
+assert(counterBuilderSrc.includes('NOMRO.effects.applyPresetEffects') &&
+       counterBuilderSrc.includes('NOMRO.markers.applyMilestoneMarkers') &&
+       countdownBuilderSrc.includes('NOMRO.effects.applyPresetEffects') &&
+       countdownBuilderSrc.includes('NOMRO.markers.applyMilestoneMarkers') &&
+       nodesBuilderSrc.includes('NOMRO.effects.applyPresetEffects') &&
+       hostIndexSrc.includes('NOMRO.effects.applyPresetEffects'),
+    'DEF-59: CounterBuilder, CountdownBuilder, NodesBuilder, and updateLayer wire preset effects and milestone markers');
+
+// DEF-60: Presets Enhanced with Native Effects & Layer Markers (SYS-16)
+assert(presetDefaultsSrc.includes("matchName: 'ADBE Drop Shadow'") &&
+       presetDefaultsSrc.includes("matchName: 'ADBE Glo2'") &&
+       presetDefaultsSrc.includes('layerMarkers: true'),
+    'DEF-60: PresetDefaults enriches factory presets with native effects and layerMarkers');
+
+// DEF-61: Selection Polling Throttling when Hidden or Modal Active (SYS-15 / VULN-10)
+assert(appSrc.includes('document.hidden') &&
+       appSrc.includes('modalOpen') &&
+       appSrc.includes('selectionRequestInFlight'),
+    'DEF-61: app.js throttles selection polling when tab is hidden or modal dialog is active');
+
+// DEF-62: Enhanced Layer Type Detection via Marker Comments (VULN-08)
+const layerResolverSrc = fs.readFileSync(path.join(baseDir, 'host', 'services', 'LayerResolver.jsx'), 'utf8');
+assert(layerResolverSrc.includes('/^(NUM:|TIME:|TXT:|DELTA:)/'),
+    'DEF-62: LayerResolver uses marker comment regex /^(NUM:|TIME:|TXT:|DELTA:)/ to reliably identify nodes layers');
+
+// DEF-63: Simulated EffectPresetApplier Execution & Property Setting
+(function testSimulatedEffectApplier() {
+    const mockPropMap = {};
+    const mockEffect = {
+        name: 'Drop Shadow',
+        matchName: 'ADBE Drop Shadow',
+        property: function (propName) {
+            return {
+                setValue: function (val) {
+                    mockPropMap[propName] = val;
+                }
+            };
+        }
+    };
+    const mockLayer = {
+        property: function () { return { numProperties: 0 }; },
+        Effects: {
+            addProperty: function (name) {
+                return mockEffect;
+            }
+        }
+    };
+
+    const effectVMContext = vm.createContext({
+        NOMRO: { effects: {}, helpers: { logError: function () {} } }
+    });
+    vm.runInContext(effectApplierSrc, effectVMContext);
+    const applied = effectVMContext.NOMRO.effects.applyPresetEffects(mockLayer, [
+        { matchName: 'ADBE Drop Shadow', opacity: 75, distance: 10, softness: 15 }
+    ]);
+    assert(applied === 1, 'DEF-63: Simulated EffectPresetApplier successfully applied 1 effect');
+    assert(mockPropMap['ADBE Drop Shadow-0002'] === 75 || mockPropMap['Opacity'] === 75,
+        'DEF-63: Simulated EffectPresetApplier set opacity value on effect');
+})();
+
+// -------------------------------------------------------------------
 // MASTER SUMMARY REPORT
 // -------------------------------------------------------------------
 console.log('\n===============================================================');
